@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:alpine
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: spendwise_user
+      POSTGRES_PASSWORD: spendwise_password
+      POSTGRES_DB: spendwise_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
