@@ -1,5 +1,10 @@
+import { RedirectOnAuthExpiration } from "@/components/common/redirect";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/modules/auth/presentation/components/auth-context";
+import { getCurrentUser } from "@/modules/auth/presentation/contracts/current-user";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense, use } from "react";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,12 +27,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = use(getCurrentUser());
+
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased p-0 overflow-hidden`}
       >
-        {children}
+        <Suspense fallback={<p>Loading...</p>}>
+          <AuthProvider initialUser={user}>
+            <RedirectOnAuthExpiration />
+            {children}
+            <Toaster />
+          </AuthProvider>
+        </Suspense>
       </body>
     </html>
   );

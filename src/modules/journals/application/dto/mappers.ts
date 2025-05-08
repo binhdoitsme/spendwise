@@ -1,0 +1,94 @@
+import { Journal } from "@/modules/journals/domain/journal";
+import { RichJournal } from "@/modules/journals/domain/rich-journal";
+import { Transaction } from "@/modules/journals/domain/transactions";
+import { UserBasic } from "../contracts/user-resolver";
+import {
+  JournalBasicDto,
+  JournalBasicWithTransactionsDto,
+  JournalDetailedDto,
+  UserBasicDto,
+} from "./dtos.types";
+
+function mapUserBasicToDto(user: UserBasic): UserBasicDto {
+  return {
+    email: user.email.value,
+    fullName: user.fullName,
+    avatarUrl: user.avatar?.url,
+  };
+}
+
+export function mapRichJournalToJournalDetailedDto(
+  richJournal: RichJournal,
+  users: UserBasic[]
+): JournalDetailedDto {
+  const { journal, transactions } = richJournal;
+  const usersByEmail = users.reduce<Record<string, UserBasic>>(
+    (prev, user) => ({
+      ...prev,
+      [user.email.value]: user,
+    }),
+    {}
+  );
+
+  return {
+    id: journal.id.value,
+    ownerId: journal.ownerId.value,
+    ownerEmail: journal.ownerEmail.toString(),
+    title: journal.title,
+    isArchived: journal.isArchived,
+    createdAt: journal.createdAt.toISO()!,
+    tags: Array.from(journal.tags.values()).map((tag) => ({
+      id: tag.id,
+      name: tag.name,
+    })),
+    accounts: Array.from(journal.accounts.values()).map((account) => ({
+      accountId: account.accountId.value,
+      ownerId: account.ownerId.value,
+      ownerEmail: account.ownerEmail.toString(),
+      gracePeriodDays: account.gracePeriodDays,
+      createdAt: account.createdAt.toISO()!,
+    })),
+    collaborators: Array.from(journal.collaborators.values()).map(
+      (collaborator) => ({
+        user: mapUserBasicToDto(usersByEmail[collaborator.email.value]),
+        permission: collaborator.permission,
+      })
+    ),
+    transactions: transactions.map((transaction) => ({
+      id: transaction.id.value,
+      title: transaction.title,
+      amount: transaction.amount,
+      date: transaction.date.toISO()!,
+      type: transaction.type,
+      status: transaction.status,
+      notes: transaction.notes,
+    })),
+  };
+}
+
+export function mapJournalToJournalBasicDto(journal: Journal): JournalBasicDto {
+  return {
+    id: journal.id.value,
+    ownerId: journal.ownerId.value,
+    ownerEmail: journal.ownerEmail.toString(),
+    title: journal.title,
+    isArchived: journal.isArchived,
+    createdAt: journal.createdAt.toISO()!,
+  };
+}
+
+export function mapJournalToJournalBasicWithTransactionsDto(
+  journal: Journal,
+  transactions: Transaction[]
+): JournalBasicWithTransactionsDto {
+  return {
+    ...mapJournalToJournalBasicDto(journal),
+    transactions: transactions.map((transaction) => ({
+      id: transaction.id.value,
+      title: transaction.title,
+      amount: transaction.amount,
+      date: transaction.date.toISO()!,
+      type: transaction.type,
+    })),
+  };
+}
