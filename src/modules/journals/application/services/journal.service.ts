@@ -40,6 +40,7 @@ export class JournalServices {
     return journals.map(mapJournalToJournalBasicDto);
   }
 
+  // eslint-disable-next-line
   async getJournalById(id: string, transactionOptions?: ListingOptions) {
     return sampleJournals[0];
     // const journalId = new JournalId(id);

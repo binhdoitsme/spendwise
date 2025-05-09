@@ -1,7 +1,7 @@
 import { Snowflake } from "@theinternetfolks/snowflake";
 import { v4 as uuid4 } from "uuid";
 
-export abstract class Identifier<T = any> {
+export abstract class Identifier<T> {
   value: T;
   constructor(value?: T) {
     this.value = value ?? this.nextValue();

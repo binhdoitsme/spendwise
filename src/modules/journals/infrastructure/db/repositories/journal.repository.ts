@@ -1,5 +1,5 @@
 import { UserId } from "@/modules/shared/domain/identifiers";
-import { eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Journal, JournalId } from "../../../domain/journal";
 import {
@@ -52,11 +52,24 @@ export class DrizzleJournalRepository implements JournalRepository {
         tags: true,
       },
     });
+    const transactions = await this.dbInstance.query.transactions.findMany({
+      limit: transactionOptions?.limit,
+      offset: transactionOptions?.offset,
+      orderBy: transactionOptions?.orderBy
+        ? [
+            (transactionOptions?.orderDesc ? desc : asc)(
+              schema.transactions[
+                transactionOptions.orderBy as keyof typeof schema.transactions.$inferSelect
+              ]
+            ),
+          ]
+        : undefined,
+    });
     if (!journalSchema) {
       return undefined;
     }
     const journal = mapJournalToDomain(journalSchema);
-    const transactionList = journalSchema.transactions
+    const transactionList = transactions
       .map((row) => mapTransactionToDomain(row))
       .filter(Boolean);
     return new RichJournal(journal, transactionList);

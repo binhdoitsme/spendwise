@@ -1,7 +1,7 @@
 import { Separator } from "@/components/ui/separator";
 import { TransactionDetailedDto } from "@/modules/journals/application/dto/dtos.types";
-import { TransactionItem } from "./transaction-item";
 import { useMemo } from "react";
+import { TransactionItem } from "./transaction-item";
 
 interface TransactionListProps {
   transactions: TransactionDetailedDto[];
@@ -22,7 +22,7 @@ export function TransactionList({
 
   const formatter = useMemo(
     () => new Intl.NumberFormat("de-DE", { style: "currency", currency }),
-    []
+    [currency]
   );
 
   return (

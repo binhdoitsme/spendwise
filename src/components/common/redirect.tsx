@@ -8,7 +8,7 @@ export function RedirectOnAuthExpiration() {
   const router = useRouter();
   const pathname = usePathname();
   const authContext = useAuthContext();
-  
+
   useEffect(() => {
     if (
       !authContext.user &&
@@ -17,6 +17,6 @@ export function RedirectOnAuthExpiration() {
     ) {
       router.push("/auth/sign-in");
     }
-  }, [authContext.user]);
+  }, [authContext.user, router, pathname]);
   return <></>;
 }

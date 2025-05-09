@@ -68,6 +68,7 @@ export function SignInForm({
         router.push(redirectTo);
       }
     } catch (err) {
+      console.error(err);
       toast.error("Cannot sign in: Email or password incorrect");
     } finally {
       setIsSubmitting(false);

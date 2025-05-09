@@ -20,14 +20,27 @@ export enum TransactionStatus {
 
 export class TransactionId extends SnowflakeIdentifier {}
 
-export type TransactionCreate = Omit<
-  ExcludeMethods<Transaction>,
-  "id" | "status"
->;
+interface TransactionProps {
+  id: TransactionId;
+  journalId: JournalId;
+  title: string;
+  amount: number;
+  date: DateTime;
+  account: AccountId;
+  type: TransactionType;
+  paidBy: Email;
+  tags: string[];
+  status: TransactionStatus;
+  notes?: string;
+  paidOffTransaction?: TransactionId;
+  relatedTransactions: TransactionId[];
+}
+
+export type TransactionCreate = Omit<TransactionProps, "id" | "status">;
 export type TransactionEdit = Partial<TransactionCreate>;
 export type TransactionRestore = ExcludeMethods<Transaction>;
 
-export class Transaction {
+export class Transaction implements TransactionProps {
   private constructor(
     readonly id: TransactionId,
     readonly journalId: JournalId, // Added field

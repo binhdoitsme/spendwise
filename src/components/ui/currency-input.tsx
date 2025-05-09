@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef, type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react";
 
 interface CurrencyInputProps {
   label?: string;
@@ -66,16 +72,18 @@ export function CurrencyInput({
     return { thousandSeparator, decimalSeparator, currencySymbol };
   };
 
-  const { thousandSeparator, decimalSeparator, currencySymbol } =
-    getFormatters();
+  const { thousandSeparator, currencySymbol } = getFormatters();
 
   // Format the number according to locale
-  const formatValue = (val: number): string => {
-    return new Intl.NumberFormat(locale, {
-      useGrouping: true,
-      maximumFractionDigits: 0,
-    }).format(val);
-  };
+  const formatValue = useCallback(
+    (val: number): string => {
+      return new Intl.NumberFormat(locale, {
+        useGrouping: true,
+        maximumFractionDigits: 0,
+      }).format(val);
+    },
+    [locale]
+  );
 
   // Parse the formatted string back to a number
   const parseFormattedValue = (val: string): number => {
@@ -88,7 +96,7 @@ export function CurrencyInput({
     if (value !== undefined) {
       setDisplayValue(formatValue(value));
     }
-  }, [locale, value]);
+  }, [locale, value, formatValue]);
 
   // Handle input changes
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

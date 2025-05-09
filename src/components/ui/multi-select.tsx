@@ -148,7 +148,6 @@ export const MultiSelect = React.forwardRef<
       animation = 0,
       maxCount = 3,
       modalPopover = false,
-      asChild = false,
       className,
       error = false,
       errorMessage,
@@ -165,7 +164,7 @@ export const MultiSelect = React.forwardRef<
     const hasAnyOptionInclude = React.useCallback(
       (searchQuery: string) =>
         options.some(({ value }) => value.includes(searchQuery)),
-      []
+      [options]
     );
 
     const handleInputKeyDown = (
@@ -356,7 +355,7 @@ export const MultiSelect = React.forwardRef<
                       className="cursor-pointer flex items-center"
                     >
                       <span className="mr-2">+</span>
-                      <span>Add "{searchQuery}" to list</span>
+                      <span>Add &quot;{searchQuery}&quot; to list</span>
                     </CommandItem>
                   )}
                 </CommandGroup>

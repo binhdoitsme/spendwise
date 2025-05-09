@@ -63,7 +63,7 @@ export function TransactionForm({
 
   useEffect(() => {
     form.resetField("account", { defaultValue: "" });
-  }, [paidByUser]);
+  }, [form, paidByUser]);
 
   const tagOptions = tags.map(({ id, name }) => ({ label: name, value: id }));
 

@@ -1,3 +1,9 @@
-export interface RecordLabels {}
+export interface JournalLabels {
+  title: string;
+}
 
-export const accountBookDetailsLabels: Record<string, RecordLabels> = {};
+export const accountBookDetailsLabels: Record<string, JournalLabels> = {
+  en: {
+    title: "Finance Journal",
+  },
+};

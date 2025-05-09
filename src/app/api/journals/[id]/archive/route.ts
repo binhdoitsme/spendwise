@@ -1,7 +1,5 @@
-import { NextRequest } from "next/server";
-
 // POST /account-books/{id}/archive -- archive account book
-export function POST(request: NextRequest) {}
+export function POST() {}
 
 // DELETE /account-books/{id}/archive -- unarchive account book
-export function DELETE(request: NextRequest) {}
+export function DELETE() {}

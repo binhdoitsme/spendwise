@@ -1,5 +1,5 @@
 import { Email, IPasswordHasher } from "@/modules/shared/domain/value-objects";
-import { RefreshToken, RefreshTokenId } from "../../domain/refresh-token";
+import { RefreshToken } from "../../domain/refresh-token";
 import {
   AuthUserRepository,
   RefreshTokenRepository,

@@ -12,7 +12,7 @@ export class JwtTokenHandler implements ITokenHandler {
   }
 
   async generateAccessToken(payload: UserPayload): Promise<string> {
-    const jwt = await new SignJWT(payload as any as Record<string, string>)
+    const jwt = await new SignJWT(payload as unknown as Record<string, string>)
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime(this.expiresIn)
       .sign(this.secretKey);
@@ -31,6 +31,7 @@ export class JwtTokenHandler implements ITokenHandler {
         refreshTokenId: payload.refreshTokenId as string,
       };
     } catch (error) {
+      console.error(error);
       return undefined;
     }
   }
