@@ -142,6 +142,7 @@ export default function FinanceJournalPage() {
           {/* Transactions List */}
           <div className="max-h-[calc(100vh-400px)] overflow-scroll pr-2">
             <TransactionList
+              tags={journal.tags}
               transactions={journal.transactions}
               currency={journal.currency}
             />

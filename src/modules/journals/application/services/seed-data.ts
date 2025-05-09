@@ -60,7 +60,7 @@ const journalDetailedSample1: JournalDetailedDto = {
       type: "EXPENSE",
       status: "AUTO_APPROVED",
       notes: "Bought fruits and vegetables",
-      tags: [{ id: "budget", name: "Budget" }],
+      tags: ["budget"],
     },
     {
       id: "txn-002",
@@ -70,7 +70,7 @@ const journalDetailedSample1: JournalDetailedDto = {
       date: "2025-05-01",
       type: "INCOME",
       status: "AUTO_APPROVED",
-      tags: [{ id: "budget", name: "Budget" }],
+      tags: ["budget"],
     },
   ],
 };
@@ -112,7 +112,7 @@ const journalDetailedSample2: JournalDetailedDto = {
       type: "EXPENSE",
       status: "AUTO_APPROVED",
       notes: "Round trip tickets to Paris",
-      tags: [{ id: "budget", name: "Budget" }],
+      tags: ["budget"],
     },
     {
       id: "txn-004",
@@ -122,7 +122,7 @@ const journalDetailedSample2: JournalDetailedDto = {
       date: "2025-03-18T12:00:00Z",
       type: "EXPENSE",
       status: "AUTO_APPROVED",
-      tags: [{ id: "budget", name: "Budget" }],
+      tags: ["budget"],
     },
   ],
 };
@@ -175,7 +175,7 @@ const journalDetailedSample3: JournalDetailedDto = {
       type: "EXPENSE",
       status: "AUTO_APPROVED",
       notes: "Purchased ergonomic chairs",
-      tags: [{ id: "budget", name: "Budget" }],
+      tags: ["budget"],
     },
     {
       id: "txn-006",
@@ -185,7 +185,7 @@ const journalDetailedSample3: JournalDetailedDto = {
       date: "2025-04-15T10:00:00Z",
       type: "INCOME",
       status: "AUTO_APPROVED",
-      tags: [{ id: "budget", name: "Budget" }],
+      tags: ["budget"],
     },
   ],
 };

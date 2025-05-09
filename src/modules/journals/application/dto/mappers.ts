@@ -35,6 +35,7 @@ export function mapRichJournalToJournalDetailedDto(
     ownerId: journal.ownerId.value,
     ownerEmail: journal.ownerEmail.toString(),
     title: journal.title,
+    currency: journal.currency,
     isArchived: journal.isArchived,
     createdAt: journal.createdAt.toISO()!,
     tags: Array.from(journal.tags.values()).map((tag) => ({
@@ -62,6 +63,8 @@ export function mapRichJournalToJournalDetailedDto(
       type: transaction.type,
       status: transaction.status,
       notes: transaction.notes,
+      accountId: transaction.account.value,
+      tags: transaction.tags,
     })),
   };
 }
@@ -74,6 +77,7 @@ export function mapJournalToJournalBasicDto(journal: Journal): JournalBasicDto {
     title: journal.title,
     isArchived: journal.isArchived,
     createdAt: journal.createdAt.toISO()!,
+    currency: journal.currency,
   };
 }
 
@@ -89,6 +93,10 @@ export function mapJournalToJournalBasicWithTransactionsDto(
       amount: transaction.amount,
       date: transaction.date.toISO()!,
       type: transaction.type,
+      accountId: transaction.account.value,
+      status: transaction.status,
+      tags: transaction.tags,
+      notes: transaction.notes,
     })),
   };
 }

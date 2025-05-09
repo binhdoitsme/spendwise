@@ -1,14 +1,19 @@
 import { Separator } from "@/components/ui/separator";
-import { TransactionDetailedDto } from "@/modules/journals/application/dto/dtos.types";
+import {
+  TagDto,
+  TransactionDetailedDto,
+} from "@/modules/journals/application/dto/dtos.types";
 import { useMemo } from "react";
 import { TransactionItem } from "./transaction-item";
 
 interface TransactionListProps {
+  tags: TagDto[];
   transactions: TransactionDetailedDto[];
   currency: string;
 }
 
 export function TransactionList({
+  tags,
   transactions,
   currency,
 }: TransactionListProps) {
@@ -40,7 +45,12 @@ export function TransactionList({
             {records.map((record) => (
               <TransactionItem
                 key={record.id}
-                transaction={record}
+                transaction={{
+                  ...record,
+                  tags: record.tags.map(
+                    (tag) => tags.find(({ id }) => id === tag)!
+                  ),
+                }}
                 formatter={formatter}
               />
             ))}

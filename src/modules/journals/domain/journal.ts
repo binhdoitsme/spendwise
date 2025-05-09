@@ -133,7 +133,13 @@ export class Journal {
 
   static create(props: JournalCreate) {
     const id = new JournalId();
-    return new Journal(id, props.ownerId, props.ownerEmail, props.title, props.currency);
+    return new Journal(
+      id,
+      props.ownerId,
+      props.ownerEmail,
+      props.title,
+      props.currency
+    );
   }
 
   static restore(props: JournalRestore) {

@@ -1,3 +1,4 @@
 export type ExcludeMethods<T> = {
-  [K in keyof T as T[K] extends (...args: unknown[]) => unknown ? never : K]: T[K];
+  // eslint-disable-next-line
+  [K in keyof T as T[K] extends (...args: any[]) => any ? never : K]: T[K];
 };

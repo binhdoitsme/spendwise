@@ -38,7 +38,7 @@ export interface TransactionDetailedDto {
   type: `${TransactionType}`;
   status: `${TransactionStatus}`;
   notes?: string;
-  tags: TagDto[];
+  tags: string[];
 }
 
 export interface UserBasicDto {
@@ -103,5 +103,6 @@ export interface TransactionCreateDto {
 export {
   mapJournalToJournalBasicDto,
   mapJournalToJournalBasicWithTransactionsDto,
-  mapRichJournalToJournalDetailedDto,
+  mapRichJournalToJournalDetailedDto
 } from "./mappers";
+

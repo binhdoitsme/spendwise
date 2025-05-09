@@ -9,7 +9,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { TransactionDetailedDto } from "@/modules/journals/application/dto/dtos.types";
+import {
+  TagDto,
+  TransactionDetailedDto,
+} from "@/modules/journals/application/dto/dtos.types";
 import {
   Archive,
   Copy,
@@ -32,7 +35,7 @@ export type TransactionCommand = {
 };
 
 export interface TransactionItemProps {
-  transaction: TransactionDetailedDto;
+  transaction: Omit<TransactionDetailedDto, "tags"> & { tags: TagDto[] };
   formatter: Intl.NumberFormat;
   commands?: TransactionCommand[];
 }
