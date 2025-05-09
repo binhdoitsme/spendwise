@@ -1,11 +1,14 @@
 import { RedirectOnAuthExpiration } from "@/components/common/redirect";
 import { Toaster } from "@/components/ui/sonner";
+import { FullScreenLoader } from "@/components/ui/spinner";
+import { getCurrentUserId } from "@/modules/auth/presentation/api/current-user";
 import { AuthProvider } from "@/modules/auth/presentation/components/auth-context";
-import { getCurrentUser } from "@/modules/auth/presentation/contracts/current-user";
+import { provideUserServices } from "@/modules/users/users.module";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense, use } from "react";
 import "./globals.css";
+import { FullScreenLoaderProvider } from "./loader-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,18 +30,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = use(getCurrentUser());
-
+  const userId = use(getCurrentUserId());
+  const userService = provideUserServices();
+  const user = userId ? use(userService.getUserById(userId)) : undefined;
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased p-0 overflow-hidden`}
       >
-        <Suspense fallback={<p>Loading...</p>}>
+        <Suspense fallback={<FullScreenLoader />}>
           <AuthProvider initialUser={user}>
-            <RedirectOnAuthExpiration />
-            {children}
-            <Toaster />
+            <FullScreenLoaderProvider>
+              <RedirectOnAuthExpiration />
+              {children}
+              <Toaster />
+            </FullScreenLoaderProvider>
           </AuthProvider>
         </Suspense>
       </body>

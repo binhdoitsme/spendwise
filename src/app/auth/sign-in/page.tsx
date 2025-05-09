@@ -1,5 +1,5 @@
+import { SignInForm } from "@/modules/auth/presentation/components/sign-in-form";
 import { Metadata } from "next";
-import { SignInForm } from "../../../modules/auth/presentation/components/sign-in-form";
 
 export const metadata: Metadata = {
   title: "Sign In | SpendWise",

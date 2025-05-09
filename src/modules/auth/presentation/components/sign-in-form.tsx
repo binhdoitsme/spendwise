@@ -20,7 +20,7 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { AuthApi } from "../contracts/auth.service";
+import { AuthApi } from "../api/auth.service";
 import { useAuthContext } from "./auth-context";
 import { signInLabels } from "./labels";
 import { SSOLoginActions } from "./sso-actions";
@@ -68,7 +68,7 @@ export function SignInForm({
         router.push(redirectTo);
       }
     } catch (err) {
-      toast.error(`Cannot sign in`);
+      toast.error("Cannot sign in: Email or password incorrect");
     } finally {
       setIsSubmitting(false);
     }

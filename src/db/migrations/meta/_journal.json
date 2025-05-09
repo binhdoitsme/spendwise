@@ -8,6 +8,27 @@
       "when": 1746598543134,
       "tag": "0000_InitialMigration",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1746697581068,
+      "tag": "0001_AddJournalCurrency",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1746757370820,
+      "tag": "0002_AddUserAndProfile",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1746783970984,
+      "tag": "0003_AddAuthUserContext",
+      "breakpoints": true
     }
   ]
 }

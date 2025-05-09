@@ -1,17 +1,11 @@
 "use client";
 
+import { UserBasicDto } from "@/modules/users/application/dto/dtos.types";
 import { createContext, ReactNode, useContext, useState } from "react";
 
-interface User {
-  email: string;
-  avatar: {
-    url: string;
-  };
-}
-
 interface AuthContextProps {
-  user?: User;
-  setUser: (user?: User) => void;
+  user?: UserBasicDto;
+  setUser: (user?: UserBasicDto) => void;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -21,9 +15,9 @@ export const AuthProvider = ({
   initialUser,
 }: {
   children: ReactNode;
-  initialUser?: User;
+  initialUser?: UserBasicDto;
 }) => {
-  const [user, setUser] = useState<User | undefined>(initialUser);
+  const [user, setUser] = useState<UserBasicDto | undefined>(initialUser);
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>

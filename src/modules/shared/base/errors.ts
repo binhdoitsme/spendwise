@@ -1,12 +1,12 @@
-export interface DomainError {
+export interface ApplicationError {
   code: string;
   message: string;
 }
 
 export function formatError(
-  error: DomainError,
+  error: ApplicationError,
   options?: Record<string, any>
-): DomainError {
+): ApplicationError {
   let newMessage = error.message;
   if (options) {
     for (const key in options) {

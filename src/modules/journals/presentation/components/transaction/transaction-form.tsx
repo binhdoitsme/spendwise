@@ -26,6 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { TransactionFormSchema, transactionFormSchema } from "../types";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export interface AccountSelectProps {
   accountId: string;
@@ -49,13 +50,13 @@ export function TransactionForm({
   const form = useForm<TransactionFormSchema>({
     resolver: zodResolver(transactionFormSchema),
     defaultValues: {
-      title: "",
+      title: undefined,
       amount: undefined,
       date: undefined,
-      account: "",
+      account: undefined,
       tags: [],
-      type: "income",
-      paidBy: "",
+      type: "EXPENSE",
+      paidBy: undefined,
     },
   });
   const paidByUser = form.watch("paidBy");
@@ -87,6 +88,39 @@ export function TransactionForm({
       )}
       <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
         <div className="max-h-[calc(100vh-300px)] overflow-y-scroll flex flex-col gap-2 p-1">
+          <FormField
+            name="type"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className="space-y-1">
+                <FormLabel>Type</FormLabel>
+                <FormControl className="mb-2">
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="flex flex-row items-center"
+                    orientation="horizontal"
+                  >
+                    {[
+                      { label: "Expense", value: "EXPENSE" },
+                      { label: "Income", value: "INCOME" },
+                    ].map(({ label, value }) => (
+                      <FormItem
+                        key={value}
+                        className="flex flex-row items-center space-x-1 space-y-0"
+                      >
+                        <FormControl>
+                          <RadioGroupItem value={value} />
+                        </FormControl>
+                        <FormLabel className="font-normal">{label}</FormLabel>
+                      </FormItem>
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             name="title"
             control={form.control}
