@@ -12,8 +12,6 @@ export class JwtTokenHandler implements ITokenHandler {
   }
 
   async generateAccessToken(payload: UserPayload): Promise<string> {
-    console.log(this.secretKey);
-    console.log(this.expiresIn);
     const jwt = await new SignJWT(payload as any as Record<string, string>)
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime(this.expiresIn)
