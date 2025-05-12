@@ -102,14 +102,27 @@ export class DrizzleJournalRepository implements JournalRepository {
             isArchived: journalSchema.isArchived,
           },
         });
-      await Promise.all([
-        tx.insert(journalAccounts).values(accountSchemas).onConflictDoNothing(),
-        tx.insert(tags).values(tagSchemas).onConflictDoNothing(),
-        tx
-          .insert(collaborators)
-          .values(collaboratorSchemas)
-          .onConflictDoNothing(),
-      ]);
+      const promises = new Array<Promise<unknown>>();
+      if (accountSchemas.length) {
+        promises.push(
+          tx
+            .insert(journalAccounts)
+            .values(accountSchemas)
+            .onConflictDoNothing()
+        );
+      }
+      if (tagSchemas.length) {
+        promises.push(tx.insert(tags).values(tagSchemas).onConflictDoNothing());
+      }
+      if (collaboratorSchemas.length) {
+        promises.push(
+          tx
+            .insert(collaborators)
+            .values(collaboratorSchemas)
+            .onConflictDoNothing()
+        );
+      }
+      await Promise.all(promises);
     });
   }
 }

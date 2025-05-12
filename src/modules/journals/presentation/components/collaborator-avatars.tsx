@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 
 interface Collaborator {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   avatarUrl?: string;
 }
 
@@ -63,15 +64,10 @@ export function Collaborators({
             <Avatar className={cn(avatarSizeClass)}>
               <AvatarImage
                 src={collaborator.avatarUrl || "/placeholder.svg"}
-                alt={collaborator.name}
+                alt={`${collaborator.firstName} ${collaborator.lastName}`}
               />
               <AvatarFallback>
-                {collaborator.name
-                  .split(" ")
-                  .map((name) => name[0])
-                  .join("")
-                  .toUpperCase()
-                  .substring(0, 2)}
+                {collaborator.firstName[0] + collaborator.lastName[0]}
               </AvatarFallback>
             </Avatar>
           </div>

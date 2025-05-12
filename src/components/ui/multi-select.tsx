@@ -203,16 +203,6 @@ export const MultiSelect = React.forwardRef<
       onValueChange(newSelectedValues);
     };
 
-    // const toggleAll = () => {
-    //   if (selectedValues.length === options.length) {
-    //     handleClear();
-    //   } else {
-    //     const allValues = options.map((option) => option.value);
-    //     setSelectedValues(allValues);
-    //     onValueChange(allValues);
-    //   }
-    // };
-
     const handleAddOption = () => {
       // Create a new option with the search query
       const newOption = {

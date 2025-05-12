@@ -43,7 +43,8 @@ export interface TransactionDetailedDto {
 
 export interface UserBasicDto {
   email: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   avatarUrl?: string;
 }
 
@@ -61,6 +62,8 @@ export interface JournalDetailedDto {
   id: string;
   ownerId: string;
   ownerEmail: string;
+  ownerFirstName: string;
+  ownerLastName: string;
   title: string;
   currency: string;
   isArchived: boolean;
@@ -103,6 +106,5 @@ export interface TransactionCreateDto {
 export {
   mapJournalToJournalBasicDto,
   mapJournalToJournalBasicWithTransactionsDto,
-  mapRichJournalToJournalDetailedDto
+  mapRichJournalToJournalDetailedDto,
 } from "./mappers";
-

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -25,8 +26,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { TransactionFormSchema, transactionFormSchema } from "../types";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { transactionFormSchema, TransactionFormSchema } from "../forms";
 
 export interface AccountSelectProps {
   accountId: string;
@@ -181,7 +181,7 @@ export function TransactionForm({
                     <SelectContent>
                       {collaborators.map((user) => (
                         <SelectItem key={user.email} value={user.email}>
-                          {user.fullName} ({user.email})
+                          {user.firstName} {user.lastName} ({user.email})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -207,8 +207,13 @@ export function TransactionForm({
                       <SelectValue placeholder="e.g. Cash, Bank" />
                     </SelectTrigger>
                     <SelectContent>
+                      {Object.values(accounts).length === 0 && (
+                        <SelectItem value="_" disabled>
+                          Add an account to continue
+                        </SelectItem>
+                      )}
                       {paidByUser &&
-                        accounts[paidByUser].map(({ accountId, name }) => (
+                        accounts[paidByUser]?.map(({ accountId, name }) => (
                           <SelectItem key={accountId} value={accountId}>
                             {name}
                           </SelectItem>

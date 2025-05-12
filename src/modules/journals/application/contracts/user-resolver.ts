@@ -2,7 +2,8 @@ import { Email } from "@/modules/shared/domain/value-objects";
 
 export interface UserBasic {
   email: Email;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   avatar?: {
     url: string;
   };

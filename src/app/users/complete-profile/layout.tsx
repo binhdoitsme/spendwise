@@ -1,10 +1,10 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Journal Details | SpendWise",
+  title: "Complete Profile | Spendwise",
 };
 
-export default function JournalByIdLayout({
+export default function CompleteProfileLayout({
   children,
 }: {
   children: React.ReactNode;

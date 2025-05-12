@@ -1,7 +1,8 @@
-// GET /journals/{id} -- get account book details by ID
+// GET /journals/{id} -- get journal details by ID
 export function GET() {}
 
-// PUT /journals/{id} -- update account book settings
+// PUT /journals/{id} -- update journal settings
 export function PUT() {}
 
-// DELETE /journals/{id} -- delete account book
+// DELETE /journals/{id} -- delete journal
+export function DELETE() {}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useLoader } from "@/app/loader.context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -13,10 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/spinner";
 import { BasicUserApi } from "@/modules/shared/presentation/contracts/user.service";
+import { Localizable } from "@/modules/shared/presentation/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -30,11 +32,10 @@ const signInSchema = z.object({
   password: z.string(),
 });
 
-export interface SignInFormProps {
-  language?: string;
+export type SignInFormProps = {
   ssoProviders: Set<string>;
   redirectTo?: string;
-}
+} & Localizable;
 
 export function SignInForm({
   language = "en",
@@ -42,11 +43,12 @@ export function SignInForm({
   redirectTo,
 }: SignInFormProps) {
   const labels = signInLabels[language];
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const authApi = useMemo(() => new AuthApi(), []);
   const userApi = useMemo(() => new BasicUserApi(), []);
   const router = useRouter();
   const { setUser } = useAuthContext();
+  const { isLoading, loadingStart, loadingEnd } = useLoader();
+
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -58,20 +60,20 @@ export function SignInForm({
   const onEmailPasswordSignIn = async (
     values: z.infer<typeof signInSchema>
   ) => {
-    setIsSubmitting(true);
+    loadingStart();
     try {
       await authApi.signIn(values);
-      form.reset();
       const user = await userApi.me();
       setUser(user);
       if (redirectTo) {
         router.push(redirectTo);
       }
+      form.reset();
     } catch (err) {
       console.error(err);
       toast.error("Cannot sign in: Email or password incorrect");
     } finally {
-      setIsSubmitting(false);
+      loadingEnd();
     }
   };
 
@@ -100,7 +102,7 @@ export function SignInForm({
                       type="email"
                       placeholder={labels.emailPlaceholder}
                       {...field}
-                      disabled={isSubmitting}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -120,7 +122,7 @@ export function SignInForm({
                       type="password"
                       placeholder={labels.passwordPlaceholder}
                       {...field}
-                      disabled={isSubmitting}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -129,9 +131,9 @@ export function SignInForm({
             />
 
             {/* Submit Button */}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {labels.signInButton}
-              {isSubmitting && <LoadingSpinner />}
+              {isLoading && <LoadingSpinner />}
             </Button>
           </form>
         </Form>

@@ -12,7 +12,8 @@ import {
 function mapUserBasicToDto(user: UserBasic): UserBasicDto {
   return {
     email: user.email.value,
-    fullName: user.fullName,
+    firstName: user.firstName,
+    lastName: user.lastName,
     avatarUrl: user.avatar?.url,
   };
 }
@@ -34,10 +35,16 @@ export function mapRichJournalToJournalDetailedDto(
     id: journal.id.value,
     ownerId: journal.ownerId.value,
     ownerEmail: journal.ownerEmail.toString(),
+    ownerFirstName:
+      users.find((user) => user.email.equals(journal.ownerEmail))?.firstName ??
+      "",
+    ownerLastName:
+      users.find((user) => user.email.equals(journal.ownerEmail))?.lastName ??
+      "",
     title: journal.title,
     currency: journal.currency,
     isArchived: journal.isArchived,
-    createdAt: journal.createdAt.toISO()!,
+    createdAt: journal.createdAt.toISODate()!,
     tags: Array.from(journal.tags.values()).map((tag) => ({
       id: tag.id,
       name: tag.name,
@@ -47,7 +54,7 @@ export function mapRichJournalToJournalDetailedDto(
       ownerId: account.ownerId.value,
       ownerEmail: account.ownerEmail.toString(),
       gracePeriodDays: account.gracePeriodDays,
-      createdAt: account.createdAt.toISO()!,
+      createdAt: account.createdAt.toISODate()!,
     })),
     collaborators: Array.from(journal.collaborators.values()).map(
       (collaborator) => ({
@@ -59,7 +66,7 @@ export function mapRichJournalToJournalDetailedDto(
       id: transaction.id.value,
       title: transaction.title,
       amount: transaction.amount,
-      date: transaction.date.toISO()!,
+      date: transaction.date.toISODate()!,
       type: transaction.type,
       status: transaction.status,
       notes: transaction.notes,
@@ -76,7 +83,7 @@ export function mapJournalToJournalBasicDto(journal: Journal): JournalBasicDto {
     ownerEmail: journal.ownerEmail.toString(),
     title: journal.title,
     isArchived: journal.isArchived,
-    createdAt: journal.createdAt.toISO()!,
+    createdAt: journal.createdAt.toISODate()!,
     currency: journal.currency,
   };
 }
@@ -91,7 +98,7 @@ export function mapJournalToJournalBasicWithTransactionsDto(
       id: transaction.id.value,
       title: transaction.title,
       amount: transaction.amount,
-      date: transaction.date.toISO()!,
+      date: transaction.date.toISODate()!,
       type: transaction.type,
       accountId: transaction.account.value,
       status: transaction.status,

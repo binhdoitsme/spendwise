@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { unauthorized } from "./app/api/api-responses";
 import { appConfig } from "./config/appConfig";
 import { JwtTokenHandler } from "./modules/auth/infrastructure/external/jwt-token-handler";
 
@@ -52,16 +53,8 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!cookieStore.has("accessToken")) {
-    if (request.nextUrl.pathname.startsWith("/api")) {
-      return new NextResponse(
-        JSON.stringify({
-          statusCode: 401,
-          message: "User is not authorized",
-          error: "Unauthorized",
-          data: {},
-        }),
-        { status: 401 }
-      );
+    if (pathname.startsWith("/api")) {
+      return unauthorized();
     } else {
       return NextResponse.redirect(
         new URL("/auth/sign-in", request.nextUrl.origin)

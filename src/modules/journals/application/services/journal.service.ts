@@ -18,8 +18,10 @@ import {
   TransactionCreateDto,
   TransactionEditDto,
 } from "../dto/dtos.types";
-import { mapJournalToJournalBasicDto } from "../dto/mappers";
-import { sampleJournals } from "./seed-data";
+import {
+  mapJournalToJournalBasicDto,
+  mapRichJournalToJournalDetailedDto,
+} from "../dto/mappers";
 
 export class JournalServices {
   constructor(
@@ -33,30 +35,27 @@ export class JournalServices {
   }
 
   async listJournals(userId: string) {
-    // return sampleJournals;
     const journals = await this.journalRepository.findByUser(
       new UserId(userId)
     );
     return journals.map(mapJournalToJournalBasicDto);
   }
 
-  // eslint-disable-next-line
   async getJournalById(id: string, transactionOptions?: ListingOptions) {
-    return sampleJournals[0];
-    // const journalId = new JournalId(id);
-    // const journal = await this.journalRepository.findByIdWithTransactions(
-    //   journalId,
-    //   transactionOptions
-    // );
-    // if (!journal) {
-    //   throw this.journalNotFound;
-    // }
-    // const collaborators = await this.userResolver.resolveMany(
-    //   Array.from(journal.journal.collaborators.values()).map(
-    //     ({ email }) => email
-    //   )
-    // );
-    // return mapRichJournalToJournalDetailedDto(journal, collaborators);
+    const journalId = new JournalId(id);
+    const journal = await this.journalRepository.findByIdWithTransactions(
+      journalId,
+      transactionOptions
+    );
+    if (!journal) {
+      throw this.journalNotFound;
+    }
+    const collaborators = await this.userResolver.resolveMany(
+      Array.from(journal.journal.collaborators.values()).map(
+        ({ email }) => email
+      )
+    );
+    return mapRichJournalToJournalDetailedDto(journal, collaborators);
   }
 
   private async getBasicJournal(id: string) {

@@ -32,6 +32,12 @@ export function TransactionList({
 
   return (
     <div className="space-y-4">
+      {Object.entries(groupedByDate).length === 0 && (
+        <p className="opacity-50 italic">
+          It&apos;s empty here. Click + New Transaction to start recording your
+          expenses!
+        </p>
+      )}
       {Object.entries(groupedByDate).map(([date, records]) => (
         <div key={date} className="space-y-3">
           <h3 className="text-sm font-semibold text-muted-foreground">

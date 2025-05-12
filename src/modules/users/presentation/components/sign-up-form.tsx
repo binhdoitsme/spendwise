@@ -1,5 +1,6 @@
 "use client";
 
+import { useLoader } from "@/app/loader.context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -12,10 +13,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/spinner";
+import { Localizable } from "@/modules/shared/presentation/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -33,16 +35,15 @@ const signUpSchema = z
     path: ["confirmPassword"],
   });
 
-export interface SignUpFormProps {
-  language?: string;
+export type SignUpFormProps = {
   redirectTo?: string;
-}
+} & Localizable;
 
 export function SignUpForm({ language = "en", redirectTo }: SignUpFormProps) {
   const labels = signUpLabels[language];
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const userApi = useMemo(() => new UserApi(), []);
   const router = useRouter();
+  const { isLoading, loadingStart, loadingEnd } = useLoader();
   const form = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -55,19 +56,19 @@ export function SignUpForm({ language = "en", redirectTo }: SignUpFormProps) {
   const onEmailPasswordSignIn = async (
     values: z.infer<typeof signUpSchema>
   ) => {
-    setIsSubmitting(true);
+    loadingStart();
     try {
       await userApi.registerUser(values);
-      form.reset();
       toast.info("Successful sign up. You can now sign in.");
       if (redirectTo) {
         router.push(redirectTo);
       }
+      form.reset();
     } catch (err) {
       console.error(err);
       toast.error(`Cannot sign in`);
     } finally {
-      setIsSubmitting(false);
+      loadingEnd();
     }
   };
 
@@ -96,7 +97,7 @@ export function SignUpForm({ language = "en", redirectTo }: SignUpFormProps) {
                       type="email"
                       placeholder={labels.emailPlaceholder}
                       {...field}
-                      disabled={isSubmitting}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -116,7 +117,7 @@ export function SignUpForm({ language = "en", redirectTo }: SignUpFormProps) {
                       type="password"
                       placeholder={labels.passwordPlaceholder}
                       {...field}
-                      disabled={isSubmitting}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -136,7 +137,7 @@ export function SignUpForm({ language = "en", redirectTo }: SignUpFormProps) {
                       type="password"
                       placeholder={labels.confirmPasswordPlaceholder}
                       {...field}
-                      disabled={isSubmitting}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -145,9 +146,9 @@ export function SignUpForm({ language = "en", redirectTo }: SignUpFormProps) {
             />
 
             {/* Submit Button */}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {labels.signUpButton}
-              {isSubmitting && <LoadingSpinner />}
+              {isLoading && <LoadingSpinner />}
             </Button>
           </form>
         </Form>

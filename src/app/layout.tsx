@@ -1,14 +1,14 @@
 import { RedirectOnAuthExpiration } from "@/components/common/redirect";
 import { Toaster } from "@/components/ui/sonner";
-import { FullScreenLoader } from "@/components/ui/spinner";
 import { getCurrentUserId } from "@/modules/auth/presentation/api/current-user";
 import { AuthProvider } from "@/modules/auth/presentation/components/auth-context";
+import { TopNavigationBar } from "@/modules/shared/presentation/components/top-nav";
 import { provideUserServices } from "@/modules/users/users.module";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Suspense, use } from "react";
+import { use } from "react";
 import "./globals.css";
-import { FullScreenLoaderProvider } from "./loader-context";
+import { LoaderProvider } from "./loader.context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,15 +38,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased p-0 overflow-hidden`}
       >
-        <Suspense fallback={<FullScreenLoader />}>
-          <AuthProvider initialUser={user}>
-            <FullScreenLoaderProvider>
-              <RedirectOnAuthExpiration />
-              {children}
-              <Toaster />
-            </FullScreenLoaderProvider>
-          </AuthProvider>
-        </Suspense>
+        <AuthProvider initialUser={user}>
+          <LoaderProvider>
+            <RedirectOnAuthExpiration />
+            <TopNavigationBar />
+            {children}
+            <Toaster />
+          </LoaderProvider>
+        </AuthProvider>
       </body>
     </html>
   );
