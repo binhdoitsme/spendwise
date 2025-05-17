@@ -6,7 +6,7 @@ import { UserServices } from "./application/services/user.service";
 import { DrizzleUserRepository } from "./infrastructure/db/repositories/user.repository";
 import * as schema from "./infrastructure/db/schemas";
 
-export function provideUserRepository(connectionPool: Pool = dbConnectionPool) {
+export function provideUserRepository(connectionPool: Pool) {
   const dbInstance = drizzle(connectionPool, { schema });
   return new DrizzleUserRepository(dbInstance);
 }

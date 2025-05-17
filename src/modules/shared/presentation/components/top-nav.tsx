@@ -58,7 +58,9 @@ export function TopNavigationBar() {
             </ul>
 
             <div>
-              <Button onClick={handleSignOut}>Sign Out</Button>
+              <Button variant="outline" onClick={handleSignOut}>
+                Sign Out
+              </Button>
             </div>
           </>
         )}

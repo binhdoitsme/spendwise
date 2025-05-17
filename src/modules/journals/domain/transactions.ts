@@ -1,6 +1,5 @@
 import { SnowflakeIdentifier } from "@/modules/shared/base/identifiers";
-import { AccountId } from "@/modules/shared/domain/identifiers";
-import { Email } from "@/modules/shared/domain/value-objects";
+import { AccountId, UserId } from "@/modules/shared/domain/identifiers";
 import { ExcludeMethods } from "@/types";
 import { DateTime } from "luxon";
 import { JournalId } from "./journal";
@@ -28,7 +27,7 @@ interface TransactionProps {
   date: DateTime;
   account: AccountId;
   type: TransactionType;
-  paidBy: Email;
+  paidBy: UserId;
   tags: string[];
   status: TransactionStatus;
   notes?: string;
@@ -49,7 +48,7 @@ export class Transaction implements TransactionProps {
     public date: DateTime,
     public account: AccountId,
     public type: TransactionType,
-    public paidBy: Email,
+    public paidBy: UserId,
     public tags: string[],
     private _status: TransactionStatus,
     public notes?: string,

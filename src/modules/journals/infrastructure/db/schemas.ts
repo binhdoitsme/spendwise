@@ -6,18 +6,26 @@ import {
   numeric,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const journalAccounts = pgTable("journal_accounts", {
-  accountId: text().primaryKey(),
-  journalId: text().notNull(),
-  ownerId: text().notNull(),
-  ownerEmail: varchar({ length: 255 }).notNull(),
-  gracePeriodDays: numeric({ mode: "number" }),
-  createdAt: date({ mode: "date" }).notNull(),
-});
+export const journalAccounts = pgTable(
+  "journal_accounts",
+  {
+    accountId: text().notNull(),
+    journalId: text().notNull(),
+    ownerId: text().notNull(),
+    createdAt: date({ mode: "date" }).notNull(),
+  },
+  (table) => [
+    primaryKey({
+      name: "journal_account_composite_pk",
+      columns: [table.accountId, table.journalId],
+    }),
+  ]
+);
 
 export const journalPermissions = pgEnum("journal_permissions", [
   "owner",
@@ -26,16 +34,22 @@ export const journalPermissions = pgEnum("journal_permissions", [
 ]);
 
 export const collaborators = pgTable("collaborators", {
-  email: varchar({ length: 255 }).primaryKey(),
+  userId: varchar({ length: 255 }).primaryKey(),
   permission: journalPermissions().notNull(),
   journalId: text().notNull(),
 });
 
-export const tags = pgTable("tags", {
-  id: text().primaryKey(),
-  name: varchar({ length: 100 }).notNull(),
-  journalId: text().notNull(),
-});
+export const tags = pgTable(
+  "tags",
+  {
+    id: text(),
+    name: varchar({ length: 100 }).notNull(),
+    journalId: text().notNull(),
+  },
+  (table) => [
+    primaryKey({ name: "tags_pkey", columns: [table.id, table.journalId] }),
+  ]
+);
 
 export const journals = pgTable("journals", {
   id: text().primaryKey(),
@@ -67,7 +81,7 @@ export const transactions = pgTable("transactions", {
   title: varchar({ length: 200 }).notNull(),
   amount: numeric({ mode: "number" }).notNull(),
   date: date({ mode: "date" }).notNull(),
-  account: varchar({ length: 100 }).notNull(),
+  account: text().notNull(),
   type: transactionTypeEnum().notNull(),
   paidBy: varchar({ length: 255 }).notNull(),
   tags: varchar().array(),

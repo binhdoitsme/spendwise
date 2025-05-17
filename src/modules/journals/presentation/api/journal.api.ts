@@ -1,10 +1,12 @@
+import { ResponseWithData } from "@/app/api/api-responses";
+import { LinkJournalAccountRequest } from "@/app/api/journals/[id]/accounts/route";
 import { ApiClientWrapper } from "@/lib/api-client";
 import {
   JournalBasicDto,
+  JournalDetailedDto,
   TransactionCreateDto,
 } from "../../application/dto/dtos.types";
 import { JournalFormSchema } from "../components/forms";
-import { ResponseWithData } from "@/app/api/api-responses";
 
 export class JournalApi extends ApiClientWrapper {
   async createTransaction(
@@ -28,6 +30,16 @@ export class JournalApi extends ApiClientWrapper {
     return resp.data;
   }
 
+  async getJournalById(journalId: string) {
+    const resp = await this.client.request<
+      ResponseWithData<JournalDetailedDto>
+    >({
+      method: "GET",
+      url: `/api/journals/${journalId}`,
+    });
+    return resp.data.data;
+  }
+
   async editJournal(
     journalId: string,
     data: { title?: string; currency?: string }
@@ -38,5 +50,32 @@ export class JournalApi extends ApiClientWrapper {
       data,
     });
     return resp.data;
+  }
+
+  async linkAccount(journalId: string, data: LinkJournalAccountRequest) {
+    const resp = await this.client.request({
+      method: "POST",
+      url: `/api/journals/${journalId}/accounts`,
+      data,
+    });
+    console.log({ resp });
+  }
+
+  async unlinkAccount(journalId: string, accountId: string) {
+    const resp = await this.client.request({
+      method: "DELETE",
+      url: `/api/journals/${journalId}/accounts`,
+      data: { accountId },
+    });
+    console.log({ resp });
+  }
+
+  async addTags(journalId: string, tags: string[]) {
+    const resp = await this.client.request({
+      method: "POST",
+      url: `/api/journals/${journalId}/tags`,
+      data: { tags },
+    });
+    console.log({ resp });
   }
 }

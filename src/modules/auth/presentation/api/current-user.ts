@@ -1,9 +1,7 @@
 import { appConfig } from "@/config/appConfig";
-import { headers } from "next/headers";
 import { UserPayload } from "../../application/dto/dtos.types";
 
-export async function getCurrentUserId() {
-  const headerStore = await headers();
+export async function getCurrentUserId(headerStore: Headers) {
   if (!headerStore.has(appConfig.userIdHeader)) {
     return undefined;
   } else {

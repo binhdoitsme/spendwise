@@ -24,7 +24,7 @@ export function ok<T>(data?: T) {
 }
 
 export function noContent() {
-  return NextResponse.json(null, { status: 204 });
+  return new Response(null, { status: 204 });
 }
 
 export function unauthorized() {
@@ -36,5 +36,17 @@ export function unauthorized() {
       data: {},
     },
     { status: 401 }
+  );
+}
+
+export function notFound(resource: string, resourceId?: string) {
+  return NextResponse.json(
+    {
+      statusCode: 404,
+      message: `${resource} not found: ${resourceId}`,
+      error: "Not Found",
+      data: {},
+    },
+    { status: 404 }
   );
 }

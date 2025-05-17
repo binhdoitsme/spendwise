@@ -1,14 +1,8 @@
 import { UserId } from "@/modules/shared/domain/identifiers";
+import { ListingOptions } from "@/modules/shared/domain/specs";
 import { Journal, JournalId } from "./journal";
 import { RichJournal } from "./rich-journal";
 import { Transaction, TransactionId } from "./transactions";
-
-export interface ListingOptions {
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDesc?: boolean;
-}
 
 export abstract class JournalRepository {
   abstract findById(journalId: JournalId): Promise<Journal | undefined>;

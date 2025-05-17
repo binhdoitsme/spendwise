@@ -1,18 +1,19 @@
-import { Email } from "@/modules/shared/domain/value-objects";
+import { UserId } from "@/modules/shared/domain/identifiers";
 import { UserRepository } from "@/modules/users/domain/repositories";
 import {
-  UserBasic,
-  UserResolver,
+  JournalUserBasic,
+  JournalUserResolver,
 } from "../../application/contracts/user-resolver";
 
-export class DrizzleUserResolver implements UserResolver {
+export class DrizzleJournalUserResolver implements JournalUserResolver {
   constructor(private readonly userRepository: UserRepository) {}
-  async resolveOne(email: Email): Promise<UserBasic | undefined> {
-    const user = await this.userRepository.findByEmail(email);
+  async resolveOne(userId: UserId): Promise<JournalUserBasic | undefined> {
+    const user = await this.userRepository.findById(userId);
     if (!user) {
       return undefined;
     }
     return {
+      id: user.id,
       email: user.email,
       firstName: user.profile?.firstName ?? "",
       lastName: user.profile?.lastName ?? "",
@@ -22,9 +23,11 @@ export class DrizzleUserResolver implements UserResolver {
     };
   }
 
-  async resolveMany(emails: Email[]): Promise<UserBasic[]> {
-    return Promise.all(emails.map((email) => this.resolveOne(email))).then(
-      (users) => users.filter((user) => !!user).map((user) => user as UserBasic)
+  async resolveMany(userIds: Set<UserId>): Promise<JournalUserBasic[]> {
+    return Promise.all(
+      Array.from(userIds).map((userId) => this.resolveOne(userId))
+    ).then((users) =>
+      users.filter((user) => !!user).map((user) => user as JournalUserBasic)
     );
   }
 }

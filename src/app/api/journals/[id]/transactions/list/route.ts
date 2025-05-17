@@ -1,6 +1,6 @@
 import { ok } from "@/app/api/api-responses";
-import { ListingOptions } from "@/modules/journals/domain/repositories";
 import { provideJournalServices } from "@/modules/journals/journal.module";
+import { ListingOptions } from "@/modules/shared/domain/specs";
 import { NextApiRequest } from "next";
 
 // POST /journals/{id}/transactions/list -- list transactions of a journal

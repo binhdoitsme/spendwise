@@ -42,7 +42,7 @@ export default function JournalListPage() {
     }
   };
   return (
-    <div className="p-6 space-y-6 w-full max-w-[800px] max-h-screen mx-auto">
+    <div className="p-6 space-y-6 w-full max-w-[1000px] max-h-screen mx-auto">
       <h1 className="text-2xl font-bold">My Finance Journals</h1>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>

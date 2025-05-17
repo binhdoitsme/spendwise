@@ -21,12 +21,17 @@ export interface JournalBasicWithTransactionsDto extends JournalBasicDto {
   transactions: TransactionDetailedDto[];
 }
 
-export interface AccountBasicDto {
+export interface JournalAccountBasicDto {
   accountId: string;
   ownerId: string;
-  ownerEmail: string;
-  gracePeriodDays?: number;
-  createdAt: string;
+  displayName: string;
+  type: string;
+  owner: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }
 
 export interface TransactionDetailedDto {
@@ -42,6 +47,7 @@ export interface TransactionDetailedDto {
 }
 
 export interface UserBasicDto {
+  id: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -69,7 +75,7 @@ export interface JournalDetailedDto {
   isArchived: boolean;
   createdAt: string;
   tags: TagDto[];
-  accounts: AccountBasicDto[];
+  accounts: JournalAccountBasicDto[];
   collaborators: CollaboratorBasicDto[];
   transactions: TransactionDetailedDto[];
 }

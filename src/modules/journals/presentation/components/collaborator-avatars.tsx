@@ -1,6 +1,11 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 interface Collaborator {
@@ -61,15 +66,22 @@ export function Collaborators({
             } ring-2 ring-background rounded-full`}
             style={{ zIndex: displayedCollaborators.length - index }}
           >
-            <Avatar className={cn(avatarSizeClass)}>
-              <AvatarImage
-                src={collaborator.avatarUrl || "/placeholder.svg"}
-                alt={`${collaborator.firstName} ${collaborator.lastName}`}
-              />
-              <AvatarFallback>
-                {collaborator.firstName[0] + collaborator.lastName[0]}
-              </AvatarFallback>
-            </Avatar>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Avatar className={cn(avatarSizeClass, "cursor-default")}>
+                  <AvatarImage
+                    src={collaborator.avatarUrl || "/placeholder.svg"}
+                    alt={`${collaborator.firstName} ${collaborator.lastName}`}
+                  />
+                  <AvatarFallback>
+                    {collaborator.firstName[0] + collaborator.lastName[0]}
+                  </AvatarFallback>
+                </Avatar>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{`${collaborator.firstName} ${collaborator.lastName}`}</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         ))}
       </div>

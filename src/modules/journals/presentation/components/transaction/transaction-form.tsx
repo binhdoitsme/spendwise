@@ -24,6 +24,7 @@ import {
   UserBasicDto,
 } from "@/modules/journals/application/dto/dtos.types";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { transactionFormSchema, TransactionFormSchema } from "../forms";
@@ -38,6 +39,8 @@ export interface TransactionFormProps {
   collaborators: UserBasicDto[];
   tags: TagDto[];
   onSubmit: (data: TransactionFormSchema) => void | Promise<void>;
+  onUnknownTag?: (tag: string) => Promise<void>;
+  onNoAccount?: () => void | Promise<void>;
 }
 
 export function TransactionForm({
@@ -45,18 +48,20 @@ export function TransactionForm({
   collaborators,
   tags,
   onSubmit,
+  onNoAccount,
+  onUnknownTag,
 }: TransactionFormProps) {
   const isDevMode = true;
   const form = useForm<TransactionFormSchema>({
     resolver: zodResolver(transactionFormSchema),
     defaultValues: {
-      title: undefined,
+      title: "",
       amount: undefined,
       date: undefined,
-      account: undefined,
+      account: "",
       tags: [],
       type: "EXPENSE",
-      paidBy: undefined,
+      paidBy: "",
     },
   });
   const paidByUser = form.watch("paidBy");
@@ -180,7 +185,7 @@ export function TransactionForm({
                     </SelectTrigger>
                     <SelectContent>
                       {collaborators.map((user) => (
-                        <SelectItem key={user.email} value={user.email}>
+                        <SelectItem key={user.id} value={user.id}>
                           {user.firstName} {user.lastName} ({user.email})
                         </SelectItem>
                       ))}
@@ -199,6 +204,7 @@ export function TransactionForm({
                 <FormLabel>Account</FormLabel>
                 <FormControl>
                   <Select
+                    disabled={!paidByUser}
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                     value={field.value}
@@ -208,9 +214,14 @@ export function TransactionForm({
                     </SelectTrigger>
                     <SelectContent>
                       {Object.values(accounts).length === 0 && (
-                        <SelectItem value="_" disabled>
-                          Add an account to continue
-                        </SelectItem>
+                        <Button
+                          className="w-full flex justify-start"
+                          variant="ghost"
+                          onClick={onNoAccount}
+                        >
+                          <Plus />
+                          Link an account to continue
+                        </Button>
                       )}
                       {paidByUser &&
                         accounts[paidByUser]?.map(({ accountId, name }) => (
@@ -240,7 +251,7 @@ export function TransactionForm({
                     error={!!form.formState.errors.tags}
                     errorMessage={form.formState.errors.tags?.message?.toString()}
                     maxCount={3}
-                    onAddOption={(option) => alert(JSON.stringify(option))}
+                    onAddOption={(option) => onUnknownTag?.(option.label)}
                   />
                 </FormControl>
                 {/* <FormMessage /> */}

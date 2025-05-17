@@ -29,6 +29,27 @@
       "when": 1746783970984,
       "tag": "0003_AddAuthUserContext",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1747217430649,
+      "tag": "0004_AddAccountContext",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1747416475625,
+      "tag": "0005_UpdateJournalCollaborator",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1747492399543,
+      "tag": "0006_UpdateJournalTag",
+      "breakpoints": true
     }
   ]
 }

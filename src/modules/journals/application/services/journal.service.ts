@@ -1,4 +1,5 @@
 import { AccountId, UserId } from "@/modules/shared/domain/identifiers";
+import { ListingOptions } from "@/modules/shared/domain/specs";
 import { Email } from "@/modules/shared/domain/value-objects";
 import { DateTime } from "luxon";
 import { JournalCollaboratorPermission } from "../../domain/collaborator";
@@ -7,11 +8,11 @@ import { Journal, JournalId } from "../../domain/journal";
 import { PayoffService } from "../../domain/payoff";
 import {
   JournalRepository,
-  ListingOptions,
   TransactionRepository,
 } from "../../domain/repositories";
 import { TransactionId, TransactionType } from "../../domain/transactions";
-import { UserResolver } from "../contracts/user-resolver";
+import { JournalAccountResolver } from "../contracts/account-resolver";
+import { JournalUserResolver } from "../contracts/user-resolver";
 import {
   JournalCreateDto,
   JournalEditDto,
@@ -27,7 +28,8 @@ export class JournalServices {
   constructor(
     private readonly journalRepository: JournalRepository,
     private readonly transactionRepository: TransactionRepository,
-    private readonly userResolver: UserResolver
+    private readonly userResolver: JournalUserResolver,
+    private readonly accountResolver: JournalAccountResolver
   ) {}
 
   private get journalNotFound() {
@@ -50,12 +52,18 @@ export class JournalServices {
     if (!journal) {
       throw this.journalNotFound;
     }
+    console.log(Array.from(journal.journal.collaborators.keys()));
     const collaborators = await this.userResolver.resolveMany(
-      Array.from(journal.journal.collaborators.values()).map(
-        ({ email }) => email
+      new Set(
+        Array.from(journal.journal.collaborators.keys()).map(
+          (id) => new UserId(id)
+        )
       )
     );
-    return mapRichJournalToJournalDetailedDto(journal, collaborators);
+    const accounts = await this.accountResolver.resolveMany(
+      Array.from(journal.journal.accounts.keys()).map((id) => new AccountId(id))
+    );
+    return mapRichJournalToJournalDetailedDto(journal, collaborators, accounts);
   }
 
   private async getBasicJournal(id: string) {
@@ -103,6 +111,26 @@ export class JournalServices {
     await this.journalRepository.save(journal);
   }
 
+  async linkAccount({
+    id,
+    accountId,
+    ownerId,
+  }: {
+    id: string;
+    accountId: string;
+    ownerId: string;
+  }) {
+    const journal = await this.getBasicJournal(id);
+    journal.linkAccount(new AccountId(accountId), new UserId(ownerId));
+    await this.journalRepository.save(journal);
+  }
+
+  async unlinkAccount(id: string, accountId: string) {
+    const journal = await this.getBasicJournal(id);
+    journal.unlinkAccount(new AccountId(accountId));
+    await this.journalRepository.save(journal);
+  }
+
   async createTransaction(journalId: string, data: TransactionCreateDto) {
     const journal = await this.getBasicJournal(journalId);
     const transaction = TransactionFactory.createTransaction(journal, {
@@ -111,7 +139,7 @@ export class JournalServices {
       date: DateTime.fromISO(data.date),
       account: new AccountId(data.account),
       type: data.type as TransactionType,
-      paidBy: Email.from(data.paidBy),
+      paidBy: new UserId(data.paidBy),
       tags: data.tags ?? [],
       notes: data.notes,
       paidOffTransaction: undefined, // explicitly ask to mark as paid by/not paid by
@@ -134,7 +162,7 @@ export class JournalServices {
       date: data.date ? DateTime.fromISO(data.date) : undefined,
       account: data.account ? new AccountId(data.account) : undefined,
       type: data.type as TransactionType,
-      paidBy: data.paidBy ? Email.from(data.paidBy) : undefined,
+      paidBy: data.paidBy ? new UserId(data.paidBy) : undefined,
       tags: data.tags,
       notes: data.notes,
     });
@@ -193,18 +221,18 @@ export class JournalServices {
     await this.transactionRepository.delete(new TransactionId(transactionId));
   }
 
-  async addCollaborator(journalId: string, email: string, permission: string) {
+  async addCollaborator(journalId: string, userId: string, permission: string) {
     const journal = await this.getBasicJournal(journalId);
     journal.addCollaborator(
-      Email.from(email),
+      new UserId(userId),
       permission as JournalCollaboratorPermission
     );
     await this.journalRepository.save(journal);
   }
 
-  async removeCollaborator(journalId: string, email: string) {
+  async removeCollaborator(journalId: string, userId: string) {
     const journal = await this.getBasicJournal(journalId);
-    journal.removeCollaborator(Email.from(email));
+    journal.removeCollaborator(new UserId(userId));
     await this.journalRepository.save(journal);
   }
 

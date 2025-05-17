@@ -1,11 +1,9 @@
 import { UserId } from "@/modules/shared/domain/identifiers";
-import { asc, desc, eq } from "drizzle-orm";
+import { ListingOptions } from "@/modules/shared/domain/specs";
+import { and, asc, desc, eq, notInArray } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Journal, JournalId } from "../../../domain/journal";
-import {
-  JournalRepository,
-  ListingOptions,
-} from "../../../domain/repositories";
+import { JournalRepository } from "../../../domain/repositories";
 import { RichJournal } from "../../../domain/rich-journal";
 import {
   mapJournalFromDomain,
@@ -111,9 +109,34 @@ export class DrizzleJournalRepository implements JournalRepository {
             .onConflictDoNothing()
         );
       }
+      const accountIds = accountSchemas.map(({ accountId }) => accountId);
+      promises.push(
+        tx
+          .delete(journalAccounts)
+          .where(
+            and(
+              eq(journalAccounts.journalId, journal.id.value),
+              notInArray(journalAccounts.accountId, accountIds)
+            )
+          )
+      );
       if (tagSchemas.length) {
         promises.push(tx.insert(tags).values(tagSchemas).onConflictDoNothing());
       }
+      const tagIds = tagSchemas
+        .map(({ id }) => id)
+        .filter(Boolean)
+        .map((id) => id!);
+      promises.push(
+        tx
+          .delete(tags)
+          .where(
+            and(
+              eq(tags.journalId, journal.id.value),
+              notInArray(tags.id, tagIds)
+            )
+          )
+      );
       if (collaboratorSchemas.length) {
         promises.push(
           tx
@@ -122,6 +145,17 @@ export class DrizzleJournalRepository implements JournalRepository {
             .onConflictDoNothing()
         );
       }
+      const collaboratorIds = collaboratorSchemas.map(({ userId }) => userId);
+      promises.push(
+        tx
+          .delete(collaborators)
+          .where(
+            and(
+              eq(collaborators.journalId, journal.id.value),
+              notInArray(collaborators.userId, collaboratorIds)
+            )
+          )
+      );
       await Promise.all(promises);
     });
   }

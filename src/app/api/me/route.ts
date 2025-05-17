@@ -6,8 +6,8 @@ import { ok, unauthorized } from "../api-responses";
 import { handleError } from "../error-handler";
 
 // GET /api/me -- get current user basic info
-export async function GET() {
-  const userId = await getCurrentUserId();
+export async function GET(request: NextRequest) {
+  const userId = await getCurrentUserId(request.headers);
   if (!userId) {
     return unauthorized();
   }
@@ -22,7 +22,7 @@ export async function GET() {
 
 // PATCH /api/me -- update current user profile
 export async function PATCH(request: NextRequest) {
-  const userId = await getCurrentUserId();
+  const userId = await getCurrentUserId(request.headers);
   if (!userId) {
     return unauthorized();
   }
