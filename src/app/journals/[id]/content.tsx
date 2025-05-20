@@ -7,6 +7,7 @@ import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
 import { Collaborators } from "@/modules/journals/presentation/components/collaborator-avatars";
 import { Tags } from "@/modules/journals/presentation/components/tag/tag-item";
 import { useMemo, useState } from "react";
+import { AccessTab } from "./access-tab";
 import { AccountTab } from "./account-tab";
 import { TransactionTab } from "./transaction-tab";
 
@@ -68,7 +69,7 @@ export function FinanceJournalPageContent(
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="accounts">Accounts</TabsTrigger>
           <TabsTrigger value="access">Access</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+          {/* <TabsTrigger value="settings">Settings</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="accounts">
@@ -80,6 +81,14 @@ export function FinanceJournalPageContent(
             journalAccounts={journal.accounts}
             handleRefreshJournal={handleRefreshJournal}
             handleRefreshAccounts={handleRefreshAccounts}
+          />
+        </TabsContent>
+
+        <TabsContent value="access">
+          <AccessTab
+            journal={journal}
+            api={journalApi}
+            handleRefreshJournal={handleRefreshJournal}
           />
         </TabsContent>
 

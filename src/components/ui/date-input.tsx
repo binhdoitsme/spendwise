@@ -64,7 +64,7 @@ export function DateInput({
   const getDaysInMonth = (year?: number, month?: number) => {
     if (!year || !month) return Array.from({ length: 31 }, (_, i) => i + 1);
 
-    const daysInMonth = DateTime.local(year, month).daysInMonth || 31;
+    const daysInMonth = DateTime.utc(year, month).daysInMonth || 31;
     return Array.from({ length: daysInMonth }, (_, i) => i + 1);
   };
 
@@ -125,7 +125,7 @@ export function DateInput({
     // If the selected day is greater than the days in the new month, adjust it
     if (selectedDay && selectedYear && selectedMonth) {
       const maxDays =
-        DateTime.local(selectedYear, selectedMonth).daysInMonth || 31;
+        DateTime.utc(selectedYear, selectedMonth).daysInMonth || 31;
       if (selectedDay > maxDays) {
         setSelectedDay(maxDays);
       }
@@ -135,7 +135,7 @@ export function DateInput({
   // Update the date when year, month, or day changes
   useEffect(() => {
     if (selectedYear && selectedMonth && selectedDay) {
-      const newDate = DateTime.local(
+      const newDate = DateTime.utc(
         selectedYear,
         selectedMonth,
         selectedDay
@@ -201,7 +201,7 @@ export function DateInput({
 
   // Format month name
   const getMonthName = (month: number) => {
-    return DateTime.local(2000, month).toFormat("MMMM");
+    return DateTime.utc(2000, month).toFormat("MMMM");
   };
 
   return (

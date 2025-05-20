@@ -35,7 +35,23 @@ export class DrizzleTransactionRepository implements TransactionRepository {
 
   async save(transaction: Transaction): Promise<void> {
     const schema = mapTransactionFromDomain(transaction);
-    await this.dbInstance.insert(transactions).values(schema);
+    await this.dbInstance
+      .insert(transactions)
+      .values(schema)
+      .onConflictDoUpdate({
+        target: [transactions.id],
+        set: {
+          title: schema.title,
+          amount: schema.amount,
+          date: schema.date,
+          type: schema.type,
+          status: schema.status,
+          notes: schema.notes,
+          account: schema.account,
+          paidBy: schema.paidBy,
+          tags: schema.tags,
+        },
+      });
   }
 
   async delete(transactionId: TransactionId): Promise<void> {

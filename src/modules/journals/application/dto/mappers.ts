@@ -7,10 +7,10 @@ import {
   JournalBasicDto,
   JournalBasicWithTransactionsDto,
   JournalDetailedDto,
-  UserBasicDto,
+  JournalUserBasicDto,
 } from "./dtos.types";
 
-function mapUserBasicToDto(user: JournalUserBasic): UserBasicDto {
+function mapUserBasicToDto(user: JournalUserBasic): JournalUserBasicDto {
   return {
     id: user.id.value,
     email: user.email.value,
@@ -86,6 +86,7 @@ export function mapRichJournalToJournalDetailedDto(
       status: transaction.status,
       notes: transaction.notes,
       accountId: transaction.account.value,
+      paidBy: transaction.paidBy.value,
       tags: transaction.tags,
     })),
   };
@@ -116,6 +117,7 @@ export function mapJournalToJournalBasicWithTransactionsDto(
       date: transaction.date.toISODate()!,
       type: transaction.type,
       accountId: transaction.account.value,
+      paidBy: transaction.paidBy.value,
       status: transaction.status,
       tags: transaction.tags,
       notes: transaction.notes,

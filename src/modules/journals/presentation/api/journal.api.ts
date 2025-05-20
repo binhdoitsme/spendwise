@@ -78,4 +78,56 @@ export class JournalApi extends ApiClientWrapper {
     });
     console.log({ resp });
   }
+
+  async inviteCollaborator({
+    journalId,
+    email,
+    permission,
+  }: {
+    journalId: string;
+    email: string;
+    permission: string;
+  }) {
+    const resp = await this.client.request({
+      method: "POST",
+      url: `/api/journals/${journalId}/collaborators`,
+      data: { email, permission },
+    });
+    console.log({ resp });
+  }
+
+  async removeCollaborator({
+    journalId,
+    userId,
+  }: {
+    journalId: string;
+    userId: string;
+  }) {
+    const resp = await this.client.request({
+      method: "DELETE",
+      url: `/api/journals/${journalId}/collaborators`,
+      data: { userId },
+    });
+    console.log({ resp });
+  }
+
+  async editTransaction(
+    journalId: string,
+    transactionId: string,
+    data: Omit<TransactionCreateDto, "journalId">
+  ) {
+    const resp = await this.client.request({
+      method: "PATCH",
+      url: `/api/journals/${journalId}/transactions/${transactionId}`,
+      data,
+    });
+    console.log({ resp });
+  }
+  async deleteTransaction(journalId: string, transactionId: string) {
+    const resp = await this.client.request({
+      method: "DELETE",
+      url: `/api/journals/${journalId}/transactions/${transactionId}`,
+    });
+    console.log({ resp });
+  }
 }

@@ -17,6 +17,3 @@ export async function POST(
   );
   return created({ transactionId });
 }
-
-// DELETE /journals/{id}/transactions -- remove transaction
-export function DELETE() {}

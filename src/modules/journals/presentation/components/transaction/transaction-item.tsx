@@ -1,132 +1,71 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import {
+  JournalAccountBasicDto,
+  JournalUserBasicDto,
   TagDto,
   TransactionDetailedDto,
 } from "@/modules/journals/application/dto/dtos.types";
-import {
-  Archive,
-  Copy,
-  Edit,
-  type LucideIcon,
-  MoreVertical,
-  Star,
-  Trash,
-} from "lucide-react";
 import { Tags } from "../tag/tag-item";
-
-// Define the command type for better type safety
-export type TransactionCommand = {
-  label: string;
-  icon?: LucideIcon;
-  onClick: () => void;
-  variant?: "default" | "destructive";
-  disabled?: boolean;
-  separator?: boolean;
-};
+import {
+  TransactionCommand,
+  TransactionCommands,
+} from "./transaction-commands";
 
 export interface TransactionItemProps {
-  transaction: Omit<TransactionDetailedDto, "tags"> & { tags: TagDto[] };
+  transaction: TransactionDetailedDto & {
+    detailedTags: TagDto[];
+    detailedPaidBy: JournalUserBasicDto;
+    detailedAccount: JournalAccountBasicDto;
+  };
   formatter: Intl.NumberFormat;
   commands?: TransactionCommand[];
+  onClick?: () => void;
 }
 
-const transactionCommands: TransactionCommand[] = [
-  {
-    label: "Edit",
-    icon: Edit,
-    onClick: () => console.log("Edit clicked"),
-  },
-  {
-    label: "Duplicate",
-    icon: Copy,
-    onClick: () => console.log("Duplicate clicked"),
-  },
-  {
-    label: "Star",
-    icon: Star,
-    onClick: () => console.log("Star clicked"),
-  },
-  {
-    label: "Archive",
-    icon: Archive,
-    onClick: () => console.log("Archive clicked"),
-    separator: true, // Adds a separator before this item
-  },
-  {
-    label: "Delete",
-    icon: Trash,
-    onClick: () => {
-      if (confirm("Are you sure you want to delete this record?")) {
-        console.log("Delete confirmed");
-      }
-    },
-    variant: "destructive", // Makes this item red
-  },
-];
-
 export function TransactionItem({
-  transaction: { accountId, amount: rawAmount, type, tags, title },
+  transaction,
   formatter,
-  commands = transactionCommands,
+  onClick,
+  commands = [],
 }: TransactionItemProps) {
-  const account = accountId;
-  const amount = formatter.format(type !== "INCOME" ? -rawAmount : rawAmount);
+  const {
+    detailedPaidBy: { firstName, lastName },
+    detailedAccount: { displayName },
+    amount,
+    type,
+    detailedTags,
+    title,
+  } = transaction;
+  const formattedAmount = formatter.format(
+    type !== "INCOME" ? -amount : amount
+  );
 
   return (
     <div className="flex items-start justify-between">
       <div className="flex flex-col gap-1">
-        <h4 className="text-md font-medium leading-none">{title}</h4>
-        <p className="text-sm text-muted-foreground">{account}</p>
-        <Tags tags={tags} />
+        <h4
+          className="text-md font-medium leading-none cursor-pointer"
+          onClick={onClick}
+        >
+          {title}
+        </h4>
+        <p className="text-sm text-muted-foreground">
+          {firstName} {lastName} • {displayName}
+        </p>
+        <Tags tags={detailedTags} />
       </div>
       <div className="flex flex-row justify-end gap-2 text-sm font-semibold min-w-[100px]">
         <span
-          className={amount.startsWith("-") ? "text-red-500" : "text-green-600"}
+          className={
+            formattedAmount.startsWith("-") ? "text-red-500" : "text-green-600"
+          }
         >
-          {amount}
+          {formattedAmount}
         </span>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-auto w-auto p-0">
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {commands.map((command, index) => (
-              <div key={index}>
-                {command.separator && index > 0 && <DropdownMenuSeparator />}
-                <DropdownMenuItem
-                  onClick={command.onClick}
-                  disabled={command.disabled}
-                  className={
-                    command.variant === "destructive" ? "text-red-600" : ""
-                  }
-                >
-                  {command.icon && (
-                    <command.icon
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        command.variant === "destructive" ? "text-red-600" : ""
-                      )}
-                    />
-                  )}
-                  {command.label}
-                </DropdownMenuItem>
-              </div>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {commands.length > 0 && (
+          <TransactionCommands commands={commands} transaction={transaction} />
+        )}
       </div>
     </div>
   );

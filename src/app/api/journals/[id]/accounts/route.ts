@@ -63,7 +63,7 @@ export async function DELETE(
   const requestBody = (await request.json()) as { accountId: string };
   const journalService = provideJournalServices();
   try {
-    journalService.unlinkAccount(journalId, requestBody.accountId);
+    await journalService.unlinkAccount(journalId, requestBody.accountId);
     return noContent();
   } catch (err) {
     return handleError(err);

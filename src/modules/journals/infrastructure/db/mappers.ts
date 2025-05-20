@@ -129,7 +129,7 @@ export const mapTransactionFromDomain = (
     date: transaction.date.toJSDate(),
     account: transaction.account.value,
     type: transaction.type,
-    paidBy: transaction.paidBy.toString(),
+    paidBy: transaction.paidBy.value,
     tags: transaction.tags,
     status: transaction.status,
     notes: transaction.notes ?? null,

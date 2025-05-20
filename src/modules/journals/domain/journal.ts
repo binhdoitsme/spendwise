@@ -5,8 +5,8 @@ import { ExcludeMethods } from "@/types";
 import { DateTime } from "luxon";
 import { JournalAccount } from "./account";
 import { Collaborator, JournalCollaboratorPermission } from "./collaborator";
-import { Tag } from "./tag";
 import { journalErrors } from "./errors";
+import { Tag } from "./tag";
 
 export class JournalId extends UUIDIdentifier {}
 
@@ -58,7 +58,7 @@ export class Journal {
   }
 
   hasCollaborator(userId: UserId): boolean {
-    return this._collaborators.has(userId.toString());
+    return this._collaborators.has(userId.value);
   }
 
   addCollaborator(userId: UserId, permission: JournalCollaboratorPermission) {
@@ -68,14 +68,14 @@ export class Journal {
     if (["owner"].includes(permission)) {
       throw Error("Cannot grant owner permission to others");
     }
-    this._collaborators.set(
-      userId.toString(),
-      new Collaborator(userId, permission)
-    );
+    this._collaborators.set(userId.value, new Collaborator(userId, permission));
   }
 
   removeCollaborator(userId: UserId) {
-    return this._collaborators.delete(userId.toString());
+    if (userId.equals(this.ownerId)) {
+      throw Error("Cannot remove yourself as a collaborator");
+    }
+    return this._collaborators.delete(userId.value);
   }
   //#endregion Collaborators
 
@@ -112,6 +112,9 @@ export class Journal {
   }
 
   linkAccount(accountId: AccountId, ownerId: UserId) {
+    if (this.isArchived) {
+      throw journalErrors.archivedJournal;
+    }
     if (this._accounts.has(accountId.value)) {
       throw journalErrors.accountAlreadyLinked;
     }
@@ -120,6 +123,9 @@ export class Journal {
   }
 
   unlinkAccount(accountId: AccountId) {
+    if (this.isArchived) {
+      throw journalErrors.archivedJournal;
+    }
     if (!this._accounts.has(accountId.value)) {
       throw journalErrors.accountNotLinked;
     }

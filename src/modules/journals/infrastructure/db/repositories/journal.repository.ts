@@ -1,6 +1,6 @@
 import { UserId } from "@/modules/shared/domain/identifiers";
 import { ListingOptions } from "@/modules/shared/domain/specs";
-import { and, asc, desc, eq, notInArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, notInArray, or } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Journal, JournalId } from "../../../domain/journal";
 import { JournalRepository } from "../../../domain/repositories";
@@ -74,14 +74,35 @@ export class DrizzleJournalRepository implements JournalRepository {
   }
 
   async findByUser(userId: UserId): Promise<Journal[]> {
+    const rows = await this.dbInstance
+      .selectDistinct({
+        journalId: journals.id,
+      })
+      .from(journals)
+      .leftJoin(collaborators, eq(journals.id, collaborators.journalId))
+      .where(
+        or(
+          eq(journals.ownerId, userId.value),
+          eq(collaborators.userId, userId.value)
+        )
+      );
+    const journalIds = [...new Set(rows.map((row) => row.journalId))];
+    if (!journalIds.length) {
+      return [];
+    }
+
     const schemas = await this.dbInstance.query.journals.findMany({
-      where: eq(journals.ownerId, userId.value),
+      where: or(
+        eq(journals.ownerId, userId.value),
+        inArray(journals.id, journalIds)
+      ),
       with: {
         accounts: true,
         collaborators: true,
         tags: true,
       },
     });
+
     return schemas.map((schema) => mapJournalToDomain(schema));
   }
 

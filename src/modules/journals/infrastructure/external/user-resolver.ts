@@ -1,4 +1,5 @@
 import { UserId } from "@/modules/shared/domain/identifiers";
+import { Email } from "@/modules/shared/domain/value-objects";
 import { UserRepository } from "@/modules/users/domain/repositories";
 import {
   JournalUserBasic,
@@ -9,6 +10,22 @@ export class DrizzleJournalUserResolver implements JournalUserResolver {
   constructor(private readonly userRepository: UserRepository) {}
   async resolveOne(userId: UserId): Promise<JournalUserBasic | undefined> {
     const user = await this.userRepository.findById(userId);
+    if (!user) {
+      return undefined;
+    }
+    return {
+      id: user.id,
+      email: user.email,
+      firstName: user.profile?.firstName ?? "",
+      lastName: user.profile?.lastName ?? "",
+      avatar: user.profile?.avatar
+        ? { url: user.profile.avatar.url.toString() }
+        : undefined,
+    };
+  }
+
+  async resolveOneByEmail(email: Email): Promise<JournalUserBasic | undefined> {
+    const user = await this.userRepository.findByEmail(email);
     if (!user) {
       return undefined;
     }

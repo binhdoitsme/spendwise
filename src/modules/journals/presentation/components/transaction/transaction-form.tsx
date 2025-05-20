@@ -20,8 +20,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  JournalUserBasicDto,
   TagDto,
-  UserBasicDto,
+  TransactionDetailedDto,
 } from "@/modules/journals/application/dto/dtos.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
@@ -35,8 +36,10 @@ export interface AccountSelectProps {
 }
 
 export interface TransactionFormProps {
+  transaction?: TransactionDetailedDto;
+  isReadonly?: boolean;
   accounts: Record<string, AccountSelectProps[]>;
-  collaborators: UserBasicDto[];
+  collaborators: JournalUserBasicDto[];
   tags: TagDto[];
   onSubmit: (data: TransactionFormSchema) => void | Promise<void>;
   onUnknownTag?: (tag: string) => Promise<void>;
@@ -44,9 +47,11 @@ export interface TransactionFormProps {
 }
 
 export function TransactionForm({
+  transaction,
   accounts,
   collaborators,
   tags,
+  isReadonly = false,
   onSubmit,
   onNoAccount,
   onUnknownTag,
@@ -54,21 +59,40 @@ export function TransactionForm({
   const isDevMode = true;
   const form = useForm<TransactionFormSchema>({
     resolver: zodResolver(transactionFormSchema),
-    defaultValues: {
-      title: "",
-      amount: undefined,
-      date: undefined,
-      account: "",
-      tags: [],
-      type: "EXPENSE",
-      paidBy: "",
-    },
+    disabled: isReadonly,
+    defaultValues: transaction
+      ? {
+          id: transaction.id,
+          title: transaction.title,
+          amount: transaction.amount,
+          date: new Date(transaction.date),
+          paidBy: transaction.paidBy,
+          account: transaction.accountId,
+          tags: transaction.tags,
+          type: transaction.type as "INCOME" | "EXPENSE",
+        }
+      : {
+          title: "",
+          amount: undefined,
+          date: undefined,
+          account: "",
+          tags: [],
+          type: "EXPENSE",
+          paidBy: "",
+        },
   });
   const paidByUser = form.watch("paidBy");
+  const account = form.watch("account");
 
   useEffect(() => {
-    form.resetField("account", { defaultValue: "" });
-  }, [form, paidByUser]);
+    if (
+      !(accounts[paidByUser] ?? [])
+        .map(({ accountId }) => accountId)
+        .includes(account)
+    ) {
+      form.resetField("account", { defaultValue: "" });
+    }
+  }, [form, paidByUser, accounts, account]);
 
   const tagOptions = tags.map(({ id, name }) => ({ label: name, value: id }));
 
@@ -76,15 +100,15 @@ export function TransactionForm({
     form.setValue("title", "Sample Transaction");
     form.setValue("amount", 100000);
     form.setValue("date", new Date());
-    form.setValue("paidBy", collaborators[0].email);
-    form.setValue("account", accounts[collaborators[0].email][0].accountId);
+    form.setValue("paidBy", collaborators[0].id);
+    form.setValue("account", accounts[collaborators[0].id][0].accountId);
     form.setValue("tags", ["food", "transport"]);
     form.setValue("notes", "This is a sample note for testing.");
   }, [form, collaborators, accounts]);
 
   return (
     <Form {...form}>
-      {isDevMode && (
+      {isDevMode && !isReadonly && (
         <div>
           <Button variant="outline" size="sm" onClick={() => doAutofill()}>
             Auto-fill
@@ -101,6 +125,7 @@ export function TransactionForm({
                 <FormLabel>Type</FormLabel>
                 <FormControl className="mb-2">
                   <RadioGroup
+                    {...field}
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                     className="flex flex-row items-center"
@@ -179,7 +204,11 @@ export function TransactionForm({
               <FormItem>
                 <FormLabel>Paid by</FormLabel>
                 <FormControl>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    {...field}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select user" />
                     </SelectTrigger>
@@ -204,9 +233,8 @@ export function TransactionForm({
                 <FormLabel>Account</FormLabel>
                 <FormControl>
                   <Select
-                    disabled={!paidByUser}
+                    disabled={field.disabled || !paidByUser}
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
                     value={field.value}
                   >
                     <SelectTrigger className="w-full">
@@ -224,11 +252,13 @@ export function TransactionForm({
                         </Button>
                       )}
                       {paidByUser &&
-                        accounts[paidByUser]?.map(({ accountId, name }) => (
-                          <SelectItem key={accountId} value={accountId}>
-                            {name}
-                          </SelectItem>
-                        ))}
+                        accounts[transaction?.paidBy ?? paidByUser]?.map(
+                          ({ accountId, name }) => (
+                            <SelectItem key={accountId} value={accountId}>
+                              {name}
+                            </SelectItem>
+                          )
+                        )}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -245,6 +275,7 @@ export function TransactionForm({
                 <FormControl>
                   <MultiSelect
                     {...field}
+                    defaultValue={field.value}
                     placeholder="e.g. Food, Transport"
                     onValueChange={field.onChange}
                     options={tagOptions}
@@ -275,9 +306,11 @@ export function TransactionForm({
             )}
           />
         </div>
-        <div className="flex justify-end">
-          <Button type="submit">Save Record</Button>
-        </div>
+        {!isReadonly && (
+          <div className="flex justify-end">
+            <Button type="submit">Save Record</Button>
+          </div>
+        )}
       </form>
     </Form>
   );

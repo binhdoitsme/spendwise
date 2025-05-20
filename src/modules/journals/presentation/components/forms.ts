@@ -9,6 +9,7 @@ export const journalFormSchema = z.object({
 export type JournalFormSchema = z.infer<typeof journalFormSchema>;
 
 export const transactionFormSchema = z.object({
+  id: z.string().optional(),
   title: z.string().nonempty("Name is required"),
   amount: z.number().min(0, "Amount must be positive"),
   date: z.date(),

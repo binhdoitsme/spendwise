@@ -3,6 +3,7 @@ import { ListingOptions } from "@/modules/shared/domain/specs";
 import { Email } from "@/modules/shared/domain/value-objects";
 import { DateTime } from "luxon";
 import { JournalCollaboratorPermission } from "../../domain/collaborator";
+import { journalErrors } from "../../domain/errors";
 import { TransactionFactory } from "../../domain/factories";
 import { Journal, JournalId } from "../../domain/journal";
 import { PayoffService } from "../../domain/payoff";
@@ -43,7 +44,13 @@ export class JournalServices {
     return journals.map(mapJournalToJournalBasicDto);
   }
 
-  async getJournalById(id: string, transactionOptions?: ListingOptions) {
+  async getJournalById(
+    id: string,
+    transactionOptions: ListingOptions = {
+      orderBy: "date",
+      orderDesc: true,
+    }
+  ) {
     const journalId = new JournalId(id);
     const journal = await this.journalRepository.findByIdWithTransactions(
       journalId,
@@ -52,7 +59,6 @@ export class JournalServices {
     if (!journal) {
       throw this.journalNotFound;
     }
-    console.log(Array.from(journal.journal.collaborators.keys()));
     const collaborators = await this.userResolver.resolveMany(
       new Set(
         Array.from(journal.journal.collaborators.keys()).map(
@@ -70,6 +76,17 @@ export class JournalServices {
     const journal = await this.journalRepository.findById(new JournalId(id));
     if (!journal) {
       throw this.journalNotFound;
+    }
+    return journal;
+  }
+
+  private async getOwnJournal(id: string, userId: string) {
+    const journal = await this.journalRepository.findById(new JournalId(id));
+    if (!journal) {
+      throw this.journalNotFound;
+    }
+    if (journal.ownerId.value !== userId) {
+      throw { code: 403, message: "You are not the owner of this journal" };
     }
     return journal;
   }
@@ -126,8 +143,45 @@ export class JournalServices {
   }
 
   async unlinkAccount(id: string, accountId: string) {
+    const richJournal = await this.journalRepository.findByIdWithTransactions(
+      new JournalId(id)
+    );
+    if (!richJournal) {
+      throw this.journalNotFound;
+    }
+    if (richJournal.transactions.some((t) => t.account.value === accountId)) {
+      throw journalErrors.accountAlreadyInUse;
+    }
     const journal = await this.getBasicJournal(id);
     journal.unlinkAccount(new AccountId(accountId));
+    await this.journalRepository.save(journal);
+  }
+
+  async inviteCollaborator({
+    journalId,
+    userId,
+    email,
+    permission,
+  }: {
+    journalId: string;
+    userId: string;
+    email: string;
+    permission: string;
+  }) {
+    const journal = await this.getOwnJournal(journalId, userId);
+    const invitedUser = await this.userResolver.resolveOneByEmail(
+      Email.from(email)
+    );
+    if (!invitedUser) {
+      throw { code: 404, message: "User not found" };
+    }
+    if (journal.hasCollaborator(invitedUser.id)) {
+      throw { code: 409, message: "User already invited" };
+    }
+    journal.addCollaborator(
+      invitedUser.id,
+      permission as JournalCollaboratorPermission
+    );
     await this.journalRepository.save(journal);
   }
 
@@ -246,5 +300,31 @@ export class JournalServices {
     const journal = await this.getBasicJournal(journalId);
     journal.removeTags(tags);
     await this.journalRepository.save(journal);
+  }
+
+  async deleteTransactions(
+    userId: string,
+    journalId: string,
+    transactionIds: string[],
+    removeRelated: boolean = false
+  ) {
+    const journal = await this.getBasicJournal(journalId);
+    if (journal.ownerId.value !== userId) {
+      throw { code: 403, message: "You are not the owner of this journal" };
+    }
+    const transactions = await this.transactionRepository.findAllByIds(
+      transactionIds.map((id) => new TransactionId(id))
+    );
+    if (removeRelated) {
+      for (const transaction of transactions) {
+        if (transaction.relatedTransactions.length > 0) {
+          await this.transactionRepository.delete(transaction.id);
+        }
+      }
+    } else {
+      for (const transaction of transactions) {
+        await this.transactionRepository.delete(transaction.id);
+      }
+    }
   }
 }

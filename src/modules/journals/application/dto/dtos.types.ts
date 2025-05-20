@@ -40,13 +40,14 @@ export interface TransactionDetailedDto {
   amount: number;
   accountId: string;
   date: string;
+  paidBy: string;
   type: `${TransactionType}`;
   status: `${TransactionStatus}`;
   notes?: string;
   tags: string[];
 }
 
-export interface UserBasicDto {
+export interface JournalUserBasicDto {
   id: string;
   email: string;
   firstName: string;
@@ -55,7 +56,7 @@ export interface UserBasicDto {
 }
 
 export interface CollaboratorBasicDto {
-  user: UserBasicDto;
+  user: JournalUserBasicDto;
   permission: string;
 }
 

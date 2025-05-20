@@ -7,12 +7,13 @@ import {
   AccountForm,
   AccountFormValues,
 } from "@/modules/accounts/presentation/components/account-form";
+import { AccountCard } from "@/modules/accounts/presentation/components/account-item";
+
 import {
-  AccountCard,
   deleteAccount,
   editAccount,
   viewAccount,
-} from "@/modules/accounts/presentation/components/account-item";
+} from "@/modules/accounts/presentation/components/account-commands";
 import { AxiosError } from "axios";
 import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";

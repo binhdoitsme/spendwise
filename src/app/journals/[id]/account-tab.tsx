@@ -11,14 +11,12 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccountBasicDto } from "@/modules/accounts/application/dto/dtos.types";
 import { AccountApi } from "@/modules/accounts/presentation/api/account.api";
+import { unlinkAccount } from "@/modules/accounts/presentation/components/account-commands";
 import {
   AccountForm,
   AccountFormValues,
 } from "@/modules/accounts/presentation/components/account-form";
-import {
-  AccountCard,
-  unlinkAccount,
-} from "@/modules/accounts/presentation/components/account-item";
+import { AccountCard } from "@/modules/accounts/presentation/components/account-item";
 import { useAuthContext } from "@/modules/auth/presentation/components/auth-context";
 import { JournalAccountBasicDto } from "@/modules/journals/application/dto/dtos.types";
 import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
@@ -84,7 +82,18 @@ export function AccountTab({
       setOpen(false);
     } catch (err) {
       console.error(err);
-      toast.error("Could not unlink selected account from current journal!");
+      if (err instanceof AxiosError) {
+        const errMessage = (err as AxiosError).response
+          ?.data as ResponseWithData<{
+          message: string;
+        }>;
+        toast.error(
+          `Could not unlink selected account: ${errMessage.data.message}`
+        );
+      } else if (err instanceof Error) {
+        const errMessage = (err as Error).message;
+        toast.error(`Could not unlink selected account: ${errMessage}`);
+      }
     } finally {
       loadingEnd();
     }

@@ -22,4 +22,8 @@ export const journalErrors = {
     code: "TX-005",
     message: "Account is not yet linked to this journal",
   } as ApplicationError,
+  accountAlreadyInUse: {
+    code: "TX-006",
+    message: "Account is already in use in some transactions",
+  } as ApplicationError,
 } as const;
