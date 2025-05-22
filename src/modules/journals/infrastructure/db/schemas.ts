@@ -8,7 +8,7 @@ import {
   pgTable,
   primaryKey,
   text,
-  varchar,
+  varchar
 } from "drizzle-orm/pg-core";
 
 export const journalAccounts = pgTable(

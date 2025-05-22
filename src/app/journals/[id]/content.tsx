@@ -2,7 +2,10 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccountBasicDto } from "@/modules/accounts/application/dto/dtos.types";
 import { AccountApi } from "@/modules/accounts/presentation/api/account.api";
-import { JournalDetailedDto } from "@/modules/journals/application/dto/dtos.types";
+import {
+  JournalDetailedDto,
+  TransactionDetailedDto,
+} from "@/modules/journals/application/dto/dtos.types";
 import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
 import { Collaborators } from "@/modules/journals/presentation/components/collaborator-avatars";
 import { Tags } from "@/modules/journals/presentation/components/tag/tag-item";
@@ -19,7 +22,7 @@ export interface FinanceJournalPageContentProps {
 export function FinanceJournalPageContent(
   props: FinanceJournalPageContentProps
 ) {
-  const [currentTab, setCurrentTab] = useState<string>("transactions");
+  const [currentTab, setCurrentTab] = useState("transactions");
   const [journal, setJournal] = useState(props.journal);
   const [myAccounts, setMyAccounts] = useState(props.myAccounts);
 
@@ -34,6 +37,12 @@ export function FinanceJournalPageContent(
   const handleRefreshAccounts = async () => {
     const refreshedAccountList = await accountApi.listAccounts();
     setMyAccounts(refreshedAccountList);
+  };
+
+  const handleRefreshTransactionList = async (
+    transactions: TransactionDetailedDto[]
+  ) => {
+    setJournal({ ...journal, transactions });
   };
 
   return (
@@ -96,6 +105,7 @@ export function FinanceJournalPageContent(
           <TransactionTab
             api={journalApi}
             journal={journal}
+            handleRefreshTransactionList={handleRefreshTransactionList}
             handleRefreshJournal={handleRefreshJournal}
             handleNoAccount={() => setCurrentTab("accounts")}
           />

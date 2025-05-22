@@ -29,6 +29,7 @@ import { Plus } from "lucide-react";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { transactionFormSchema, TransactionFormSchema } from "../forms";
+import { Tags } from "../tag/tag-item";
 
 export interface AccountSelectProps {
   accountId: string;
@@ -266,29 +267,37 @@ export function TransactionForm({
               </FormItem>
             )}
           />
-          <FormField
-            name="tags"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tags</FormLabel>
-                <FormControl>
-                  <MultiSelect
-                    {...field}
-                    defaultValue={field.value}
-                    placeholder="e.g. Food, Transport"
-                    onValueChange={field.onChange}
-                    options={tagOptions}
-                    error={!!form.formState.errors.tags}
-                    errorMessage={form.formState.errors.tags?.message?.toString()}
-                    maxCount={3}
-                    onAddOption={(option) => onUnknownTag?.(option.label)}
-                  />
-                </FormControl>
-                {/* <FormMessage /> */}
-              </FormItem>
-            )}
-          />
+          {isReadonly ? (
+            <FormItem>
+              <FormLabel>Tags</FormLabel>
+              <div className="pt-1 pb-4">
+                <Tags tags={tags} />
+              </div>
+            </FormItem>
+          ) : (
+            <FormField
+              name="tags"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tags</FormLabel>
+                  <FormControl>
+                    <MultiSelect
+                      {...field}
+                      defaultValue={field.value}
+                      placeholder="e.g. Food, Transport"
+                      onValueChange={field.onChange}
+                      options={tagOptions}
+                      error={!!form.formState.errors.tags}
+                      errorMessage={form.formState.errors.tags?.message?.toString()}
+                      maxCount={3}
+                      onAddOption={(option) => onUnknownTag?.(option.label)}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          )}
           <FormField
             name="notes"
             control={form.control}

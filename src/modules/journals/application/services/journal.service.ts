@@ -23,7 +23,17 @@ import {
 import {
   mapJournalToJournalBasicDto,
   mapRichJournalToJournalDetailedDto,
+  mapTransactionToDetailedDto,
 } from "../dto/mappers";
+
+export interface JournalTransactionSpecsInput {
+  query?: string;
+  creditOnly?: boolean;
+  dateRange?: {
+    start: string;
+    end: string;
+  };
+}
 
 export class JournalServices {
   constructor(
@@ -70,6 +80,43 @@ export class JournalServices {
       Array.from(journal.journal.accounts.keys()).map((id) => new AccountId(id))
     );
     return mapRichJournalToJournalDetailedDto(journal, collaborators, accounts);
+  }
+
+  async getTransactionsByJournalId(
+    id: string,
+    specs: JournalTransactionSpecsInput,
+    options: ListingOptions = {
+      orderBy: "date",
+      orderDesc: true,
+    }
+  ) {
+    const journalId = new JournalId(id);
+    const journal = await this.getBasicJournal(id);
+    const accounts = await this.accountResolver.resolveMany(
+      [...journal.accounts.keys()].map((id) => new AccountId(id))
+    );
+    const accountIds = accounts
+      .filter((account) => account.type === "credit")
+      .map((account) => account.id.value);
+    const searchSpecs = {
+      accountIds: specs.creditOnly ? accountIds : undefined,
+      dateRange: specs.dateRange
+        ? {
+            start: DateTime.fromISO(specs.dateRange.start, { zone: "utc" }),
+            end: DateTime.fromISO(specs.dateRange.end, { zone: "utc" }),
+          }
+        : undefined,
+      query: specs.query,
+    };
+    const transactions = await this.transactionRepository.findBy(
+      journalId,
+      searchSpecs,
+      options
+    );
+    if (!transactions) {
+      throw this.journalNotFound;
+    }
+    return transactions.map(mapTransactionToDetailedDto);
   }
 
   private async getBasicJournal(id: string) {
@@ -302,29 +349,25 @@ export class JournalServices {
     await this.journalRepository.save(journal);
   }
 
-  async deleteTransactions(
+  async deleteTransaction(
     userId: string,
-    journalId: string,
-    transactionIds: string[],
+    transactionId: string,
     removeRelated: boolean = false
   ) {
-    const journal = await this.getBasicJournal(journalId);
-    if (journal.ownerId.value !== userId) {
+    const transaction = await this.transactionRepository.findById(
+      new TransactionId(transactionId)
+    );
+    if (!transaction) {
+      throw { code: 404, message: "Transaction not found" };
+    }
+    if (transaction.paidBy.value !== userId) {
       throw { code: 403, message: "You are not the owner of this journal" };
     }
-    const transactions = await this.transactionRepository.findAllByIds(
-      transactionIds.map((id) => new TransactionId(id))
-    );
     if (removeRelated) {
-      for (const transaction of transactions) {
-        if (transaction.relatedTransactions.length > 0) {
-          await this.transactionRepository.delete(transaction.id);
-        }
-      }
-    } else {
-      for (const transaction of transactions) {
-        await this.transactionRepository.delete(transaction.id);
+      for (const relatedTransaction of transaction.relatedTransactions) {
+        await this.transactionRepository.delete(relatedTransaction);
       }
     }
+    await this.transactionRepository.delete(transaction.id);
   }
 }

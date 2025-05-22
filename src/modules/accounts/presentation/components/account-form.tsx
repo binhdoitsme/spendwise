@@ -78,7 +78,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({
   return (
     <Form {...form}>
       <form className={cn(className)} onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="h-[calc(100%-3.75rem)] max-h-[50vh] space-y-6 mb-6 overflow-y-scroll">
+        <div className="h-[calc(100%-3.25rem)] max-h-[50vh] space-y-6 mb-3 overflow-y-scroll">
           <FormField
             control={form.control}
             name="type"
@@ -159,7 +159,13 @@ export const AccountForm: React.FC<AccountFormProps> = ({
                   <FormItem>
                     <FormLabel>Statement Day</FormLabel>
                     <FormControl>
-                      <Input type="number" min={1} max={28} {...field} />
+                      <Input
+                        type="number"
+                        min={1}
+                        max={28}
+                        value={field.value ?? ''}
+                        onChange={e => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -172,7 +178,13 @@ export const AccountForm: React.FC<AccountFormProps> = ({
                   <FormItem>
                     <FormLabel>Grace Period (days)</FormLabel>
                     <FormControl>
-                      <Input type="number" min={1} max={60} {...field} />
+                      <Input
+                        type="number"
+                        min={1}
+                        max={60}
+                        value={field.value ?? ''}
+                        onChange={e => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

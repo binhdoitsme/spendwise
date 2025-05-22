@@ -1,29 +1,18 @@
-import { ResponseWithData } from "@/app/api/api-responses";
-import { useLoader } from "@/app/loader.context";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccountBasicDto } from "@/modules/accounts/application/dto/dtos.types";
 import { AccountApi } from "@/modules/accounts/presentation/api/account.api";
 import { unlinkAccount } from "@/modules/accounts/presentation/components/account-commands";
-import {
-  AccountForm,
-  AccountFormValues,
-} from "@/modules/accounts/presentation/components/account-form";
 import { AccountCard } from "@/modules/accounts/presentation/components/account-item";
-import { useAuthContext } from "@/modules/auth/presentation/components/auth-context";
 import { JournalAccountBasicDto } from "@/modules/journals/application/dto/dtos.types";
 import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
-import { AxiosError } from "axios";
 import { Link, PlusIcon } from "lucide-react";
-import { ReactNode, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { useEffect, useMemo, useState } from "react";
+import { AccountDialogContent, AccountDialogType } from "./account-dialogs";
+import { useAccountTabHandlers } from "./account-handlers";
+import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
+import { useAuthContext } from "@/modules/auth/presentation/components/auth-context";
 
 interface AccountTabProps {
   journalApi: JournalApi;
@@ -36,18 +25,11 @@ interface AccountTabProps {
   handleRefreshAccounts: () => void | Promise<void>;
 }
 
-export function AccountTab({
-  journalApi,
-  journalId,
-  accountApi,
-  myAccounts,
-  journalAccounts,
-  handleRefreshJournal,
-}: AccountTabProps) {
-  const [open, setOpen] = useState(false);
-  const [content, setContent] = useState<ReactNode | null>(null);
+export function AccountTab(props: AccountTabProps) {
+  const { myAccounts, journalAccounts } = props;
   const authContext = useAuthContext();
-  const { loadingStart, loadingEnd } = useLoader();
+  const [open, setOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<AccountDialogType>(null);
   const linkableAccounts = useMemo(
     () =>
       myAccounts.filter((account) =>
@@ -58,108 +40,13 @@ export function AccountTab({
     [myAccounts, journalAccounts]
   );
 
-  const handleLinkAccount = (accountId: string) => async () => {
-    try {
-      loadingStart();
-      await journalApi.linkAccount(journalId, { accountId });
-      toast.success("Successfully linked account to journal!");
-      await handleRefreshJournal();
-      setOpen(false);
-    } catch (err) {
-      console.error(err);
-      toast.error("Could not link selected account with current journal!");
-    } finally {
-      loadingEnd();
+  const { handleUnlinkAccount } = useAccountTabHandlers({ ...props, setOpen });
+
+  useEffect(() => {
+    if (!!dialogType) {
+      setOpen(true);
     }
-  };
-
-  const handleUnlinkAccount = async (account: AccountBasicDto) => {
-    loadingStart();
-    try {
-      await journalApi.unlinkAccount(journalId, account.id);
-      toast.success("Successfully unlinked account from journal!");
-      await handleRefreshJournal();
-      setOpen(false);
-    } catch (err) {
-      console.error(err);
-      if (err instanceof AxiosError) {
-        const errMessage = (err as AxiosError).response
-          ?.data as ResponseWithData<{
-          message: string;
-        }>;
-        toast.error(
-          `Could not unlink selected account: ${errMessage.data.message}`
-        );
-      } else if (err instanceof Error) {
-        const errMessage = (err as Error).message;
-        toast.error(`Could not unlink selected account: ${errMessage}`);
-      }
-    } finally {
-      loadingEnd();
-    }
-  };
-
-  const handleCreateAccount = async (
-    data: AccountFormValues
-  ): Promise<void> => {
-    try {
-      loadingStart();
-      await accountApi
-        .createAccount({
-          ...data,
-        })
-        .then(() => {
-          toast.success("Successfully created new account!");
-          setOpen(false);
-        });
-    } catch (err) {
-      console.error(err);
-      const errMessage =
-        err instanceof AxiosError
-          ? (
-              (err as AxiosError).response?.data as ResponseWithData<{
-                message: string;
-              }>
-            ).data.message
-          : (err as Error).message;
-      toast.error(`Could not create new account: ${errMessage}`);
-    } finally {
-      loadingEnd();
-    }
-  };
-
-  const showNewAccountDialog = () => {
-    setContent(
-      <>
-        <DialogHeader>
-          <DialogTitle>New Account</DialogTitle>
-        </DialogHeader>
-        <AccountForm className="h-full mt-2" onSubmit={handleCreateAccount} />
-      </>
-    );
-  };
-
-  const showLinkAccountDialog = () => {
-    setContent(
-      <>
-        <DialogHeader>
-          <DialogTitle>Link your Account</DialogTitle>
-        </DialogHeader>
-        <div className="w-full py-2 grid grid-cols-1 gap-2">
-          {linkableAccounts.length === 0 && <p>No new account to link</p>}
-          {linkableAccounts.map((account) => (
-            <AccountCard
-              key={account.id}
-              className="flex flex-row justify-between cursor-pointer transition-all duration-300 hover:bg-secondary"
-              account={account}
-              currentUserEmail={authContext.user?.email}
-              onClick={handleLinkAccount(account.id)}
-            />
-          ))}
-        </div>
-      </>
-    );
-  };
+  }, [dialogType]);
 
   return (
     <div className="w-full h-full overflow-scroll">
@@ -167,7 +54,7 @@ export function AccountTab({
         <DialogTrigger asChild>
           <Button
             className="w-full md:w-auto gap-0"
-            onClick={showNewAccountDialog}
+            onClick={() => setDialogType("newAccount")}
           >
             <PlusIcon className="w-4 h-4 mr-2" /> New Account
           </Button>
@@ -176,13 +63,20 @@ export function AccountTab({
           <Button
             className="w-full md:w-auto gap-0 mx-2"
             variant="outline"
-            onClick={showLinkAccountDialog}
+            onClick={() => setDialogType("linkAccount")}
             disabled={linkableAccounts.length === 0}
           >
             <Link className="w-4 h-4 mr-2" /> Link your Account
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-lg">{content}</DialogContent>
+        <DialogContent className="sm:max-w-lg">
+          <AccountDialogContent
+            dialogType={dialogType}
+            setOpen={setOpen}
+            linkableAccounts={linkableAccounts}
+            {...props}
+          />
+        </DialogContent>
       </Dialog>
       <ScrollArea className="w-full max-h-[calc(100vh-480px)]">
         {journalAccounts.length === 0 && (
@@ -198,6 +92,7 @@ export function AccountTab({
               account={{
                 ...account,
                 id: account.accountId,
+                owner: convertToCurrentUser(account.owner, authContext.user!),
                 type: account.type as "cash" | "credit" | "debit" | "loan",
               }}
               commands={[unlinkAccount(handleUnlinkAccount)]}

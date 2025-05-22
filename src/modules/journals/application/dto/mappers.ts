@@ -8,6 +8,7 @@ import {
   JournalBasicWithTransactionsDto,
   JournalDetailedDto,
   JournalUserBasicDto,
+  TransactionDetailedDto,
 } from "./dtos.types";
 
 function mapUserBasicToDto(user: JournalUserBasic): JournalUserBasicDto {
@@ -104,23 +105,29 @@ export function mapJournalToJournalBasicDto(journal: Journal): JournalBasicDto {
   };
 }
 
+export function mapTransactionToDetailedDto(
+  transaction: Transaction
+): TransactionDetailedDto {
+  return {
+    id: transaction.id.value,
+    title: transaction.title,
+    amount: transaction.amount,
+    date: transaction.date.toISODate()!,
+    type: transaction.type,
+    accountId: transaction.account.value,
+    paidBy: transaction.paidBy.value,
+    status: transaction.status,
+    tags: transaction.tags,
+    notes: transaction.notes,
+  };
+}
+
 export function mapJournalToJournalBasicWithTransactionsDto(
   journal: Journal,
   transactions: Transaction[]
 ): JournalBasicWithTransactionsDto {
   return {
     ...mapJournalToJournalBasicDto(journal),
-    transactions: transactions.map((transaction) => ({
-      id: transaction.id.value,
-      title: transaction.title,
-      amount: transaction.amount,
-      date: transaction.date.toISODate()!,
-      type: transaction.type,
-      accountId: transaction.account.value,
-      paidBy: transaction.paidBy.value,
-      status: transaction.status,
-      tags: transaction.tags,
-      notes: transaction.notes,
-    })),
+    transactions: transactions.map(mapTransactionToDetailedDto),
   };
 }

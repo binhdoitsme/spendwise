@@ -1,11 +1,14 @@
 import { ResponseWithData } from "@/app/api/api-responses";
 import { LinkJournalAccountRequest } from "@/app/api/journals/[id]/accounts/route";
 import { ApiClientWrapper } from "@/lib/api-client";
+import { ListingOptions } from "@/modules/shared/domain/specs";
 import {
   JournalBasicDto,
   JournalDetailedDto,
   TransactionCreateDto,
+  TransactionDetailedDto,
 } from "../../application/dto/dtos.types";
+import { JournalTransactionSpecsInput } from "../../application/services/journal.service";
 import { JournalFormSchema } from "../components/forms";
 
 export class JournalApi extends ApiClientWrapper {
@@ -109,6 +112,21 @@ export class JournalApi extends ApiClientWrapper {
       data: { userId },
     });
     console.log({ resp });
+  }
+
+  async listTransactions(
+    journalId: string,
+    specs: JournalTransactionSpecsInput,
+    options?: ListingOptions
+  ) {
+    const resp = await this.client.request<
+      ResponseWithData<{ result: TransactionDetailedDto[] }>
+    >({
+      method: "POST",
+      url: `/api/journals/${journalId}/transactions/list`,
+      data: { specs, options },
+    });
+    return resp.data.data.result;
   }
 
   async editTransaction(

@@ -1,4 +1,5 @@
 "use client";
+import { useLoader } from "@/app/loader.context";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -6,14 +7,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthContext } from "@/modules/auth/presentation/components/auth-context";
 import {
   JournalAccountBasicDto,
   JournalDetailedDto,
@@ -28,11 +24,19 @@ import {
   viewTransaction,
 } from "@/modules/journals/presentation/components/transaction/transaction-commands";
 import {
+  FilterSchema,
+  TransactionQuickFilters,
+} from "@/modules/journals/presentation/components/transaction/transaction-filters";
+import {
   AccountSelectProps,
   TransactionForm,
 } from "@/modules/journals/presentation/components/transaction/transaction-form";
 import { TransactionItem } from "@/modules/journals/presentation/components/transaction/transaction-item";
-import { CalendarIcon, PlusIcon } from "lucide-react";
+import { TransactionSearch } from "@/modules/journals/presentation/components/transaction/transaction-search";
+import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
+import { PlusIcon } from "lucide-react";
+import { DateTime } from "luxon";
+import { AnimatePresence, motion } from "motion/react";
 import { ReactNode, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -41,16 +45,85 @@ export interface TransactionTabProps {
   api: JournalApi;
   handleNoAccount: () => void;
   handleRefreshJournal: () => void | Promise<void>;
+  handleRefreshTransactionList: (
+    transactions: TransactionDetailedDto[]
+  ) => void | Promise<void>;
 }
+
+const toDateRange = (filters: Partial<FilterSchema>) => {
+  if (!filters.filterByDate) {
+    return undefined;
+  }
+  if (filters.datePreset === "custom") {
+    return {
+      start: filters.startDate!.toISOString().split("T")[0],
+      end: filters.endDate!.toISOString().split("T")[0],
+    };
+  }
+  if (filters.datePreset === "current-month") {
+    const monthStart = DateTime.utc().startOf("month");
+    return {
+      start: monthStart.toISODate(),
+      end: monthStart.plus({ months: 1 }).toISODate(),
+    };
+  }
+  if (filters.datePreset === "last-month") {
+    const lastMonthStart = DateTime.utc().startOf("month").minus({ months: 1 });
+    return {
+      start: lastMonthStart.toISODate(),
+      end: lastMonthStart.plus({ months: 1 }).toISODate(),
+    };
+  }
+  if (filters.datePreset === "recent-2-months") {
+    const lastMonthStart = DateTime.utc().startOf("month").minus({ months: 1 });
+    return {
+      start: lastMonthStart.toISODate(),
+      end: lastMonthStart.plus({ months: 2 }).toISODate(),
+    };
+  }
+};
 
 export function TransactionTab({
   journal,
   api,
   handleNoAccount,
   handleRefreshJournal,
+  handleRefreshTransactionList,
 }: TransactionTabProps) {
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState<ReactNode | null>(null);
+  const [currentFilters, setFilters] = useState<
+    Partial<FilterSchema> & { query?: string }
+  >();
+
+  const authContext = useAuthContext();
+  const { loadingStart, loadingEnd, isLoading } = useLoader();
+
+  const handleQuickFilters = async (filters: FilterSchema) => {
+    loadingStart();
+    const dateRange = toDateRange(filters);
+    const transactions = await api.listTransactions(journal.id, {
+      creditOnly: filters.showCredit,
+      dateRange: dateRange,
+      query: currentFilters?.query,
+    });
+    await handleRefreshTransactionList(transactions);
+    setFilters({ ...currentFilters, ...filters });
+    loadingEnd();
+  };
+
+  const handleSearch = async (query: string) => {
+    loadingStart();
+    const dateRange = currentFilters ? toDateRange(currentFilters) : undefined;
+    const transactions = await api.listTransactions(journal.id, {
+      creditOnly: currentFilters?.showCredit,
+      dateRange: dateRange,
+      query,
+    });
+    await handleRefreshTransactionList(transactions);
+    setFilters({ ...currentFilters, query });
+    loadingEnd();
+  };
 
   const handleCreateTransaction = async (data: TransactionFormSchema) => {
     try {
@@ -63,6 +136,20 @@ export function TransactionTab({
     } catch (error) {
       console.error(error);
       toast.error("Failed to create transaction");
+    }
+  };
+
+  const handleDeleteTransaction = async (
+    transaction: TransactionDetailedDto
+  ) => {
+    try {
+      await api.deleteTransaction(journal.id, transaction.id!);
+      await handleRefreshJournal();
+      toast("Successfully deleted transaction");
+      setOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete transaction");
     }
   };
 
@@ -168,7 +255,6 @@ export function TransactionTab({
   const showDeleteTransactionDialog = async (
     transaction: TransactionDetailedDto
   ) => {
-    console.log({ transaction });
     setContent(
       <>
         <DialogHeader>
@@ -176,8 +262,15 @@ export function TransactionTab({
         </DialogHeader>
         <p>Are you sure want to delete this transaction?</p>
         <div className="space-x-2">
-          <Button variant="destructive">Yes</Button>
-          <Button variant="secondary">No</Button>
+          <Button
+            variant="destructive"
+            onClick={async () => await handleDeleteTransaction(transaction)}
+          >
+            Yes
+          </Button>
+          <Button variant="secondary" onClick={() => setOpen(false)}>
+            No
+          </Button>
         </div>
       </>
     );
@@ -199,7 +292,7 @@ export function TransactionTab({
     );
 
   const collaborators = journal.collaborators
-    .map(({ user }) => user)
+    .map(({ user }) => convertToCurrentUser(user, authContext.user!))
     .reduce<Record<string, JournalUserBasicDto>>(
       (current, next) => ({ ...current, [next.id]: next }),
       {}
@@ -230,19 +323,8 @@ export function TransactionTab({
     <>
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
         <div className="flex flex-1 gap-2 w-full md:max-w-md">
-          <Input placeholder="Search..." />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                All <CalendarIcon className="w-4 h-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem>This Month</DropdownMenuItem>
-              <DropdownMenuItem>Last Month</DropdownMenuItem>
-              <DropdownMenuItem>This Year</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <TransactionSearch handleSearch={handleSearch} />
+          <TransactionQuickFilters handleFilter={handleQuickFilters} />
         </div>
 
         <Button
@@ -251,56 +333,83 @@ export function TransactionTab({
         >
           <PlusIcon className="w-4 h-4 mr-2" /> New Transaction
         </Button>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="sm:max-w-lg overflow-x-visible">
-            {content}
-          </DialogContent>
-        </Dialog>
       </div>
-
-      <div className="max-h-[calc(100vh-400px)] overflow-scroll pr-2">
-        <div className="space-y-4">
-          {Object.entries(groupedByDate).length === 0 && (
-            <p className="opacity-50 italic">
-              It&apos;s empty here. Click + New Transaction to start recording
-              your expenses!
-            </p>
-          )}
-          {Object.entries(groupedByDate).map(([date, records]) => (
-            <div key={date} className="space-y-3">
-              <h3 className="text-sm font-semibold text-muted-foreground">
-                {new Date(date).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </h3>
-              <div className="space-y-4 mt-2">
-                {records.map((transaction) => (
-                  <TransactionItem
-                    onClick={() => showViewTransactionDialog(transaction)}
-                    key={transaction.id}
-                    transaction={{
-                      ...transaction,
-                      detailedTags: transaction.tags.map(
-                        (tag) => journal.tags.find(({ id }) => id === tag)!
-                      ),
-                      detailedPaidBy: collaborators[transaction.paidBy],
-                      detailedAccount: accounts[transaction.accountId],
-                    }}
-                    formatter={formatter}
-                    commands={[
-                      viewTransaction(showViewTransactionDialog),
-                      editTransaction(showEditTransactionDialog),
-                      deleteTransaction(showDeleteTransactionDialog),
-                    ]}
-                  />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg overflow-x-visible">
+          {content}
+        </DialogContent>
+      </Dialog>
+      <div>
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.125 } }}
+              exit={{ opacity: 0 }}
+              className="grid grid-cols-1 gap-2 mb-4"
+            >
+              <Skeleton className="h-[4rem] w-full col-span-1 rounded-xl" />
+              <Skeleton className="h-[4rem] w-full col-span-1 rounded-xl" />
+              <Skeleton className="h-[4rem] w-full col-span-1 rounded-xl" />
+              <Skeleton className="h-[4rem] w-full col-span-1 rounded-xl" />
+              <Skeleton className="h-[4rem] w-full col-span-1 rounded-xl" />
+              <Skeleton className="h-[4rem] w-full col-span-1 rounded-xl" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="loaded"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.125 } }}
+              exit={{ opacity: 0 }}
+              className="max-h-[calc(100vh-450px)] overflow-scroll pr-2"
+            >
+              <div className="space-y-4">
+                {Object.entries(groupedByDate).length === 0 && (
+                  <p className="opacity-50 italic">
+                    It&apos;s empty here. Click + New Transaction to start
+                    recording your expenses!
+                  </p>
+                )}
+                {Object.entries(groupedByDate).map(([date, records]) => (
+                  <div key={date} className="space-y-3">
+                    <h3 className="text-sm font-semibold text-muted-foreground">
+                      {new Date(date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </h3>
+                    <div className="space-y-4 mt-2">
+                      {records.map((transaction) => (
+                        <TransactionItem
+                          onClick={() => showViewTransactionDialog(transaction)}
+                          key={transaction.id}
+                          transaction={{
+                            ...transaction,
+                            detailedTags: transaction.tags.map(
+                              (tag) =>
+                                journal.tags.find(({ id }) => id === tag)!
+                            ),
+                            detailedPaidBy: collaborators[transaction.paidBy],
+                            detailedAccount: accounts[transaction.accountId],
+                          }}
+                          formatter={formatter}
+                          commands={[
+                            viewTransaction(showViewTransactionDialog),
+                            editTransaction(showEditTransactionDialog),
+                            deleteTransaction(showDeleteTransactionDialog),
+                          ]}
+                        />
+                      ))}
+                    </div>
+                    <Separator className="mt-4" />
+                  </div>
                 ))}
               </div>
-              <Separator className="mt-4" />
-            </div>
-          ))}
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </>
   );

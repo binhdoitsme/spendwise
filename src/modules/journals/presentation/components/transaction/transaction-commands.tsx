@@ -15,8 +15,8 @@ import {
   Edit,
   Eye,
   type LucideIcon,
-  MoreVertical,
-  Trash,
+  MoreHorizontal,
+  Trash
 } from "lucide-react";
 
 export type TransactionCommand<T extends Array<unknown> = unknown[]> = {
@@ -86,7 +86,7 @@ export function TransactionCommands({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-auto w-auto p-0">
-          <MoreVertical className="h-4 w-4" />
+          <MoreHorizontal className="h-4 w-4" />
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>

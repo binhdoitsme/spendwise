@@ -30,13 +30,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; transactionId: string }> }
 ) {
   const journalService = provideJournalServices();
-  const { id: journalId, transactionId } = await params;
+  const { transactionId } = await params;
   const userId = await getCurrentUserId(request.headers);
   if (!userId) {
     return unauthorized();
   }
   try {
-    await journalService.deleteTransactions(userId, journalId, [transactionId]);
+    await journalService.deleteTransaction(userId, transactionId);
     return noContent();
   } catch (err) {
     return handleError(err);
