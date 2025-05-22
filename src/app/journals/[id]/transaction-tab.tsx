@@ -212,7 +212,7 @@ export function TransactionTab({
     setContent(
       <>
         <DialogHeader>
-          <DialogTitle>Transaction Details</DialogTitle>
+          <DialogTitle>{labels.transactionDetails}</DialogTitle>
         </DialogHeader>
         <TransactionForm
           language={language}
@@ -239,7 +239,7 @@ export function TransactionTab({
     setContent(
       <>
         <DialogHeader>
-          <DialogTitle>Transaction Details</DialogTitle>
+          <DialogTitle>{labels.editTransaction}</DialogTitle>
         </DialogHeader>
         <TransactionForm
           language={language}

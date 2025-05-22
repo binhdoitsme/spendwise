@@ -26,6 +26,8 @@ export interface JournalDetailsPageLabels {
 
   newTransaction: string;
   noTransactions: string;
+  transactionDetails: string;
+  editTransaction: string;
 }
 
 export const journalDetailsPageLabels: Record<
@@ -56,6 +58,8 @@ export const journalDetailsPageLabels: Record<
     newTransaction: "New Transaction",
     noTransactions:
       "It's empty here. Click + New Transaction to start recording your expenses!",
+    transactionDetails: "Transaction Details",
+    editTransaction: "Edit Transaction",
   },
   vi: {
     title: "Sổ chi tiêu",
@@ -81,5 +85,7 @@ export const journalDetailsPageLabels: Record<
     newTransaction: "Tạo giao dịch mới",
     noTransactions:
       "Chưa có giao dịch nào. Nhấn + Tạo giao dịch mới để bắt đầu ghi lại chi tiêu của bạn!",
+    transactionDetails: "Chi tiết giao dịch",
+    editTransaction: "Chỉnh sửa giao dịch",
   },
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useLoader } from "@/app/loader.context";
+import { Localizable } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -14,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/spinner";
 import { BasicUserApi } from "@/modules/shared/presentation/contracts/user.service";
-import { Localizable } from "@/modules/shared/presentation/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
