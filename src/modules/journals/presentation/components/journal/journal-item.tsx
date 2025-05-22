@@ -1,6 +1,7 @@
+import { Localizable } from "@/components/common/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { JournalBasicDto } from "@/modules/journals/application/dto/dtos.types";
-import { Localizable } from "@/modules/shared/presentation/types";
+import { journalLabels } from "./labels";
 
 type JournalItemProps = {
   journal: JournalBasicDto;
@@ -11,9 +12,11 @@ type JournalItemProps = {
 export function JournalItem({
   journal,
   currentUserEmail,
+  language,
   onClick,
 }: JournalItemProps) {
   const isCurrentUserOwner = journal.ownerEmail === currentUserEmail;
+  const labels = journalLabels[language];
 
   return (
     <Card
@@ -24,8 +27,12 @@ export function JournalItem({
         <CardTitle>{journal.title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>Owner: {isCurrentUserOwner ? "you" : journal.ownerEmail}</p>
-        <p>Created at: {journal.createdAt}</p>
+        <p>
+          {labels.owner}: {isCurrentUserOwner ? labels.you : journal.ownerEmail}
+        </p>
+        <p>
+          {labels.createdAt}: {journal.createdAt}
+        </p>
       </CardContent>
     </Card>
   );

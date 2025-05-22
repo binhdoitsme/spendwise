@@ -1,5 +1,6 @@
 "use client";
 import { useLoader } from "@/app/loader.context";
+import { useI18n } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,8 +38,9 @@ import { convertToCurrentUser } from "@/modules/users/presentation/components/di
 import { PlusIcon } from "lucide-react";
 import { DateTime } from "luxon";
 import { AnimatePresence, motion } from "motion/react";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { journalDetailsPageLabels } from "./labels";
 
 export interface TransactionTabProps {
   journal: JournalDetailedDto;
@@ -98,6 +100,8 @@ export function TransactionTab({
 
   const authContext = useAuthContext();
   const { loadingStart, loadingEnd, isLoading } = useLoader();
+  const { language } = useI18n();
+  const labels = journalDetailsPageLabels[language];
 
   const handleQuickFilters = async (filters: FilterSchema) => {
     loadingStart();
@@ -182,10 +186,11 @@ export function TransactionTab({
     setContent(
       <>
         <DialogHeader>
-          <DialogTitle>New Transaction</DialogTitle>
+          <DialogTitle>{labels.newTransaction}</DialogTitle>
         </DialogHeader>
         <Separator />
         <TransactionForm
+          language={language}
           accounts={selectableAccounts}
           tags={journal.tags}
           collaborators={journal.collaborators.map(({ user }) => user)}
@@ -210,6 +215,7 @@ export function TransactionTab({
           <DialogTitle>Transaction Details</DialogTitle>
         </DialogHeader>
         <TransactionForm
+          language={language}
           transaction={transaction}
           isReadonly
           accounts={selectableAccounts}
@@ -236,6 +242,7 @@ export function TransactionTab({
           <DialogTitle>Transaction Details</DialogTitle>
         </DialogHeader>
         <TransactionForm
+          language={language}
           transaction={transaction}
           accounts={selectableAccounts}
           tags={journal.tags}
@@ -292,7 +299,9 @@ export function TransactionTab({
     );
 
   const collaborators = journal.collaborators
-    .map(({ user }) => convertToCurrentUser(user, authContext.user!))
+    .map(({ user }) =>
+      convertToCurrentUser(user, authContext.user?.email, labels.you)
+    )
     .reduce<Record<string, JournalUserBasicDto>>(
       (current, next) => ({ ...current, [next.id]: next }),
       {}
@@ -310,7 +319,13 @@ export function TransactionTab({
     {} as Record<string, TransactionDetailedDto[]>
   );
 
-  const formatter = useMemo(
+  const transactionCommands = [
+    viewTransaction(language)(showViewTransactionDialog),
+    editTransaction(language)(showEditTransactionDialog),
+    deleteTransaction(language)(showDeleteTransactionDialog),
+  ];
+
+  const currencyFormatter = useMemo(
     () =>
       new Intl.NumberFormat("de-DE", {
         style: "currency",
@@ -319,19 +334,42 @@ export function TransactionTab({
     [journal.currency]
   );
 
+  const formatDate = useCallback(
+    (date: string) => {
+      switch (language) {
+        case "vi":
+          return new Date(date).toLocaleDateString("vi-VN", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+        default:
+          return new Date(date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+      }
+    },
+    [language]
+  );
+
   return (
     <>
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
         <div className="flex flex-1 gap-2 w-full md:max-w-md">
-          <TransactionSearch handleSearch={handleSearch} />
-          <TransactionQuickFilters handleFilter={handleQuickFilters} />
+          <TransactionSearch language={language} handleSearch={handleSearch} />
+          <TransactionQuickFilters
+            language={language}
+            handleFilter={handleQuickFilters}
+          />
         </div>
 
         <Button
           className="w-full md:w-auto gap-0"
           onClick={showNewTransactionDialog}
         >
-          <PlusIcon className="w-4 h-4 mr-2" /> New Transaction
+          <PlusIcon className="w-4 h-4 mr-2" /> {labels.newTransaction}
         </Button>
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -366,19 +404,12 @@ export function TransactionTab({
             >
               <div className="space-y-4">
                 {Object.entries(groupedByDate).length === 0 && (
-                  <p className="opacity-50 italic">
-                    It&apos;s empty here. Click + New Transaction to start
-                    recording your expenses!
-                  </p>
+                  <p className="opacity-50 italic">{labels.noTransactions}</p>
                 )}
                 {Object.entries(groupedByDate).map(([date, records]) => (
                   <div key={date} className="space-y-3">
                     <h3 className="text-sm font-semibold text-muted-foreground">
-                      {new Date(date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
+                      {formatDate(date)}
                     </h3>
                     <div className="space-y-4 mt-2">
                       {records.map((transaction) => (
@@ -394,12 +425,8 @@ export function TransactionTab({
                             detailedPaidBy: collaborators[transaction.paidBy],
                             detailedAccount: accounts[transaction.accountId],
                           }}
-                          formatter={formatter}
-                          commands={[
-                            viewTransaction(showViewTransactionDialog),
-                            editTransaction(showEditTransactionDialog),
-                            deleteTransaction(showDeleteTransactionDialog),
-                          ]}
+                          formatter={currencyFormatter}
+                          commands={transactionCommands}
                         />
                       ))}
                     </div>

@@ -1,4 +1,5 @@
 "use client";
+import { Localizable } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,13 +21,20 @@ import { ISO_CURRENCIES } from "@/modules/shared/presentation/currencies";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { journalFormSchema, JournalFormSchema } from "../forms";
+import { journalLabels } from "./labels";
 
-interface JournalFormProps {
+interface JournalFormProps extends Localizable {
   isLoading?: boolean;
   onSubmit: (data: JournalFormSchema) => void | Promise<void>;
 }
 
-export function JournalForm({ onSubmit, isLoading }: JournalFormProps) {
+export function JournalForm({
+  onSubmit,
+  isLoading,
+  language,
+}: JournalFormProps) {
+  const labels = journalLabels[language];
+
   const form = useForm<JournalFormSchema>({
     resolver: zodResolver(journalFormSchema),
     defaultValues: {
@@ -48,12 +56,12 @@ export function JournalForm({ onSubmit, isLoading }: JournalFormProps) {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>{labels.journalTitle}</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   disabled={!!field.disabled || !!isLoading}
-                  placeholder="Give a memorable name for your finance journal"
+                  placeholder={labels.journalTitlePlaceholder}
                 />
               </FormControl>
               <FormMessage />
@@ -66,7 +74,7 @@ export function JournalForm({ onSubmit, isLoading }: JournalFormProps) {
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Currency</FormLabel>
+              <FormLabel>{labels.currency}</FormLabel>
               <FormControl>
                 <Select
                   onValueChange={field.onChange}
@@ -75,7 +83,7 @@ export function JournalForm({ onSubmit, isLoading }: JournalFormProps) {
                   disabled={!!field.disabled || !!isLoading}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="e.g. VND, EUR, USD, etc." />
+                    <SelectValue placeholder={labels.currencyPlaceholder} />
                   </SelectTrigger>
                   <SelectContent>
                     {ISO_CURRENCIES.map((code) => (
@@ -92,7 +100,7 @@ export function JournalForm({ onSubmit, isLoading }: JournalFormProps) {
         />
 
         <div>
-          <Button type="submit">Submit</Button>
+          <Button type="submit">{labels.submit}</Button>
         </div>
       </form>
     </Form>

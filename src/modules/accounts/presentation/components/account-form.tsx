@@ -1,5 +1,6 @@
 "use client";
 
+import { Localizable } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { accountLabels } from "../labels";
 
 export const accountFormSchema = z.discriminatedUnion("type", [
   z.object({
@@ -54,7 +56,7 @@ export const accountFormSchema = z.discriminatedUnion("type", [
 
 export type AccountFormValues = z.infer<typeof accountFormSchema>;
 
-interface AccountFormProps {
+interface AccountFormProps extends Localizable {
   onSubmit: (values: AccountFormValues) => void | Promise<void>;
   className?: string;
   initialValues?: AccountFormValues;
@@ -64,6 +66,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({
   onSubmit,
   className,
   initialValues,
+  language = "en",
 }) => {
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
@@ -74,6 +77,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({
   });
 
   const type = form.watch("type");
+  const labels = accountLabels[language];
 
   return (
     <Form {...form}>
@@ -84,16 +88,16 @@ export const AccountForm: React.FC<AccountFormProps> = ({
             name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Account Type</FormLabel>
+                <FormLabel>{labels.accountType}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={labels.selectType} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="cash">Cash</SelectItem>
-                    <SelectItem value="debit">Debit</SelectItem>
-                    <SelectItem value="credit">Credit</SelectItem>
-                    <SelectItem value="loan">Loan</SelectItem>
+                    <SelectItem value="cash">{labels.cash}</SelectItem>
+                    <SelectItem value="debit">{labels.debit}</SelectItem>
+                    <SelectItem value="credit">{labels.credit}</SelectItem>
+                    <SelectItem value="loan">{labels.loan}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -106,12 +110,9 @@ export const AccountForm: React.FC<AccountFormProps> = ({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Account Name</FormLabel>
+                <FormLabel>{labels.accountName}</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="My Wallet / Visa Card / etc."
-                    {...field}
-                  />
+                  <Input placeholder={labels.myWalletPlaceholder} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -124,9 +125,12 @@ export const AccountForm: React.FC<AccountFormProps> = ({
               name="bankName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Bank Name</FormLabel>
+                  <FormLabel>{labels.bankName}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Vietcombank" {...field} />
+                    <Input
+                      placeholder={labels.bankNamePlaceholder}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -140,9 +144,13 @@ export const AccountForm: React.FC<AccountFormProps> = ({
               name="last4"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Last 4 digits</FormLabel>
+                  <FormLabel>{labels.last4}</FormLabel>
                   <FormControl>
-                    <Input placeholder="1234" maxLength={4} {...field} />
+                    <Input
+                      placeholder={labels.last4Placeholder}
+                      maxLength={4}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -157,14 +165,21 @@ export const AccountForm: React.FC<AccountFormProps> = ({
                 name="statementDay"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Statement Day</FormLabel>
+                    <FormLabel>{labels.statementDay}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         min={1}
                         max={28}
-                        value={field.value ?? ''}
-                        onChange={e => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === ""
+                              ? undefined
+                              : Number(e.target.value)
+                          )
+                        }
+                        placeholder={labels.statementDayPlaceholder}
                       />
                     </FormControl>
                     <FormMessage />
@@ -176,14 +191,21 @@ export const AccountForm: React.FC<AccountFormProps> = ({
                 name="gracePeriodInDays"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Grace Period (days)</FormLabel>
+                    <FormLabel>{labels.gracePeriodInDays}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         min={1}
                         max={60}
-                        value={field.value ?? ''}
-                        onChange={e => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === ""
+                              ? undefined
+                              : Number(e.target.value)
+                          )
+                        }
+                        placeholder={labels.gracePeriodPlaceholder}
                       />
                     </FormControl>
                     <FormMessage />
@@ -195,9 +217,13 @@ export const AccountForm: React.FC<AccountFormProps> = ({
                 name="limit"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Credit Limit</FormLabel>
+                    <FormLabel>{labels.limit}</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="Optional" {...field} />
+                      <Input
+                        type="number"
+                        placeholder={labels.limitPlaceholder}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -213,9 +239,13 @@ export const AccountForm: React.FC<AccountFormProps> = ({
                 name="loanStartDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Loan Start Date</FormLabel>
+                    <FormLabel>{labels.loanStartDate}</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input
+                        type="date"
+                        placeholder={labels.loanStartDatePlaceholder}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -226,9 +256,13 @@ export const AccountForm: React.FC<AccountFormProps> = ({
                 name="loanEndDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Loan End Date</FormLabel>
+                    <FormLabel>{labels.loanEndDate}</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input
+                        type="date"
+                        placeholder={labels.loanEndDatePlaceholder}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -239,9 +273,14 @@ export const AccountForm: React.FC<AccountFormProps> = ({
                 name="originalAmount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Original Amount</FormLabel>
+                    <FormLabel>{labels.originalAmount}</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.01" {...field} />
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder={labels.originalAmountPlaceholder}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -251,7 +290,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({
           )}
         </div>
 
-        <Button type="submit">Save Account</Button>
+        <Button type="submit">{labels.saveAccount}</Button>
       </form>
     </Form>
   );

@@ -10,6 +10,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { LoaderProvider } from "./loader.context";
+import { I18nProvider } from "@/components/common/i18n";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,12 +42,14 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased p-0 overflow-hidden`}
       >
         <AuthProvider initialUser={user}>
-          <LoaderProvider>
-            <RedirectOnAuthExpiration />
-            <TopNavigationBar />
-            <TooltipProvider>{children}</TooltipProvider>
-            <Toaster />
-          </LoaderProvider>
+          <I18nProvider language="vi">
+            <LoaderProvider>
+              <RedirectOnAuthExpiration />
+              <TopNavigationBar />
+              <TooltipProvider>{children}</TooltipProvider>
+              <Toaster />
+            </LoaderProvider>
+          </I18nProvider>
         </AuthProvider>
       </body>
     </html>

@@ -1,14 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AccountBasicDto } from "@/modules/accounts/application/dto/dtos.types";
 import { AccountApi } from "@/modules/accounts/presentation/api/account.api";
-import {
-  AccountForm,
-  AccountFormValues,
-} from "@/modules/accounts/presentation/components/account-form";
+import { AccountFormValues } from "@/modules/accounts/presentation/components/account-form";
 import { AccountCard } from "@/modules/accounts/presentation/components/account-item";
+import { AccountDialogContent, AccountDialogType } from "./dialogs";
+import { accountPageLabels } from "./labels";
 
+import { useI18n } from "@/components/common/i18n";
 import {
   deleteAccount,
   editAccount,
@@ -25,20 +25,21 @@ export function MyAccountPageContent({
 }: {
   accounts: AccountBasicDto[];
 }) {
-  const [dialog, setDialog] = useState<{
-    title: string;
-    content: React.ReactNode;
-  }>();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialog, setDialog] = useState<AccountDialogType>({ type: null });
+  const [open, setOpen] = useState(false);
   const api = useMemo(() => new AccountApi(), []);
   const { loadingStart, loadingEnd } = useLoader();
+  const { language } = useI18n();
+  const labels = accountPageLabels[language];
 
   const handleDelete = (account: AccountBasicDto) => async () => {
     try {
       await api.deleteAccount(account.id);
+      setDialog({ type: null });
+      setOpen(false);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete account!");
+      toast.error(labels.failedToDelete);
     }
   };
 
@@ -46,98 +47,82 @@ export function MyAccountPageContent({
     loadingStart();
     try {
       await api.createAccount(values);
-      setDialogOpen(false);
+      setDialog({ type: null });
+      setOpen(false);
     } catch (err) {
       console.error(err);
       const errMessage =
         err instanceof AxiosError
           ? err.response!.data.data.message
           : (err as Error).message;
-      toast.error(`Failed to create account: ${errMessage}`);
+      toast.error(`${labels.failedToCreate} ${errMessage}`);
     } finally {
       loadingEnd();
     }
   };
 
-  const handleNewAccountDialog = () => {
-    setDialog({
-      title: "New Account",
-      content: <AccountForm onSubmit={handleCreateAccount} />,
-    });
-    setDialogOpen(true);
+  // Dialog open helpers
+  const showNewAccountDialog = () => {
+    setDialog({ type: "new" });
+    setOpen(true);
+  };
+  const showViewAccountDialog = (account: AccountBasicDto) => {
+    setDialog({ type: "view", account });
+    setOpen(true);
+  };
+  const showEditAccountDialog = (account: AccountBasicDto) => {
+    setDialog({ type: "edit", account });
+    setOpen(true);
+  };
+  const showConfirmDeleteAccountDialog = (account: AccountBasicDto) => {
+    setDialog({ type: "delete", account });
+    setOpen(true);
   };
 
-  const handleViewAccountDialog = (account: AccountBasicDto) => {
-    setDialog({
-      title: "View Account",
-      content: (
-        <AccountForm
-          initialValues={account as unknown as AccountFormValues}
-          onSubmit={(account) => alert(JSON.stringify(account))}
-        />
-      ),
-    });
-    setDialogOpen(true);
-  };
-
-  const handleEditAccountDialog = (account: AccountBasicDto) => {
-    setDialog({
-      title: "Edit Account",
-      content: (
-        <AccountForm
-          initialValues={account as unknown as AccountFormValues}
-          onSubmit={(account) => alert(JSON.stringify(account))}
-        />
-      ),
-    });
-    setDialogOpen(true);
-  };
-
-  const handleConfirmDeleteAccountDialog = (account: AccountBasicDto) => {
-    setDialog({
-      title: "Confirm Delete Account",
-      content: (
-        <div className="space-y-4">
-          <p>Are you sure want to delete this account?</p>
-          <div className="space-x-2">
-            <Button onClick={handleDelete(account)}>Yes</Button>
-            <Button variant="secondary" onClick={() => setDialogOpen(false)}>
-              No
-            </Button>
-          </div>
-        </div>
-      ),
-    });
-    setDialogOpen(true);
+  const handleDialogClose = () => {
+    setOpen(false);
+    // Delay clearing dialog content to avoid abrupt content change
+    setTimeout(() => setDialog({ type: null }), 200);
   };
 
   return (
     <div className="w-full p-6 grid lg:grid-cols-3 grid-cols-2 gap-2">
       <div className="col-span-2 lg:col-span-3 mb-4 flex flex-col gap-4 items-start">
-        <h1 className="text-2xl font-bold">My Accounts</h1>
-        <Button onClick={handleNewAccountDialog}>
-          <Plus /> New Account
+        <h1 className="text-2xl font-bold">{labels.myAccounts}</h1>
+        <Button onClick={showNewAccountDialog}>
+          <Plus /> {labels.newAccount}
         </Button>
       </div>
       {accounts.map((account) => (
         <AccountCard
+          language={language}
           key={account.id}
           className="flex flex-row justify-between"
           account={account}
           commands={[
-            viewAccount((account) => handleViewAccountDialog(account)),
-            editAccount((account) => handleEditAccountDialog(account)),
-            deleteAccount((account) =>
-              handleConfirmDeleteAccountDialog(account)
-            ),
+            viewAccount(language)(showViewAccountDialog),
+            editAccount(language)(showEditAccountDialog),
+            deleteAccount(language)(showConfirmDeleteAccountDialog),
           ]}
           layout="row"
         />
       ))}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(v) => (v ? setOpen(true) : handleDialogClose())}
+      >
         <DialogContent>
-          <DialogTitle>{dialog?.title}</DialogTitle>
-          {dialog?.content}
+          <AccountDialogContent
+            dialogType={dialog.type}
+            account={"account" in dialog ? dialog.account : undefined}
+            onCreate={handleCreateAccount}
+            onDelete={
+              "account" in dialog ? handleDelete(dialog.account) : undefined
+            }
+            onClose={handleDialogClose}
+            language={language}
+            labels={labels}
+          />
         </DialogContent>
       </Dialog>
     </div>

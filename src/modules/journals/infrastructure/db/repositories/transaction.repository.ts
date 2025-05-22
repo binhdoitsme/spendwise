@@ -58,7 +58,6 @@ export class DrizzleTransactionRepository implements TransactionRepository {
       );
     }
     if (specs.dateRange) {
-      console.log("date range", specs.dateRange);
       conditions.push(
         and(
           gte(transactions.date, specs.dateRange.start.toJSDate()),

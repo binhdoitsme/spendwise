@@ -9,6 +9,8 @@ import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
 import { Trash, UserPlus2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AccessDialogContent, AccessDialogType } from "./access-dialogs";
+import { useI18n } from "@/components/common/i18n";
+import { journalDetailsPageLabels } from "./labels";
 
 export interface AccessTabProps {
   journal: JournalDetailedDto;
@@ -21,9 +23,11 @@ export function AccessTab({
   handleRefreshJournal,
   api,
 }: AccessTabProps) {
-  const [open, setOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<AccessDialogType | null>(null);
   const authContext = useAuthContext();
+  const { language } = useI18n();
+  const labels = journalDetailsPageLabels[language];
+  const [dialogType, setDialogType] = useState<AccessDialogType | null>(null);
+  const [open, setOpen] = useState(false);
   const [selectedSharedUser, setSelectedSharedUser] =
     useState<JournalUserBasicDto>();
 
@@ -50,10 +54,10 @@ export function AccessTab({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Users with Access</h2>
+        <h2 className="text-lg font-semibold">{labels.usersWithAccess}</h2>
         <Button variant="secondary" onClick={() => setDialogType("invite")}>
           <UserPlus2 />
-          Invite to Workspace
+          {labels.invite}
         </Button>
       </div>
       <Dialog open={open} onOpenChange={setOpen}>

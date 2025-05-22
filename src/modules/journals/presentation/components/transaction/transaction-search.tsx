@@ -1,14 +1,20 @@
+import { Localizable } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useRef } from "react";
+import { transactionLabels } from "./labels";
+
+interface TransactionSearchProps extends Localizable {
+  handleSearch: (query: string) => Promise<void>;
+}
 
 export function TransactionSearch({
   handleSearch,
-}: {
-  handleSearch: (query: string) => Promise<void>;
-}) {
+  language,
+}: TransactionSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const labels = transactionLabels[language];
 
   // Debounce the onChange handler
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -28,7 +34,7 @@ export function TransactionSearch({
   return (
     <>
       <Input
-        placeholder="Search..."
+        placeholder={labels.searchPlaceholder}
         ref={inputRef}
         onChange={handleDebouncedChange()}
       />

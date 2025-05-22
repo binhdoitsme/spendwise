@@ -1,4 +1,5 @@
 "use client";
+import { Language } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,8 +17,9 @@ import {
   Eye,
   type LucideIcon,
   MoreHorizontal,
-  Trash
+  Trash,
 } from "lucide-react";
+import { transactionLabels } from "./labels";
 
 export type TransactionCommand<T extends Array<unknown> = unknown[]> = {
   label: string;
@@ -28,52 +30,52 @@ export type TransactionCommand<T extends Array<unknown> = unknown[]> = {
   separator?: boolean;
 };
 
-export const editTransaction = (
-  handleEditTransaction: (transaction: TransactionDetailedDto) => void
-) =>
-  ({
-    label: "Edit",
-    icon: Edit,
-    handleCommand: handleEditTransaction,
-  } as TransactionCommand);
+export const editTransaction =
+  (language: Language) =>
+  (handleEditTransaction: (transaction: TransactionDetailedDto) => void) =>
+    ({
+      label: transactionLabels[language].edit,
+      icon: Edit,
+      handleCommand: handleEditTransaction,
+    } as TransactionCommand);
 
-export const duplicateTransaction = (
-  handleDuplicateTransaction: (transaction: TransactionDetailedDto) => void
-) =>
-  ({
-    label: "Duplicate",
-    icon: Copy,
-    handleCommand: handleDuplicateTransaction,
-  } as TransactionCommand);
+export const duplicateTransaction =
+  (language: Language) =>
+  (handleDuplicateTransaction: (transaction: TransactionDetailedDto) => void) =>
+    ({
+      label: transactionLabels[language].duplicate,
+      icon: Copy,
+      handleCommand: handleDuplicateTransaction,
+    } as TransactionCommand);
 
-export const archiveTransaction = (
-  handleArchiveTransaction: (transaction: TransactionDetailedDto) => void
-) =>
-  ({
-    label: "Archive",
-    icon: Archive,
-    handleCommand: handleArchiveTransaction,
-    separator: true,
-  } as TransactionCommand);
+export const archiveTransaction =
+  (language: Language) =>
+  (handleArchiveTransaction: (transaction: TransactionDetailedDto) => void) =>
+    ({
+      label: transactionLabels[language].archive,
+      icon: Archive,
+      handleCommand: handleArchiveTransaction,
+      separator: true,
+    } as TransactionCommand);
 
-export const deleteTransaction = (
-  handleDeleteTransaction: (transaction: TransactionDetailedDto) => void
-) =>
-  ({
-    label: "Delete",
-    icon: Trash,
-    handleCommand: handleDeleteTransaction,
-    variant: "destructive",
-  } as TransactionCommand);
+export const deleteTransaction =
+  (language: Language) =>
+  (handleDeleteTransaction: (transaction: TransactionDetailedDto) => void) =>
+    ({
+      label: transactionLabels[language].delete,
+      icon: Trash,
+      handleCommand: handleDeleteTransaction,
+      variant: "destructive",
+    } as TransactionCommand);
 
-export const viewTransaction = (
-  handleViewTransaction: (transaction: TransactionDetailedDto) => void
-) =>
-  ({
-    label: "View",
-    icon: Eye,
-    handleCommand: handleViewTransaction,
-  } as TransactionCommand);
+export const viewTransaction =
+  (language: Language) =>
+  (handleViewTransaction: (transaction: TransactionDetailedDto) => void) =>
+    ({
+      label: transactionLabels[language].view,
+      icon: Eye,
+      handleCommand: handleViewTransaction,
+    } as TransactionCommand);
 
 export function TransactionCommands({
   commands,

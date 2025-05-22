@@ -1,3 +1,4 @@
+import { Language, Localizable } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,6 +17,7 @@ import {
   Trash,
 } from "lucide-react";
 import { AccountBasicDto } from "../../application/dto/dtos.types";
+import { accountLabels } from "../labels";
 
 // Define the command type for better type safety
 export type AccountCommand<T extends Array<unknown> = unknown[]> = {
@@ -27,51 +29,50 @@ export type AccountCommand<T extends Array<unknown> = unknown[]> = {
   separator?: boolean;
 };
 
-export const viewAccount = (
-  handleViewAccount: (account: AccountBasicDto) => void | Promise<void>
-) =>
-  ({
-    label: "View",
-    icon: Eye,
-    handleCommand: handleViewAccount,
-  } as AccountCommand);
+export const viewAccount =
+  (language: Language) =>
+  (handleViewAccount: (account: AccountBasicDto) => void | Promise<void>) =>
+    ({
+      label: accountLabels[language].view,
+      icon: Eye,
+      handleCommand: handleViewAccount,
+    } as AccountCommand);
 
-export const editAccount = (
-  handleEditAccount: (account: AccountBasicDto) => void | Promise<void>
-) =>
-  ({
-    label: "Edit",
-    icon: Edit,
-    handleCommand: handleEditAccount,
-  } as AccountCommand);
+export const editAccount =
+  (language: Language) =>
+  (handleEditAccount: (account: AccountBasicDto) => void | Promise<void>) =>
+    ({
+      label: accountLabels[language].edit,
+      icon: Edit,
+      handleCommand: handleEditAccount,
+    } as AccountCommand);
 
-export const unlinkAccount = (
-  handleUnlinkAccount: (account: AccountBasicDto) => void | Promise<void>
-) =>
-  ({
-    label: "Unlink",
-    icon: Link2Off,
-    handleCommand: handleUnlinkAccount,
-    separator: true,
-  } as AccountCommand);
+export const unlinkAccount =
+  (language: Language) =>
+  (handleUnlinkAccount: (account: AccountBasicDto) => void | Promise<void>) =>
+    ({
+      label: accountLabels[language].unlink,
+      icon: Link2Off,
+      handleCommand: handleUnlinkAccount,
+      separator: true,
+    } as AccountCommand);
 
-export const deleteAccount = (
-  handleDeleteAccount: (account: AccountBasicDto) => void | Promise<void>
-) =>
-  ({
-    label: "Delete",
-    icon: Trash,
-    handleCommand: handleDeleteAccount,
-    variant: "destructive",
-  } as AccountCommand);
+export const deleteAccount =
+  (language: Language) =>
+  (handleDeleteAccount: (account: AccountBasicDto) => void | Promise<void>) =>
+    ({
+      label: accountLabels[language].delete,
+      icon: Trash,
+      handleCommand: handleDeleteAccount,
+      variant: "destructive",
+    } as AccountCommand);
 
-export function AccountCommands({
-  commands,
-  account,
-}: {
+interface AccountCommandProps extends Localizable {
   commands: AccountCommand[];
   account: AccountBasicDto;
-}) {
+}
+
+export function AccountCommands({ commands, account }: AccountCommandProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

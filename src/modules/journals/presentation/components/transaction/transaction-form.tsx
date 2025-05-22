@@ -1,3 +1,4 @@
+import { Localizable } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import { DateInput } from "@/components/ui/date-input";
 import {
@@ -30,13 +31,14 @@ import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { transactionFormSchema, TransactionFormSchema } from "../forms";
 import { Tags } from "../tag/tag-item";
+import { transactionLabels } from "./labels";
 
 export interface AccountSelectProps {
   accountId: string;
   name: string;
 }
 
-export interface TransactionFormProps {
+export interface TransactionFormProps extends Localizable {
   transaction?: TransactionDetailedDto;
   isReadonly?: boolean;
   accounts: Record<string, AccountSelectProps[]>;
@@ -52,12 +54,14 @@ export function TransactionForm({
   accounts,
   collaborators,
   tags,
+  language,
   isReadonly = false,
   onSubmit,
   onNoAccount,
   onUnknownTag,
 }: TransactionFormProps) {
   const isDevMode = true;
+  const labels = transactionLabels[language];
   const form = useForm<TransactionFormSchema>({
     resolver: zodResolver(transactionFormSchema),
     disabled: isReadonly,
@@ -123,7 +127,7 @@ export function TransactionForm({
             control={form.control}
             render={({ field }) => (
               <FormItem className="space-y-1">
-                <FormLabel>Type</FormLabel>
+                <FormLabel>{labels.type}</FormLabel>
                 <FormControl className="mb-2">
                   <RadioGroup
                     {...field}
@@ -133,8 +137,8 @@ export function TransactionForm({
                     orientation="horizontal"
                   >
                     {[
-                      { label: "Expense", value: "EXPENSE" },
-                      { label: "Income", value: "INCOME" },
+                      { label: labels.expense, value: "EXPENSE" },
+                      { label: labels.income, value: "INCOME" },
                     ].map(({ label, value }) => (
                       <FormItem
                         key={value}
@@ -157,9 +161,9 @@ export function TransactionForm({
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Title</FormLabel>
+                <FormLabel>{labels.title}</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="e.g. Pho lunch, Invoice #42" />
+                  <Input {...field} placeholder={labels.titlePlaceholder} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -170,7 +174,7 @@ export function TransactionForm({
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Amount</FormLabel>
+                <FormLabel>{labels.amount}</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -190,7 +194,7 @@ export function TransactionForm({
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Date</FormLabel>
+                <FormLabel>{labels.date}</FormLabel>
                 <FormControl>
                   <DateInput {...field} placeholder="Date" />
                 </FormControl>
@@ -203,7 +207,7 @@ export function TransactionForm({
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Paid by</FormLabel>
+                <FormLabel>{labels.paidBy}</FormLabel>
                 <FormControl>
                   <Select
                     {...field}
@@ -211,7 +215,7 @@ export function TransactionForm({
                     value={field.value}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select user" />
+                      <SelectValue placeholder={labels.paidByPlaceholder} />
                     </SelectTrigger>
                     <SelectContent>
                       {collaborators.map((user) => (
@@ -231,7 +235,7 @@ export function TransactionForm({
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Account</FormLabel>
+                <FormLabel>{labels.account}</FormLabel>
                 <FormControl>
                   <Select
                     disabled={field.disabled || !paidByUser}
@@ -239,7 +243,7 @@ export function TransactionForm({
                     value={field.value}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="e.g. Cash, Bank" />
+                      <SelectValue placeholder={labels.accountPlaceholder} />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.values(accounts).length === 0 && (
@@ -249,7 +253,7 @@ export function TransactionForm({
                           onClick={onNoAccount}
                         >
                           <Plus />
-                          Link an account to continue
+                          {labels.linkAccountOnNoAccount}
                         </Button>
                       )}
                       {paidByUser &&
@@ -269,7 +273,7 @@ export function TransactionForm({
           />
           {isReadonly ? (
             <FormItem>
-              <FormLabel>Tags</FormLabel>
+              <FormLabel>{labels.tags}</FormLabel>
               <div className="pt-1 pb-4">
                 <Tags tags={tags} />
               </div>
@@ -280,12 +284,12 @@ export function TransactionForm({
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tags</FormLabel>
+                  <FormLabel>{labels.tags}</FormLabel>
                   <FormControl>
                     <MultiSelect
                       {...field}
                       defaultValue={field.value}
-                      placeholder="e.g. Food, Transport"
+                      placeholder={labels.tagsPlaceholder}
                       onValueChange={field.onChange}
                       options={tagOptions}
                       error={!!form.formState.errors.tags}
@@ -303,12 +307,9 @@ export function TransactionForm({
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Notes</FormLabel>
+                <FormLabel>{labels.notes}</FormLabel>
                 <FormControl>
-                  <Textarea
-                    {...field}
-                    placeholder="Optional note or description..."
-                  />
+                  <Textarea {...field} placeholder={labels.notesPlaceholder} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -317,7 +318,7 @@ export function TransactionForm({
         </div>
         {!isReadonly && (
           <div className="flex justify-end">
-            <Button type="submit">Save Record</Button>
+            <Button type="submit">{labels.saveTransaction}</Button>
           </div>
         )}
       </form>

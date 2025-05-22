@@ -1,3 +1,4 @@
+import { useI18n } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
@@ -22,6 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { journalDetailsPageLabels } from "./labels";
 
 export interface AccessDialogContentProps {
   user?: JournalUserBasicDto;
@@ -32,6 +34,8 @@ export interface AccessDialogContentProps {
 }
 
 function RemoveAccessConfirmationDialog(props: AccessDialogContentProps) {
+  const { language } = useI18n();
+  const labels = journalDetailsPageLabels[language];
   const { setOpen, journal, api } = props;
   const user = props.user!;
   const handleRemoveCollaborator = async (userId: string) => {
@@ -47,16 +51,16 @@ function RemoveAccessConfirmationDialog(props: AccessDialogContentProps) {
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Confirm deletion</DialogTitle>
+        <DialogTitle>{labels.confirmUnshare}</DialogTitle>
       </DialogHeader>
       <Card className="border-none shadow-none py-0">
         <CardContent className="p-0 pt-4">
           <p>
-            Are you sure want to remove{" "}
+            {labels.confirmUnsharePromptPrefix}{" "}
             <strong className="font-bold">
               {user.firstName} {user.lastName} ({user.email})
             </strong>{" "}
-            as a collaborator?
+            {labels.confirmUnsharePromptSuffix}
           </p>
         </CardContent>
         <CardFooter className="w-full flex gap-2 px-0">
@@ -64,10 +68,10 @@ function RemoveAccessConfirmationDialog(props: AccessDialogContentProps) {
             variant="destructive"
             onClick={() => handleRemoveCollaborator(user.id)}
           >
-            Yes
+            {labels.confirmUnshareYes}
           </Button>
           <Button variant="secondary" onClick={() => setOpen(false)}>
-            No
+            {labels.cancel}
           </Button>
         </CardFooter>
       </Card>
@@ -88,6 +92,9 @@ function InviteDialog({
   handleRefreshJournal,
   setOpen,
 }: AccessDialogContentProps) {
+  const { language } = useI18n();
+  const labels = journalDetailsPageLabels[language];
+
   const inviteForm = useForm<InviteFormSchema>({
     resolver: zodResolver(inviteSchema),
     defaultValues: {
@@ -118,7 +125,7 @@ function InviteDialog({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Share with others</DialogTitle>
+        <DialogTitle>{labels.shareWithOthers}</DialogTitle>
       </DialogHeader>
       <Card className="border-none shadow-none py-0">
         <CardContent className="p-0 pt-4">
@@ -137,7 +144,7 @@ function InviteDialog({
                   name="email"
                   render={({ field }) => (
                     <FormItem className="col-span-2">
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{labels.email}</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter email" {...field} />
                       </FormControl>
@@ -152,9 +159,9 @@ function InviteDialog({
               )}
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>
-                  Cancel
+                  {labels.cancel}
                 </Button>
-                <Button type="submit">Submit</Button>
+                <Button type="submit">{labels.share}</Button>
               </DialogFooter>
             </form>
           </Form>

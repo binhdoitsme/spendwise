@@ -13,6 +13,10 @@ import { useMemo, useState } from "react";
 import { AccessTab } from "./access-tab";
 import { AccountTab } from "./account-tab";
 import { TransactionTab } from "./transaction-tab";
+import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
+import { useAuthContext } from "@/modules/auth/presentation/components/auth-context";
+import { useI18n } from "@/components/common/i18n";
+import { journalDetailsPageLabels } from "./labels";
 
 export interface FinanceJournalPageContentProps {
   journal: JournalDetailedDto;
@@ -28,6 +32,19 @@ export function FinanceJournalPageContent(
 
   const journalApi = useMemo(() => new JournalApi(), []);
   const accountApi = useMemo(() => new AccountApi(), []);
+
+  const authContext = useAuthContext();
+  const { language } = useI18n();
+  const labels = journalDetailsPageLabels[language];
+  const owner = convertToCurrentUser(
+    {
+      firstName: journal.ownerFirstName,
+      lastName: journal.ownerLastName,
+      email: journal.ownerEmail,
+    },
+    authContext.user?.email,
+    labels.you
+  );
 
   const handleRefreshJournal = async () => {
     const refreshedJournal = await journalApi.getJournalById(props.journal.id);
@@ -49,9 +66,11 @@ export function FinanceJournalPageContent(
     <div className="p-6 space-y-6 max-w-[1000px] max-h-screen mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Finance Journal: {journal.title}</h1>
+        <h1 className="text-2xl font-bold">
+          {labels.title}: {journal.title}
+        </h1>
         <p className="text-muted-foreground">
-          Owner: {journal.ownerFirstName} {journal.ownerLastName} (
+          {labels.owner}: {owner.firstName} {owner.lastName} (
           {journal.ownerEmail})
         </p>
         <div className="mt-1 mb-3">
@@ -75,9 +94,9 @@ export function FinanceJournalPageContent(
         className="w-full"
       >
         <TabsList className="mb-4 gap-1">
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="accounts">Accounts</TabsTrigger>
-          <TabsTrigger value="access">Access</TabsTrigger>
+          <TabsTrigger value="transactions">{labels.transactions}</TabsTrigger>
+          <TabsTrigger value="accounts">{labels.accounts}</TabsTrigger>
+          <TabsTrigger value="access">{labels.access}</TabsTrigger>
           {/* <TabsTrigger value="settings">Settings</TabsTrigger> */}
         </TabsList>
 

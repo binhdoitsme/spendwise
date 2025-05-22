@@ -1,3 +1,4 @@
+import { Localizable } from "@/components/common/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FilterIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { transactionLabels } from "./labels";
 
 const filterSchema = z
   .object({
@@ -33,6 +35,7 @@ const filterSchema = z
   })
   .refine(
     (data) =>
+      !data.filterByDate ||
       data.datePreset !== "custom" ||
       (data.startDate instanceof Date &&
         !isNaN(data.startDate.getTime()) &&
@@ -45,11 +48,16 @@ const filterSchema = z
   );
 export type FilterSchema = z.infer<typeof filterSchema>;
 
-export function TransactionQuickFilters({
-  handleFilter,
-}: {
+interface TransactionQuickFiltersProps extends Localizable {
   handleFilter: (data: FilterSchema) => Promise<void>;
-}) {
+}
+
+export function TransactionQuickFilters({
+  language,
+  handleFilter,
+}: TransactionQuickFiltersProps) {
+  const labels = transactionLabels[language];
+
   const form = useForm<FilterSchema>({
     resolver: zodResolver(filterSchema),
     defaultValues: {
@@ -70,7 +78,7 @@ export function TransactionQuickFilters({
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="outline">
-            Quick Filters <FilterIcon />{" "}
+            {labels.quickFilters} <FilterIcon />{" "}
             {quickFilterCount > 0 && (
               <Badge className="rounded-full text-xs">{quickFilterCount}</Badge>
             )}
@@ -80,7 +88,7 @@ export function TransactionQuickFilters({
           <Form {...form}>
             <form onSubmit={onSubmit}>
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Quick Filters</h3>
+                <h3 className="text-lg font-semibold">{labels.quickFilters}</h3>
                 <FormField
                   name="showCredit"
                   control={form.control}
@@ -97,7 +105,7 @@ export function TransactionQuickFilters({
                         htmlFor="credit-accounts"
                         className="font-normal"
                       >
-                        Show only credit transactions
+                        {labels.showOnlyCredit}
                       </FormLabel>
                       <FormMessage />
                     </FormItem>
@@ -119,7 +127,7 @@ export function TransactionQuickFilters({
                         htmlFor="filter-by-date"
                         className="font-normal"
                       >
-                        Filter by Date
+                        {labels.filterByDate}
                       </FormLabel>
                       <FormMessage />
                     </FormItem>
@@ -149,7 +157,7 @@ export function TransactionQuickFilters({
                               htmlFor="current-month"
                               className="font-normal"
                             >
-                              Current month
+                              {labels.currentMonth}
                             </FormLabel>
                           </FormItem>
                           <FormItem className="flex flex-row items-center gap-2 space-y-0">
@@ -164,7 +172,7 @@ export function TransactionQuickFilters({
                               htmlFor="last-month"
                               className="font-normal"
                             >
-                              Last month
+                              {labels.lastMonth}
                             </FormLabel>
                           </FormItem>
                           <FormItem className="flex flex-row items-center gap-2 space-y-0">
@@ -179,7 +187,7 @@ export function TransactionQuickFilters({
                               htmlFor="recent-2-months"
                               className="font-normal"
                             >
-                              Most recent 2 months
+                              {labels.mostRecent2Months}
                             </FormLabel>
                           </FormItem>
                           <FormItem className="flex flex-row items-center gap-2 space-y-0">
@@ -191,7 +199,7 @@ export function TransactionQuickFilters({
                               />
                             </FormControl>
                             <FormLabel htmlFor="custom" className="font-normal">
-                              Custom range
+                              {labels.customDateRange}
                             </FormLabel>
                           </FormItem>
                         </RadioGroup>
@@ -207,7 +215,7 @@ export function TransactionQuickFilters({
                       control={form.control}
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>Start Date</FormLabel>
+                          <FormLabel>{labels.startDate}</FormLabel>
                           <FormControl>
                             <input
                               type="date"
@@ -229,7 +237,7 @@ export function TransactionQuickFilters({
                       control={form.control}
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>End Date</FormLabel>
+                          <FormLabel>{labels.endDate}</FormLabel>
                           <FormControl>
                             <input
                               type="date"
@@ -250,7 +258,7 @@ export function TransactionQuickFilters({
                 )}
               </div>
               <Button variant="outline" className="w-full mt-4" type="submit">
-                Apply Filters
+                {labels.applyFilters}
               </Button>
             </form>
           </Form>

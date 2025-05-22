@@ -1,4 +1,5 @@
 import { useLoader } from "@/app/loader.context";
+import { useI18n } from "@/components/common/i18n";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AccountBasicDto } from "@/modules/accounts/application/dto/dtos.types";
 import { AccountApi } from "@/modules/accounts/presentation/api/account.api";
@@ -31,6 +32,7 @@ function LinkAccountDialogContent({
 }: AccountDialogContentProps) {
   const { loadingStart, loadingEnd } = useLoader();
   const authContext = useAuthContext();
+  const { language } = useI18n();
 
   const handleLinkAccount = (accountId: string) => async () => {
     try {
@@ -64,6 +66,7 @@ function LinkAccountDialogContent({
             account={account}
             currentUserEmail={authContext.user?.email}
             onClick={handleLinkAccount(account.id)}
+            language={language}
           />
         ))}
       </div>
@@ -80,6 +83,7 @@ function NewAccountDialogContent({
   handleRefreshAccounts,
 }: AccountDialogContentProps) {
   const { loadingStart, loadingEnd } = useLoader();
+  const { language } = useI18n();
 
   const handleCreateAccount = async (
     data: AccountFormValues
@@ -106,7 +110,11 @@ function NewAccountDialogContent({
       <DialogHeader>
         <DialogTitle>New Account</DialogTitle>
       </DialogHeader>
-      <AccountForm className="h-full mt-2" onSubmit={handleCreateAccount} />
+      <AccountForm
+        language={language}
+        className="h-full mt-2"
+        onSubmit={handleCreateAccount}
+      />
     </>
   );
 }
@@ -124,4 +132,3 @@ export function AccountDialogContent({
   }
   return null;
 }
-

@@ -1,12 +1,16 @@
 "use client";
+import { useI18n } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/modules/auth/presentation/components/auth-context";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { topNavigationLabels } from "./top-nav-labels";
 
 export function TopNavigationBar() {
   const router = useRouter();
   const { user, setUser } = useAuthContext();
+  const { language } = useI18n();
+  const labels = topNavigationLabels[language];
 
   const handleSignOut = async () => {
     try {
@@ -36,7 +40,7 @@ export function TopNavigationBar() {
                   href="/dashboard"
                   className="text-gray-700 hover:text-blue-500"
                 >
-                  Dashboard
+                  {labels.dashboard}
                 </Link>
               </li>
               <li>
@@ -44,7 +48,7 @@ export function TopNavigationBar() {
                   href="/journals"
                   className="text-gray-700 hover:text-blue-500"
                 >
-                  Journals
+                  {labels.journals}
                 </Link>
               </li>
               <li>
@@ -52,14 +56,14 @@ export function TopNavigationBar() {
                   href="/accounts"
                   className="text-gray-700 hover:text-blue-500"
                 >
-                  Accounts
+                  {labels.accounts}
                 </Link>
               </li>
             </ul>
 
             <div>
               <Button variant="outline" onClick={handleSignOut}>
-                Sign Out
+                {labels.signOut}
               </Button>
             </div>
           </>

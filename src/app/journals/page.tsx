@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,15 +13,18 @@ import { JournalFormSchema } from "@/modules/journals/presentation/components/fo
 import { JournalForm } from "@/modules/journals/presentation/components/journal/journal-form";
 import { JournalList } from "@/modules/journals/presentation/components/journal/journal-list";
 import { useJournalListContext } from "@/modules/journals/presentation/contexts/journal-list.context";
+import { AxiosError } from "axios";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useLoader } from "../loader.context";
 import { toast } from "sonner";
-import { AxiosError } from "axios";
+import { useLoader } from "../loader.context";
+import { journalListLabels } from "./labels";
 
 export default function JournalListPage() {
   const authContext = useAuthContext();
   const journalListContext = useJournalListContext();
+  const { language } = useI18n();
+  const labels = journalListLabels[language];
   const [open, setOpen] = useState(false);
   const { loadingStart, loadingEnd, isLoading } = useLoader();
 
@@ -43,22 +47,27 @@ export default function JournalListPage() {
   };
   return (
     <div className="p-6 space-y-6 w-full max-w-[1000px] max-h-screen mx-auto">
-      <h1 className="text-2xl font-bold">My Finance Journals</h1>
+      <h1 className="text-2xl font-bold">{labels.title}</h1>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button className="md:w-auton">
             <Plus />
-            New Finance Journal
+            {labels.newJournal}
           </Button>
         </DialogTrigger>
         <DialogContent>
-          <DialogTitle>New Finance Journal</DialogTitle>
+          <DialogTitle>{labels.newJournal}</DialogTitle>
           <div>
-            <JournalForm onSubmit={handleCreateJournal} isLoading={isLoading} />
+            <JournalForm
+              language={language}
+              onSubmit={handleCreateJournal}
+              isLoading={isLoading}
+            />
           </div>
         </DialogContent>
       </Dialog>
       <JournalList
+        language={language}
         journals={journalListContext.journals}
         currentUserEmail={authContext.user?.email}
       />
