@@ -14,8 +14,8 @@ export default function SignInPage() {
   return (
     <SignInForm
       ssoProviders={ssoProviders}
-      language="en"
-      redirectTo="/dashboard"
+      language="vi"
+      redirectTo="/journals"
     />
   );
 }

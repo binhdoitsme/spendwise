@@ -29,7 +29,7 @@ import { SSOLoginActions } from "./sso-actions";
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string(),
+  password: z.string().min(8),
 });
 
 export type SignInFormProps = {

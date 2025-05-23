@@ -93,7 +93,7 @@ export function FinanceJournalPageContent(
         onValueChange={setCurrentTab}
         className="w-full"
       >
-        <TabsList className="mb-4 gap-1">
+        <TabsList className="mb-2 gap-1">
           <TabsTrigger value="transactions">{labels.transactions}</TabsTrigger>
           <TabsTrigger value="accounts">{labels.accounts}</TabsTrigger>
           <TabsTrigger value="access">{labels.access}</TabsTrigger>

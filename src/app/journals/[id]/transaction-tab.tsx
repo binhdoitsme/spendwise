@@ -265,18 +265,18 @@ export function TransactionTab({
     setContent(
       <>
         <DialogHeader>
-          <DialogTitle>Confirm deletion</DialogTitle>
+          <DialogTitle>{labels.confirmDelete}</DialogTitle>
         </DialogHeader>
-        <p>Are you sure want to delete this transaction?</p>
+        <p>{labels.confirmDeletePrompt}</p>
         <div className="space-x-2">
           <Button
             variant="destructive"
             onClick={async () => await handleDeleteTransaction(transaction)}
           >
-            Yes
+            {labels.confirmDeleteYes}
           </Button>
           <Button variant="secondary" onClick={() => setOpen(false)}>
-            No
+            {labels.cancel}
           </Button>
         </div>
       </>

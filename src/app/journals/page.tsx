@@ -15,7 +15,7 @@ import { JournalList } from "@/modules/journals/presentation/components/journal/
 import { useJournalListContext } from "@/modules/journals/presentation/contexts/journal-list.context";
 import { AxiosError } from "axios";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLoader } from "../loader.context";
 import { journalListLabels } from "./labels";
@@ -25,8 +25,9 @@ export default function JournalListPage() {
   const journalListContext = useJournalListContext();
   const { language } = useI18n();
   const labels = journalListLabels[language];
-  const [open, setOpen] = useState(false);
   const { loadingStart, loadingEnd, isLoading } = useLoader();
+  const [mounted, setMounted] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const api = new JournalApi();
   const handleCreateJournal = async (f: JournalFormSchema) => {
@@ -45,9 +46,25 @@ export default function JournalListPage() {
       loadingEnd();
     }
   };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    console.log(labels.title);
+    if (mounted) {
+      document.title = labels.title;
+    }
+  }, [labels, mounted]);
+
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <div className="p-6 space-y-6 w-full max-w-[1000px] max-h-screen mx-auto">
-      <h1 className="text-2xl font-bold">{labels.title}</h1>
+      <h1 className="text-2xl font-bold">{labels.pageTitle}</h1>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button className="md:w-auton">

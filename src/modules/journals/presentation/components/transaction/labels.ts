@@ -74,7 +74,7 @@ export const transactionLabels: Record<Language, TransactionLabels> = {
   },
   vi: {
     searchPlaceholder: "Tìm kiếm...",
-    quickFilters: "Bộ lọc nhanh",
+    quickFilters: "Lọc nhanh",
     showOnlyCredit: "Chỉ hiển thị giao dịch tín dụng",
     filterByDate: "Lọc theo ngày",
     currentMonth: "Tháng này",

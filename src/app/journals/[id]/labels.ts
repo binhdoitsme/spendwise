@@ -28,6 +28,9 @@ export interface JournalDetailsPageLabels {
   noTransactions: string;
   transactionDetails: string;
   editTransaction: string;
+  confirmDelete: string;
+  confirmDeletePrompt: string;
+  confirmDeleteYes: string;
 }
 
 export const journalDetailsPageLabels: Record<
@@ -60,6 +63,9 @@ export const journalDetailsPageLabels: Record<
       "It's empty here. Click + New Transaction to start recording your expenses!",
     transactionDetails: "Transaction Details",
     editTransaction: "Edit Transaction",
+    confirmDelete: "Confirm delete transaction",
+    confirmDeletePrompt: "Are you sure you want to delete this transaction?",
+    confirmDeleteYes: "Yes, delete transaction",
   },
   vi: {
     title: "Sổ chi tiêu",
@@ -87,5 +93,8 @@ export const journalDetailsPageLabels: Record<
       "Chưa có giao dịch nào. Nhấn + Tạo giao dịch mới để bắt đầu ghi lại chi tiêu của bạn!",
     transactionDetails: "Chi tiết giao dịch",
     editTransaction: "Chỉnh sửa giao dịch",
+    confirmDelete: "Xác nhận xóa giao dịch",
+    confirmDeletePrompt: "Bạn có chắc chắn muốn xóa giao dịch này không?",
+    confirmDeleteYes: "Có, xóa giao dịch",
   },
 };
