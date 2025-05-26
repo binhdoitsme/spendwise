@@ -1,7 +1,9 @@
 "use client";
+import { useI18n } from "@/components/common/i18n";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccountBasicDto } from "@/modules/accounts/application/dto/dtos.types";
 import { AccountApi } from "@/modules/accounts/presentation/api/account.api";
+import { useAuthContext } from "@/modules/auth/presentation/components/auth-context";
 import {
   JournalDetailedDto,
   TransactionDetailedDto,
@@ -9,24 +11,25 @@ import {
 import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
 import { Collaborators } from "@/modules/journals/presentation/components/collaborator-avatars";
 import { Tags } from "@/modules/journals/presentation/components/tag/tag-item";
+import { AccountSummary } from "@/modules/reports/application/dto/dtos.types";
+import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
 import { useMemo, useState } from "react";
 import { AccessTab } from "./access-tab";
 import { AccountTab } from "./account-tab";
-import { TransactionTab } from "./transaction-tab";
-import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
-import { useAuthContext } from "@/modules/auth/presentation/components/auth-context";
-import { useI18n } from "@/components/common/i18n";
 import { journalDetailsPageLabels } from "./labels";
+import { SummaryTab } from "./summary-tab";
+import { TransactionTab } from "./transaction-tab";
 
 export interface FinanceJournalPageContentProps {
   journal: JournalDetailedDto;
   myAccounts: AccountBasicDto[];
+  accountSummary: AccountSummary;
 }
 
 export function FinanceJournalPageContent(
   props: FinanceJournalPageContentProps
 ) {
-  const [currentTab, setCurrentTab] = useState("transactions");
+  const [currentTab, setCurrentTab] = useState("summary");
   const [journal, setJournal] = useState(props.journal);
   const [myAccounts, setMyAccounts] = useState(props.myAccounts);
 
@@ -89,16 +92,22 @@ export function FinanceJournalPageContent(
       {/* Tabs */}
       <Tabs
         value={currentTab}
-        defaultValue="transactions"
+        // defaultValue="transactions"
+        defaultValue="summary"
         onValueChange={setCurrentTab}
         className="w-full"
       >
         <TabsList className="mb-2 gap-1">
+          <TabsTrigger value="summary">{labels.summary}</TabsTrigger>
           <TabsTrigger value="transactions">{labels.transactions}</TabsTrigger>
           <TabsTrigger value="accounts">{labels.accounts}</TabsTrigger>
           <TabsTrigger value="access">{labels.access}</TabsTrigger>
           {/* <TabsTrigger value="settings">Settings</TabsTrigger> */}
         </TabsList>
+
+        <TabsContent value="summary">
+          <SummaryTab accountSummary={props.accountSummary} />
+        </TabsContent>
 
         <TabsContent value="accounts">
           <AccountTab

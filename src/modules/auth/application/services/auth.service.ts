@@ -1,4 +1,5 @@
 import { Email, IPasswordHasher } from "@/modules/shared/domain/value-objects";
+import { DateTime } from "luxon";
 import { RefreshToken } from "../../domain/refresh-token";
 import {
   AuthUserRepository,
@@ -39,7 +40,7 @@ export class AuthServices {
 
   async refreshSession(token: string): Promise<UserTokens | undefined> {
     const refreshToken = await this.refreshTokenRepository.findByToken(token);
-    if (!refreshToken) {
+    if (!refreshToken || refreshToken.expired(DateTime.utc())) {
       return undefined;
     }
     const user = await this.userRepository.findById(refreshToken.userId);

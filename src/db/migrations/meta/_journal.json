@@ -57,6 +57,13 @@
       "when": 1748224135064,
       "tag": "0007_UpdateCasing",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1748240483306,
+      "tag": "0008_AddMonthlyAccountReportView",
+      "breakpoints": true
     }
   ]
 }

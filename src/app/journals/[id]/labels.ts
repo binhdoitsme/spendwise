@@ -31,6 +31,12 @@ export interface JournalDetailsPageLabels {
   confirmDelete: string;
   confirmDeletePrompt: string;
   confirmDeleteYes: string;
+
+  summary: string;
+  paymentSummary: string;
+  upcomingDues: string;
+  usageThisMonth: (month: string) => string;
+  noCreditOrLoanAccounts: string;
 }
 
 export const journalDetailsPageLabels: Record<
@@ -66,6 +72,11 @@ export const journalDetailsPageLabels: Record<
     confirmDelete: "Confirm delete transaction",
     confirmDeletePrompt: "Are you sure you want to delete this transaction?",
     confirmDeleteYes: "Yes, delete transaction",
+    summary: "Summary",
+    paymentSummary: "Payment Summary",
+    upcomingDues: "Upcoming Dues",
+    usageThisMonth: (month) => `Usage This Month (${month})`,
+    noCreditOrLoanAccounts: "No credit or loan accounts to display.",
   },
   vi: {
     title: "Sổ chi tiêu",
@@ -96,5 +107,11 @@ export const journalDetailsPageLabels: Record<
     confirmDelete: "Xác nhận xóa giao dịch",
     confirmDeletePrompt: "Bạn có chắc chắn muốn xóa giao dịch này không?",
     confirmDeleteYes: "Có, xóa giao dịch",
+    summary: "Tổng quan",
+    paymentSummary: "Tổng quan thanh toán",
+    upcomingDues: "Các khoản đến hạn",
+    usageThisMonth: (month) => `Đã tiêu tháng này (${month})`,
+    noCreditOrLoanAccounts:
+      "Không có tài khoản tín dụng hoặc vay nào để hiển thị.",
   },
 };

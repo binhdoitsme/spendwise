@@ -48,6 +48,15 @@ export async function middleware(request: NextRequest) {
         const value = rest.join("=").split(";")[0];
         cookieStore.set(name.trim(), value.trim());
       });
+    } else {
+      // clear token
+      const cleanupUrl = new URL("/api/sessions", request.nextUrl.origin);
+      await fetch(cleanupUrl, {
+        method: "DELETE",
+        headers: {
+          cookie: request.headers.get("cookie") ?? "",
+        },
+      });
     }
     cookieStore = await cookies();
   }

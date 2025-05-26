@@ -15,7 +15,7 @@ export const topNavigationLabels: Record<string, TopNavigationLabels> = {
     signIn: "Sign In",
   },
   vi: {
-    dashboard: "Tóm tắt",
+    dashboard: "Tổng quan",
     journals: "Sổ chi tiêu",
     accounts: "Tài khoản tiêu dùng",
     signOut: "Đăng xuất",

@@ -14,7 +14,7 @@ export function provideJournalServices(
   connectionPool: Pool = dbConnectionPool
 ): JournalServices {
   const dbInstance = drizzle(connectionPool, { schema });
-  const journalRepository = new DrizzleJournalRepository(dbInstance);
+  const journalRepository = provideJournalRepository(connectionPool);
   const transactionRepository = new DrizzleTransactionRepository(dbInstance);
   const userResolver = new DrizzleJournalUserResolver(
     provideUserRepository(connectionPool)
@@ -28,4 +28,9 @@ export function provideJournalServices(
     userResolver,
     accountResolver
   );
+}
+
+export function provideJournalRepository(connectionPool: Pool) {
+  const dbInstance = drizzle(connectionPool, { schema });
+  return new DrizzleJournalRepository(dbInstance);
 }

@@ -76,6 +76,10 @@ export class Account<T extends AccountType = AccountType> {
     return this._isActive;
   }
 
+  isCreditOrLoan() {
+    return this.type === "credit" || this.type === "loan";
+  }
+
   deactivate() {
     this._isActive = false;
   }

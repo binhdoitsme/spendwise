@@ -244,18 +244,17 @@ export function DateInput({
               <CalendarIcon className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 h-[21rem]" align="end">
-            <Tabs
-              defaultValue={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-2 rounded-sm">
+          <PopoverContent className="min-w-64 w-full p-0 h-[21rem]" align="end">
+            <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="w-full">
                 <TabsTrigger value="calendar">Calendar</TabsTrigger>
                 <TabsTrigger value="picker">Year/Month/Day</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="calendar" className="p-0">
+              <TabsContent
+                value="calendar"
+                className="p-0 mt-0 w-full flex justify-center"
+              >
                 <Calendar
                   mode="single"
                   selected={date}
@@ -267,7 +266,7 @@ export function DateInput({
                 />
               </TabsContent>
 
-              <TabsContent value="picker" className="p-4 pt-2 space-y-4">
+              <TabsContent value="picker" className="p-4 pt-2 space-y-4 w-full">
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
                     <Label
@@ -338,7 +337,7 @@ export function DateInput({
                 </div>
 
                 <Button
-                  className="w-full"
+                  className="w-full mt-4"
                   onClick={() => setOpen(false)}
                   disabled={
                     !selectedYear || !selectedMonth || !selectedDay || yearError

@@ -10,7 +10,6 @@ const accessTokenCookieConfig = {
 };
 
 const refreshTokenCookieConfig = {
-  maxAge: 3600 * 24,
   httpOnly: true,
   secure: true,
 };
