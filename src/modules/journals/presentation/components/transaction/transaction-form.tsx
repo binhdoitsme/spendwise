@@ -30,6 +30,7 @@ import { Plus } from "lucide-react";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { transactionFormSchema, TransactionFormSchema } from "../forms";
+import { Colorized } from "../tag/tag-colors";
 import { Tags } from "../tag/tag-item";
 import { transactionLabels } from "./labels";
 
@@ -44,7 +45,7 @@ export interface TransactionFormProps extends Localizable {
   isReadonly?: boolean;
   accounts: Record<string, AccountSelectProps[]>;
   collaborators: JournalUserBasicDto[];
-  tags: TagDto[];
+  tags: (TagDto & Colorized)[];
   onSubmit: (data: TransactionFormSchema) => void | Promise<void>;
   onUnknownTag?: (tag: string) => Promise<void>;
   onNoAccount?: () => void | Promise<void>;
@@ -276,7 +277,11 @@ export function TransactionForm({
             <FormItem>
               <FormLabel>{labels.tags}</FormLabel>
               <div className="pt-1 pb-4">
-                <Tags tags={tags} />
+                <Tags
+                  tags={transaction!.tags.map(
+                    (tagId) => tags.find(({ id }) => id === tagId)!
+                  )}
+                />
               </div>
             </FormItem>
           ) : (

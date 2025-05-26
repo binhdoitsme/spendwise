@@ -19,6 +19,7 @@ import {
 } from "@/modules/journals/application/dto/dtos.types";
 import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
 import { TransactionFormSchema } from "@/modules/journals/presentation/components/forms";
+import { tagColors } from "@/modules/journals/presentation/components/tag/tag-colors";
 import {
   deleteTransaction,
   duplicateTransaction,
@@ -68,6 +69,11 @@ export function TransactionTab({
   const { isLoading } = useLoader();
   const { language } = useI18n();
   const labels = journalDetailsPageLabels[language];
+
+  const colorizedTags = journal.tags.map((tag, index) => ({
+    ...tag,
+    color: tagColors[index],
+  }));
 
   const handleCreateTransaction = async (data: TransactionFormSchema) => {
     try {
@@ -133,7 +139,7 @@ export function TransactionTab({
         <TransactionForm
           language={language}
           accounts={selectableAccounts}
-          tags={journal.tags}
+          tags={colorizedTags}
           collaborators={journal.collaborators.map(({ user }) => user)}
           onSubmit={(data) => handleCreateTransaction(data)}
           onNoAccount={() => {
@@ -160,7 +166,7 @@ export function TransactionTab({
           transaction={transaction}
           isReadonly
           accounts={selectableAccounts}
-          tags={journal.tags}
+          tags={colorizedTags}
           collaborators={journal.collaborators.map(({ user }) => user)}
           onSubmit={handleCreateTransaction}
           onNoAccount={() => {
@@ -186,7 +192,7 @@ export function TransactionTab({
           language={language}
           transaction={transaction}
           accounts={selectableAccounts}
-          tags={journal.tags}
+          tags={colorizedTags}
           collaborators={journal.collaborators.map(({ user }) => user)}
           onSubmit={handleEditTransaction}
           onNoAccount={() => {
@@ -212,7 +218,7 @@ export function TransactionTab({
           language={language}
           transaction={{ ...transaction, id: undefined }}
           accounts={selectableAccounts}
-          tags={journal.tags}
+          tags={colorizedTags}
           collaborators={journal.collaborators.map(({ user }) => user)}
           onSubmit={handleCreateTransaction}
           onNoAccount={() => {
@@ -393,7 +399,7 @@ export function TransactionTab({
                             ...transaction,
                             detailedTags: transaction.tags.map(
                               (tag) =>
-                                journal.tags.find(({ id }) => id === tag)!
+                                colorizedTags.find(({ id }) => id === tag)!
                             ),
                             detailedPaidBy: collaborators[transaction.paidBy],
                             detailedAccount: accounts[transaction.accountId],

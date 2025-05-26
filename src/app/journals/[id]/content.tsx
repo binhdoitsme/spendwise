@@ -11,6 +11,7 @@ import {
 } from "@/modules/journals/application/dto/dtos.types";
 import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
 import { Collaborators } from "@/modules/journals/presentation/components/collaborator-avatars";
+import { tagColors } from "@/modules/journals/presentation/components/tag/tag-colors";
 import { Tags } from "@/modules/journals/presentation/components/tag/tag-item";
 import { FilterSchema } from "@/modules/journals/presentation/components/transaction/transaction-filters";
 import { AccountSummary } from "@/modules/reports/application/dto/dtos.types";
@@ -91,6 +92,10 @@ export function FinanceJournalPageContent(
     authContext.user?.email,
     labels.you
   );
+  const colorizedTags = journal.tags.map((tag, index) => ({
+    ...tag,
+    color: tagColors[index],
+  }));
 
   const handleRefreshJournal = async () => {
     const dateRange = currentFilters ? toDateRange(currentFilters) : undefined;
@@ -166,7 +171,7 @@ export function FinanceJournalPageContent(
             }))}
           />
         </div>
-        <Tags tags={journal.tags} />
+        <Tags tags={colorizedTags} />
       </div>
 
       {/* Tabs */}

@@ -12,10 +12,11 @@ import {
   TransactionCommand,
   TransactionCommands,
 } from "./transaction-commands";
+import { Colorized } from "../tag/tag-colors";
 
 export interface TransactionItemProps {
   transaction: TransactionDetailedDto & {
-    detailedTags: TagDto[];
+    detailedTags: (TagDto & Colorized)[];
     detailedPaidBy: JournalUserBasicDto;
     detailedAccount: JournalAccountBasicDto;
   };

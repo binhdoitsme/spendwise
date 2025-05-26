@@ -1,12 +1,21 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { TagDto } from "@/modules/journals/application/dto/dtos.types";
 import { Plus, Tag as TagIcon } from "lucide-react";
 import { MouseEventHandler } from "react";
+import { Colorized } from "./tag-colors";
 
-export function TagItem({ tag }: { tag: TagDto }) {
+export function TagItem({ tag }: { tag: TagDto & Colorized }) {
   return (
-    <Badge variant="outline" className="cursor-default">
+    <Badge
+      variant="outline"
+      className={cn(
+        "cursor-default",
+        "border-gray-50",
+        ...Object.entries(tag.color).map(([key, value]) => `${key}-${value}`)
+      )}
+    >
       {tag.name}
     </Badge>
   );
@@ -30,7 +39,7 @@ export function Tags({
   handleManageTags,
   handleAddTag,
 }: {
-  tags: TagDto[];
+  tags: (TagDto & Colorized)[];
   maxVisibleTags?: number;
   handleManageTags?: MouseEventHandler<HTMLSpanElement>;
   handleAddTag?: (tag: string) => void;
