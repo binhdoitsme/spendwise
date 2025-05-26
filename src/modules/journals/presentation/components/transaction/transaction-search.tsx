@@ -6,11 +6,13 @@ import { useRef } from "react";
 import { transactionLabels } from "./labels";
 
 interface TransactionSearchProps extends Localizable {
+  initValue?: string;
   handleSearch: (query: string) => Promise<void>;
 }
 
 export function TransactionSearch({
   handleSearch,
+  initValue,
   language,
 }: TransactionSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -36,6 +38,7 @@ export function TransactionSearch({
       <Input
         placeholder={labels.searchPlaceholder}
         ref={inputRef}
+        defaultValue={initValue}
         onChange={handleDebouncedChange()}
       />
       <Button

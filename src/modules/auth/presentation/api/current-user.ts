@@ -2,7 +2,10 @@ import { appConfig } from "@/config/appConfig";
 import { UserPayload } from "../../application/dto/dtos.types";
 
 export async function getCurrentUserId(headerStore: Headers) {
-  if (!headerStore.has(appConfig.userIdHeader)) {
+  if (
+    !headerStore.has(appConfig.userIdHeader) ||
+    !headerStore.get(appConfig.userIdHeader)
+  ) {
     return undefined;
   } else {
     const { userId } = JSON.parse(

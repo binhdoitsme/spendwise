@@ -79,7 +79,9 @@ export class DrizzleTransactionRepository implements TransactionRepository {
       const orderBy = options.orderDesc ? desc : asc;
       const orderKey =
         options.orderBy as keyof typeof transactions.$inferSelect;
-      query.orderBy(orderBy(transactions[orderKey]));
+      query.orderBy(orderBy(transactions[orderKey]), desc(transactions.id));
+    } else {
+      query.orderBy(desc(transactions.id));
     }
     const schemas = await query;
     return schemas.map(mapTransactionToDomain);

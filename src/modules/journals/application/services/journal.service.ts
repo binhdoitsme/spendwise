@@ -237,7 +237,7 @@ export class JournalServices {
     const transaction = TransactionFactory.createTransaction(journal, {
       title: data.title,
       amount: data.amount,
-      date: DateTime.fromISO(data.date),
+      date: DateTime.fromISO(data.date, { zone: "utc" }),
       account: new AccountId(data.account),
       type: data.type as TransactionType,
       paidBy: new UserId(data.paidBy),
@@ -359,9 +359,6 @@ export class JournalServices {
     );
     if (!transaction) {
       throw { code: 404, message: "Transaction not found" };
-    }
-    if (transaction.paidBy.value !== userId) {
-      throw { code: 403, message: "You are not the owner of this journal" };
     }
     if (removeRelated) {
       for (const relatedTransaction of transaction.relatedTransactions) {

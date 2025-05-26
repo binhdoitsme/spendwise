@@ -21,6 +21,7 @@ import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
 import { TransactionFormSchema } from "@/modules/journals/presentation/components/forms";
 import {
   deleteTransaction,
+  duplicateTransaction,
   editTransaction,
   viewTransaction,
 } from "@/modules/journals/presentation/components/transaction/transaction-commands";
@@ -36,7 +37,6 @@ import { TransactionItem } from "@/modules/journals/presentation/components/tran
 import { TransactionSearch } from "@/modules/journals/presentation/components/transaction/transaction-search";
 import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
 import { PlusIcon } from "lucide-react";
-import { DateTime } from "luxon";
 import { AnimatePresence, motion } from "motion/react";
 import { ReactNode, useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -45,89 +45,29 @@ import { journalDetailsPageLabels } from "./labels";
 export interface TransactionTabProps {
   journal: JournalDetailedDto;
   api: JournalApi;
+  currentFilters?: Partial<FilterSchema> & { query?: string };
   handleNoAccount: () => void;
   handleRefreshJournal: () => void | Promise<void>;
-  handleRefreshTransactionList: (
-    transactions: TransactionDetailedDto[]
-  ) => void | Promise<void>;
+  handleQuickFilters: (filters: FilterSchema) => Promise<void>;
+  handleSearch: (query: string) => Promise<void>;
 }
-
-const toDateRange = (filters: Partial<FilterSchema>) => {
-  if (!filters.filterByDate) {
-    return undefined;
-  }
-  if (filters.datePreset === "custom") {
-    return {
-      start: filters.startDate!.toISOString().split("T")[0],
-      end: filters.endDate!.toISOString().split("T")[0],
-    };
-  }
-  if (filters.datePreset === "current-month") {
-    const monthStart = DateTime.utc().startOf("month");
-    return {
-      start: monthStart.toISODate(),
-      end: monthStart.plus({ months: 1 }).toISODate(),
-    };
-  }
-  if (filters.datePreset === "last-month") {
-    const lastMonthStart = DateTime.utc().startOf("month").minus({ months: 1 });
-    return {
-      start: lastMonthStart.toISODate(),
-      end: lastMonthStart.plus({ months: 1 }).toISODate(),
-    };
-  }
-  if (filters.datePreset === "recent-2-months") {
-    const lastMonthStart = DateTime.utc().startOf("month").minus({ months: 1 });
-    return {
-      start: lastMonthStart.toISODate(),
-      end: lastMonthStart.plus({ months: 2 }).toISODate(),
-    };
-  }
-};
 
 export function TransactionTab({
   journal,
   api,
+  currentFilters,
   handleNoAccount,
   handleRefreshJournal,
-  handleRefreshTransactionList,
+  handleQuickFilters,
+  handleSearch,
 }: TransactionTabProps) {
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState<ReactNode | null>(null);
-  const [currentFilters, setFilters] = useState<
-    Partial<FilterSchema> & { query?: string }
-  >();
 
   const authContext = useAuthContext();
-  const { loadingStart, loadingEnd, isLoading } = useLoader();
+  const { isLoading } = useLoader();
   const { language } = useI18n();
   const labels = journalDetailsPageLabels[language];
-
-  const handleQuickFilters = async (filters: FilterSchema) => {
-    loadingStart();
-    const dateRange = toDateRange(filters);
-    const transactions = await api.listTransactions(journal.id, {
-      creditOnly: filters.showCredit,
-      dateRange: dateRange,
-      query: currentFilters?.query,
-    });
-    await handleRefreshTransactionList(transactions);
-    setFilters({ ...currentFilters, ...filters });
-    loadingEnd();
-  };
-
-  const handleSearch = async (query: string) => {
-    loadingStart();
-    const dateRange = currentFilters ? toDateRange(currentFilters) : undefined;
-    const transactions = await api.listTransactions(journal.id, {
-      creditOnly: currentFilters?.showCredit,
-      dateRange: dateRange,
-      query,
-    });
-    await handleRefreshTransactionList(transactions);
-    setFilters({ ...currentFilters, query });
-    loadingEnd();
-  };
 
   const handleCreateTransaction = async (data: TransactionFormSchema) => {
     try {
@@ -137,9 +77,10 @@ export function TransactionTab({
       });
       await handleRefreshJournal();
       setOpen(false);
+      toast(labels.createTransactionSuccess);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to create transaction");
+      toast.error(labels.createTransactionFailed(error));
     }
   };
 
@@ -259,6 +200,32 @@ export function TransactionTab({
     setOpen(true);
   };
 
+  const showDuplicateTransactionDialog = async (
+    transaction: TransactionDetailedDto
+  ) => {
+    setContent(
+      <>
+        <DialogHeader>
+          <DialogTitle>{labels.duplicateTransaction}</DialogTitle>
+        </DialogHeader>
+        <TransactionForm
+          language={language}
+          transaction={{ ...transaction, id: undefined }}
+          accounts={selectableAccounts}
+          tags={journal.tags}
+          collaborators={journal.collaborators.map(({ user }) => user)}
+          onSubmit={handleCreateTransaction}
+          onNoAccount={() => {
+            setOpen(false);
+            setTimeout(() => handleNoAccount?.());
+          }}
+          onUnknownTag={handleAddTag}
+        />
+      </>
+    );
+    setOpen(true);
+  };
+
   const showDeleteTransactionDialog = async (
     transaction: TransactionDetailedDto
   ) => {
@@ -322,6 +289,7 @@ export function TransactionTab({
   const transactionCommands = [
     viewTransaction(language)(showViewTransactionDialog),
     editTransaction(language)(showEditTransactionDialog),
+    duplicateTransaction(language)(showDuplicateTransactionDialog),
     deleteTransaction(language)(showDeleteTransactionDialog),
   ];
 
@@ -358,9 +326,14 @@ export function TransactionTab({
     <>
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
         <div className="flex flex-1 gap-2 w-full md:max-w-md">
-          <TransactionSearch language={language} handleSearch={handleSearch} />
+          <TransactionSearch
+            language={language}
+            handleSearch={handleSearch}
+            initValue={currentFilters?.query}
+          />
           <TransactionQuickFilters
             language={language}
+            initValues={currentFilters}
             handleFilter={handleQuickFilters}
           />
         </div>

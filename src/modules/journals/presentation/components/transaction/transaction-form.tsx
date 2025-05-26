@@ -39,7 +39,8 @@ export interface AccountSelectProps {
 }
 
 export interface TransactionFormProps extends Localizable {
-  transaction?: TransactionDetailedDto;
+  transaction?: Omit<TransactionDetailedDto, "id"> &
+    Partial<Pick<TransactionDetailedDto, "id">>;
   isReadonly?: boolean;
   accounts: Record<string, AccountSelectProps[]>;
   collaborators: JournalUserBasicDto[];

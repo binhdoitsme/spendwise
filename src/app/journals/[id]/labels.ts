@@ -31,6 +31,9 @@ export interface JournalDetailsPageLabels {
   confirmDelete: string;
   confirmDeletePrompt: string;
   confirmDeleteYes: string;
+  duplicateTransaction: string;
+  createTransactionSuccess: string;
+  createTransactionFailed: (error: unknown) => string;
 
   summary: string;
   paymentSummary: string;
@@ -72,6 +75,10 @@ export const journalDetailsPageLabels: Record<
     confirmDelete: "Confirm delete transaction",
     confirmDeletePrompt: "Are you sure you want to delete this transaction?",
     confirmDeleteYes: "Yes, delete transaction",
+    duplicateTransaction: "Duplicate Transaction",
+    createTransactionSuccess: "Successfully created transaction!",
+    createTransactionFailed: (error) =>
+      `Failed to create transaction: ${error}`,
     summary: "Summary",
     paymentSummary: "Payment Summary",
     upcomingDues: "Upcoming Dues",
@@ -107,6 +114,9 @@ export const journalDetailsPageLabels: Record<
     confirmDelete: "Xác nhận xóa giao dịch",
     confirmDeletePrompt: "Bạn có chắc chắn muốn xóa giao dịch này không?",
     confirmDeleteYes: "Có, xóa giao dịch",
+    duplicateTransaction: "Tạo bản sao giao dịch",
+    createTransactionSuccess: "Tạo giao dịch thành công!",
+    createTransactionFailed: (error) => `Lỗi khi tạo giao dịch: ${error}`,
     summary: "Tổng quan",
     paymentSummary: "Tổng quan thanh toán",
     upcomingDues: "Các khoản đến hạn",

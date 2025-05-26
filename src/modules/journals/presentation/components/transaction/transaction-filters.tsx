@@ -49,21 +49,29 @@ const filterSchema = z
 export type FilterSchema = z.infer<typeof filterSchema>;
 
 interface TransactionQuickFiltersProps extends Localizable {
+  initValues?: Partial<FilterSchema>;
   handleFilter: (data: FilterSchema) => Promise<void>;
 }
 
 export function TransactionQuickFilters({
   language,
+  initValues,
   handleFilter,
 }: TransactionQuickFiltersProps) {
   const labels = transactionLabels[language];
 
   const form = useForm<FilterSchema>({
     resolver: zodResolver(filterSchema),
-    defaultValues: {
-      showCredit: false,
-      filterByDate: false,
-    },
+    defaultValues: !!initValues
+      ? {
+          ...initValues,
+          showCredit: initValues?.showCredit ?? false,
+          filterByDate: initValues?.filterByDate ?? false,
+        }
+      : {
+          showCredit: false,
+          filterByDate: false,
+        },
   });
   const filterByDate = form.watch("filterByDate");
   const quickFilterCount =
