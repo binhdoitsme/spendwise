@@ -7,12 +7,13 @@ import {
   TransactionDetailedDto,
 } from "@/modules/journals/application/dto/dtos.types";
 import { CreditCard, Wallet } from "lucide-react";
+import { Colorized } from "../tag/tag-colors";
 import { Tags } from "../tag/tag-item";
 import {
   TransactionCommand,
   TransactionCommands,
 } from "./transaction-commands";
-import { Colorized } from "../tag/tag-colors";
+import { cn } from "@/lib/utils";
 
 export interface TransactionItemProps {
   transaction: TransactionDetailedDto & {
@@ -22,13 +23,15 @@ export interface TransactionItemProps {
   };
   formatter: Intl.NumberFormat;
   commands?: TransactionCommand[];
-  onClick?: () => void;
+  onTitleClick?: () => void | Promise<void>;
+  onAccountClick?: () => void | Promise<void>;
 }
 
 export function TransactionItem({
   transaction,
   formatter,
-  onClick,
+  onTitleClick,
+  onAccountClick,
   commands = [],
 }: TransactionItemProps) {
   const {
@@ -47,8 +50,11 @@ export function TransactionItem({
     <div className="grid grid-cols-9 items-start justify-between">
       <div className="col-span-3 flex flex-col gap-1">
         <h4
-          className="text-md font-medium leading-none cursor-pointer"
-          onClick={onClick}
+          className={cn(
+            "text-md font-medium leading-none",
+            "cursor-pointer hover:text-muted-foreground transition-colors duration-150"
+          )}
+          onClick={onTitleClick}
         >
           {title}
         </h4>
@@ -56,7 +62,13 @@ export function TransactionItem({
           {firstName} {lastName}
         </p>
       </div>
-      <div className="col-span-2 flex items-center gap-2 text-sm">
+      <div
+        className={cn(
+          "col-span-2 flex items-center gap-2 text-sm",
+          "cursor-pointer hover:text-muted-foreground transition-colors duration-150"
+        )}
+        onClick={onAccountClick}
+      >
         {detailedAccount.type.toLowerCase() === "cash" && <Wallet size="20" />}
         {["credit", "debit"].includes(detailedAccount.type.toLowerCase()) && (
           <CreditCard size="20" />

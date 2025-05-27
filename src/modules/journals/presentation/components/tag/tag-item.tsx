@@ -13,7 +13,7 @@ export function TagItem({ tag }: { tag: TagDto & Colorized }) {
       className={cn(
         "cursor-default",
         "border-gray-50",
-        ...Object.entries(tag.color).map(([key, value]) => `${key}-${value}`)
+        ...Object.values(tag.color)
       )}
     >
       {tag.name}

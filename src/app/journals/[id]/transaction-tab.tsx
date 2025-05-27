@@ -2,12 +2,7 @@
 import { useLoader } from "@/app/loader.context";
 import { useI18n } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthContext } from "@/modules/auth/presentation/components/auth-context";
@@ -30,22 +25,26 @@ import {
   FilterSchema,
   TransactionQuickFilters,
 } from "@/modules/journals/presentation/components/transaction/transaction-filters";
-import {
-  AccountSelectProps,
-  TransactionForm,
-} from "@/modules/journals/presentation/components/transaction/transaction-form";
+import { AccountSelectProps } from "@/modules/journals/presentation/components/transaction/transaction-form";
 import { TransactionItem } from "@/modules/journals/presentation/components/transaction/transaction-item";
 import { TransactionSearch } from "@/modules/journals/presentation/components/transaction/transaction-search";
+import { ReportsApi } from "@/modules/reports/presentation/contracts/reports.api";
 import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
 import { PlusIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { ReactNode, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { journalDetailsPageLabels } from "./labels";
+import {
+  TransactionDialogContent,
+  TransactionDialogType,
+} from "./transaction-dialogs";
+import { AccountSummary } from "@/modules/reports/application/dto/dtos.types";
 
 export interface TransactionTabProps {
   journal: JournalDetailedDto;
-  api: JournalApi;
+  journalApi: JournalApi;
+  reportsApi: ReportsApi;
   currentFilters?: Partial<FilterSchema> & { query?: string };
   handleNoAccount: () => void;
   handleRefreshJournal: () => void | Promise<void>;
@@ -55,7 +54,8 @@ export interface TransactionTabProps {
 
 export function TransactionTab({
   journal,
-  api,
+  journalApi,
+  reportsApi,
   currentFilters,
   handleNoAccount,
   handleRefreshJournal,
@@ -63,7 +63,13 @@ export function TransactionTab({
   handleSearch,
 }: TransactionTabProps) {
   const [open, setOpen] = useState(false);
-  const [content, setContent] = useState<ReactNode | null>(null);
+  const [dialogType, setDialogType] = useState<TransactionDialogType | null>(
+    null
+  );
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<TransactionDetailedDto>();
+  const [currentAccountReports, setCurrentAccountReports] =
+    useState<AccountSummary>();
 
   const authContext = useAuthContext();
   const { isLoading } = useLoader();
@@ -77,7 +83,7 @@ export function TransactionTab({
 
   const handleCreateTransaction = async (data: TransactionFormSchema) => {
     try {
-      await api.createTransaction(journal.id, {
+      await journalApi.createTransaction(journal.id, {
         ...data,
         date: data.date.toISOString(),
       });
@@ -94,7 +100,7 @@ export function TransactionTab({
     transaction: TransactionDetailedDto
   ) => {
     try {
-      await api.deleteTransaction(journal.id, transaction.id!);
+      await journalApi.deleteTransaction(journal.id, transaction.id!);
       await handleRefreshJournal();
       toast("Successfully deleted transaction");
       setOpen(false);
@@ -106,7 +112,7 @@ export function TransactionTab({
 
   const handleAddTag = async (tag: string) => {
     try {
-      await api.addTags(journal.id, [tag]);
+      await journalApi.addTags(journal.id, [tag]);
       await handleRefreshJournal();
       toast("Successfully added tags");
     } catch (error) {
@@ -117,7 +123,7 @@ export function TransactionTab({
 
   const handleEditTransaction = async (data: TransactionFormSchema) => {
     try {
-      await api.editTransaction(journal.id, data.id!, {
+      await journalApi.editTransaction(journal.id, data.id!, {
         ...data,
         date: data.date.toISOString(),
       });
@@ -130,131 +136,47 @@ export function TransactionTab({
   };
 
   const showNewTransactionDialog = () => {
-    setContent(
-      <>
-        <DialogHeader>
-          <DialogTitle>{labels.newTransaction}</DialogTitle>
-        </DialogHeader>
-        <Separator />
-        <TransactionForm
-          language={language}
-          accounts={selectableAccounts}
-          tags={colorizedTags}
-          collaborators={journal.collaborators.map(({ user }) => user)}
-          onSubmit={(data) => handleCreateTransaction(data)}
-          onNoAccount={() => {
-            setOpen(false);
-            setTimeout(() => handleNoAccount?.());
-          }}
-          onUnknownTag={handleAddTag}
-        />
-      </>
-    );
+    setDialogType("new");
     setOpen(true);
   };
 
   const showViewTransactionDialog = async (
     transaction: TransactionDetailedDto
   ) => {
-    setContent(
-      <>
-        <DialogHeader>
-          <DialogTitle>{labels.transactionDetails}</DialogTitle>
-        </DialogHeader>
-        <TransactionForm
-          language={language}
-          transaction={transaction}
-          isReadonly
-          accounts={selectableAccounts}
-          tags={colorizedTags}
-          collaborators={journal.collaborators.map(({ user }) => user)}
-          onSubmit={handleCreateTransaction}
-          onNoAccount={() => {
-            setOpen(false);
-            setTimeout(() => handleNoAccount?.());
-          }}
-          onUnknownTag={handleAddTag}
-        />
-      </>
-    );
+    setSelectedTransaction(transaction);
+    setDialogType("view");
     setOpen(true);
   };
 
   const showEditTransactionDialog = async (
     transaction: TransactionDetailedDto
   ) => {
-    setContent(
-      <>
-        <DialogHeader>
-          <DialogTitle>{labels.editTransaction}</DialogTitle>
-        </DialogHeader>
-        <TransactionForm
-          language={language}
-          transaction={transaction}
-          accounts={selectableAccounts}
-          tags={colorizedTags}
-          collaborators={journal.collaborators.map(({ user }) => user)}
-          onSubmit={handleEditTransaction}
-          onNoAccount={() => {
-            setOpen(false);
-            setTimeout(() => handleNoAccount?.());
-          }}
-          onUnknownTag={handleAddTag}
-        />
-      </>
-    );
+    setSelectedTransaction(transaction);
+    setDialogType("edit");
     setOpen(true);
   };
 
   const showDuplicateTransactionDialog = async (
     transaction: TransactionDetailedDto
   ) => {
-    setContent(
-      <>
-        <DialogHeader>
-          <DialogTitle>{labels.duplicateTransaction}</DialogTitle>
-        </DialogHeader>
-        <TransactionForm
-          language={language}
-          transaction={{ ...transaction, id: undefined }}
-          accounts={selectableAccounts}
-          tags={colorizedTags}
-          collaborators={journal.collaborators.map(({ user }) => user)}
-          onSubmit={handleCreateTransaction}
-          onNoAccount={() => {
-            setOpen(false);
-            setTimeout(() => handleNoAccount?.());
-          }}
-          onUnknownTag={handleAddTag}
-        />
-      </>
-    );
+    setSelectedTransaction(transaction);
+    setDialogType("duplicate");
     setOpen(true);
   };
 
   const showDeleteTransactionDialog = async (
     transaction: TransactionDetailedDto
   ) => {
-    setContent(
-      <>
-        <DialogHeader>
-          <DialogTitle>{labels.confirmDelete}</DialogTitle>
-        </DialogHeader>
-        <p>{labels.confirmDeletePrompt}</p>
-        <div className="space-x-2">
-          <Button
-            variant="destructive"
-            onClick={async () => await handleDeleteTransaction(transaction)}
-          >
-            {labels.confirmDeleteYes}
-          </Button>
-          <Button variant="secondary" onClick={() => setOpen(false)}>
-            {labels.cancel}
-          </Button>
-        </div>
-      </>
-    );
+    setSelectedTransaction(transaction);
+    setDialogType("delete");
     setOpen(true);
+  };
+
+  const showAccountReportsDialog = async (accountId: string) => {
+    setDialogType("accountReport");
+    setOpen(true);
+    const reports = await reportsApi.getPaymentSummary({ accountId });
+    setCurrentAccountReports(reports);
   };
 
   const selectableAccounts = journal.accounts
@@ -353,7 +275,34 @@ export function TransactionTab({
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg overflow-x-visible">
-          {content}
+          {dialogType && (
+            <TransactionDialogContent
+              dialogType={dialogType}
+              labels={labels}
+              language={language}
+              selectableAccounts={selectableAccounts}
+              colorizedTags={colorizedTags}
+              collaborators={journal.collaborators.map(({ user }) => user)}
+              transaction={selectedTransaction}
+              accountReports={currentAccountReports}
+              onSubmit={
+                dialogType === "edit"
+                  ? handleEditTransaction
+                  : handleCreateTransaction
+              }
+              onDelete={() =>
+                selectedTransaction
+                  ? handleDeleteTransaction(selectedTransaction)
+                  : Promise.resolve()
+              }
+              onCancel={() => setOpen(false)}
+              onNoAccount={() => {
+                setOpen(false);
+                setTimeout(() => handleNoAccount?.());
+              }}
+              onUnknownTag={handleAddTag}
+            />
+          )}
         </DialogContent>
       </Dialog>
       <div>
@@ -393,7 +342,12 @@ export function TransactionTab({
                     <div className="space-y-4 mt-2">
                       {records.map((transaction) => (
                         <TransactionItem
-                          onClick={() => showViewTransactionDialog(transaction)}
+                          onTitleClick={() =>
+                            showViewTransactionDialog(transaction)
+                          }
+                          onAccountClick={() =>
+                            showAccountReportsDialog(transaction.accountId)
+                          }
                           key={transaction.id}
                           transaction={{
                             ...transaction,

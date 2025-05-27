@@ -40,6 +40,10 @@ export interface JournalDetailsPageLabels {
   upcomingDues: string;
   usageThisMonth: (month: string) => string;
   noCreditOrLoanAccounts: string;
+
+  accountSummary: string;
+  dueSoon: string;
+  history: string;
 }
 
 export const journalDetailsPageLabels: Record<
@@ -84,6 +88,9 @@ export const journalDetailsPageLabels: Record<
     upcomingDues: "Upcoming Dues",
     usageThisMonth: (month) => `Usage This Month (${month})`,
     noCreditOrLoanAccounts: "No credit or loan accounts to display.",
+    accountSummary: "Account Summary",
+    dueSoon: "Due Soon",
+    history: "History",
   },
   vi: {
     title: "Sổ chi tiêu",
@@ -123,5 +130,8 @@ export const journalDetailsPageLabels: Record<
     usageThisMonth: (month) => `Đã tiêu tháng này (${month})`,
     noCreditOrLoanAccounts:
       "Không có tài khoản tín dụng hoặc vay nào để hiển thị.",
+    accountSummary: "Tổng quan tài khoản",
+    dueSoon: "Sắp đến hạn",
+    history: "Lịch sử tiêu dùng",
   },
 };

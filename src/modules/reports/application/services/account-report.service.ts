@@ -8,7 +8,7 @@ import { JournalResolver } from "../contracts/journal-resolver";
 import {
   AccountSummary,
   AccountSummaryQueryInput,
-  MonthlyCreditSpend,
+  MonthlySpend,
   PaymentDue,
 } from "../dto/dtos.types";
 
@@ -32,7 +32,6 @@ export class AccountReportsServices {
     if (!accountIds) {
       throw reportErrors.accountIdNotProvided;
     }
-    const thisMonth = DateTime.utc().startOf("month");
     const months = specs.monthRange
       ? Interval.fromDateTimes(
           DateTime.fromISO(specs.monthRange.start).startOf("month"),
@@ -43,12 +42,12 @@ export class AccountReportsServices {
             year: interval.start!.year,
             month: interval.start!.month,
           }))
-      : [{ year: thisMonth.year, month: thisMonth.month }];
+      : undefined;
     const monthlyReports =
       await this.accountReportRepository.getMonthlyAccountReports({
         accountIds,
         months,
-        accountTypes: ["credit", "loan", "debit", "cash"],
+        accountTypes: specs.accountTypes ?? ["credit", "loan", "debit", "cash"],
       });
     const accounts = await this.accountResolver
       .resolveMany(accountIds)
@@ -58,22 +57,22 @@ export class AccountReportsServices {
           {} as Record<string, AccountBasic>
         )
       );
-    const monthlySpends: MonthlyCreditSpend[] = monthlyReports
-      .filter((report) => accounts[report.accountId.value].type === "credit")
-      .map((report) => ({
-        account: {
-          displayName: accounts[report.accountId.value].displayName,
-        },
-        month: report.month.toFormat("yyyy-MM"),
-        spentAmount: report.amount,
-        creditLimit: report.limit!,
-      }));
+    const monthlySpends: MonthlySpend[] = monthlyReports.map((report) => ({
+      account: {
+        displayName: accounts[report.accountId.value].displayName,
+        type: accounts[report.accountId.value].type,
+      },
+      month: report.month.toFormat("yyyy-MM"),
+      spentAmount: report.amount,
+      creditLimit: report.limit,
+    }));
 
     const upcomingDues: PaymentDue[] = monthlyReports
       .filter((report) => !!report.dueDate)
       .map((report) => ({
         account: {
           displayName: accounts[report.accountId.value].displayName,
+          type: accounts[report.accountId.value].type,
         },
         dueAmount: report.amount,
         dueDate: report.dueDate!.toISODate()!,
@@ -82,54 +81,6 @@ export class AccountReportsServices {
     return {
       monthlySpends,
       upcomingDues,
-      // monthlySpends: [
-      //   // {
-      //   //   account: { displayName: "BankA ****7890" },
-      //   //   month: "2025-05",
-      //   //   spentAmount: { amount: 8_000_000, currency: "VND" },
-      //   //   creditLimit: { amount: 20_000_000, currency: "VND" },
-      //   // },
-      //   // {
-      //   //   account: { displayName: "BankB ****7778" },
-      //   //   month: "2025-05",
-      //   //   spentAmount: { amount: 9_000_000, currency: "VND" },
-      //   //   creditLimit: { amount: 15_000_000, currency: "VND" },
-      //   // },
-      //   {
-      //     account: { displayName: "BankC ****1234" },
-      //     month: "2025-05",
-      //     spentAmount: { amount: 14_500_000, currency: "VND" },
-      //     creditLimit: { amount: 15_000_000, currency: "VND" },
-      //   },
-      //   {
-      //     account: { displayName: "BankD ****5678" },
-      //     month: "2025-05",
-      //     spentAmount: { amount: 2_000_000, currency: "VND" },
-      //     creditLimit: { amount: 10_000_000, currency: "VND" },
-      //   },
-      // ],
-      // upcomingDues: [
-      //   // {
-      //   //   account: { displayName: "BankA ****7890" },
-      //   //   dueDate: "2025-06-04",
-      //   //   dueAmount: { amount: 10_000_000, currency: "VND" },
-      //   // },
-      //   // {
-      //   //   account: { displayName: "BankB ****7778" },
-      //   //   dueDate: "2025-05-25",
-      //   //   dueAmount: { amount: 8_500_000, currency: "VND" },
-      //   // },
-      //   {
-      //     account: { displayName: "BankC ****1234" },
-      //     dueDate: "2025-05-23",
-      //     dueAmount: { amount: 5_000_000, currency: "VND" },
-      //   },
-      //   {
-      //     account: { displayName: "BankD ****5678" },
-      //     dueDate: "2025-06-30",
-      //     dueAmount: { amount: 12_000_000, currency: "VND" },
-      //   },
-      // ],
     };
   }
 }

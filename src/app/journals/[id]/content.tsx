@@ -99,10 +99,19 @@ export function FinanceJournalPageContent(
 
   const handleRefreshJournal = async () => {
     const dateRange = currentFilters ? toDateRange(currentFilters) : undefined;
+    const now = DateTime.now();
+    const thisMonth = {
+      start: now.startOf("month").toISODate(),
+      end: now.endOf("month").toISODate(),
+    };
     const [refreshedJournal, refreshedAccountSummary, refreshedTransactions] =
       await Promise.all([
         journalApi.getJournalById(props.journal.id),
-        reportsApi.getPaymentSummary({ journalId: props.journal.id }),
+        reportsApi.getPaymentSummary({
+          journalId: props.journal.id,
+          monthRange: thisMonth,
+          accountTypes: ["credit", "loan"],
+        }),
         journalApi.listTransactions(journal.id, {
           creditOnly: currentFilters?.showCredit,
           dateRange: dateRange,
@@ -216,8 +225,9 @@ export function FinanceJournalPageContent(
 
         <TabsContent value="transactions">
           <TransactionTab
-            api={journalApi}
             journal={journal}
+            journalApi={journalApi}
+            reportsApi={reportsApi}
             currentFilters={currentFilters}
             handleSearch={handleSearch}
             handleQuickFilters={handleQuickFilters}

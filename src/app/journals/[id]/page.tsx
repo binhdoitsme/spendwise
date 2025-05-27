@@ -1,9 +1,10 @@
 import { provideAccountServices } from "@/modules/accounts/account.module";
 import { getCurrentUserId } from "@/modules/auth/presentation/api/current-user";
 import { provideJournalServices } from "@/modules/journals/journal.module";
+import { provideAccountReportServices } from "@/modules/reports/reports.module";
+import { DateTime } from "luxon";
 import { headers } from "next/headers";
 import { FinanceJournalPageContent } from "./content";
-import { provideAccountReportServices } from "@/modules/reports/reports.module";
 
 export default async function FinanceJournalPage({
   params,
@@ -18,8 +19,15 @@ export default async function FinanceJournalPage({
   const userId = await getCurrentUserId(headerStore);
   const accounts = await accountService.getAccounts(userId!);
   const accountReportServices = provideAccountReportServices();
+  const now = DateTime.now();
+  const thisMonth = {
+    start: now.startOf("month").toISODate(),
+    end: now.endOf("month").toISODate(),
+  };
   const accountSummary = await accountReportServices.getMonthlyAccountSummary({
     journalId: id,
+    monthRange: thisMonth,
+    accountTypes: ["credit", "loan"],
   });
   return (
     <FinanceJournalPageContent
