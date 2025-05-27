@@ -1,4 +1,4 @@
-import { Email } from "@/modules/shared/domain/value-objects";
+import { UserId } from "@/modules/shared/domain/identifiers";
 
 export const journalCollaboratorPermissions = ["read", "write"] as const;
 export type JournalCollaboratorPermission =
@@ -11,7 +11,10 @@ export const journalPermissions = [
 export type JournalPermission = (typeof journalPermissions)[number];
 
 export class Collaborator {
-  constructor(readonly email: Email, private _permission: JournalPermission) {}
+  constructor(
+    readonly userId: UserId,
+    private _permission: JournalPermission
+  ) {}
 
   get permission() {
     return this._permission;

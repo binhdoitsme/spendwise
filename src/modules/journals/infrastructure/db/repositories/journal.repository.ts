@@ -1,11 +1,9 @@
 import { UserId } from "@/modules/shared/domain/identifiers";
-import { asc, desc, eq } from "drizzle-orm";
+import { ListingOptions } from "@/modules/shared/domain/specs";
+import { and, asc, desc, eq, inArray, notInArray, or } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Journal, JournalId } from "../../../domain/journal";
-import {
-  JournalRepository,
-  ListingOptions,
-} from "../../../domain/repositories";
+import { JournalRepository } from "../../../domain/repositories";
 import { RichJournal } from "../../../domain/rich-journal";
 import {
   mapJournalFromDomain,
@@ -76,14 +74,35 @@ export class DrizzleJournalRepository implements JournalRepository {
   }
 
   async findByUser(userId: UserId): Promise<Journal[]> {
+    const rows = await this.dbInstance
+      .selectDistinct({
+        journalId: journals.id,
+      })
+      .from(journals)
+      .leftJoin(collaborators, eq(journals.id, collaborators.journalId))
+      .where(
+        or(
+          eq(journals.ownerId, userId.value),
+          eq(collaborators.userId, userId.value)
+        )
+      );
+    const journalIds = [...new Set(rows.map((row) => row.journalId))];
+    if (!journalIds.length) {
+      return [];
+    }
+
     const schemas = await this.dbInstance.query.journals.findMany({
-      where: eq(journals.ownerId, userId.value),
+      where: or(
+        eq(journals.ownerId, userId.value),
+        inArray(journals.id, journalIds)
+      ),
       with: {
         accounts: true,
         collaborators: true,
         tags: true,
       },
     });
+
     return schemas.map((schema) => mapJournalToDomain(schema));
   }
 
@@ -102,14 +121,63 @@ export class DrizzleJournalRepository implements JournalRepository {
             isArchived: journalSchema.isArchived,
           },
         });
-      await Promise.all([
-        tx.insert(journalAccounts).values(accountSchemas).onConflictDoNothing(),
-        tx.insert(tags).values(tagSchemas).onConflictDoNothing(),
+      const promises = new Array<Promise<unknown>>();
+      if (accountSchemas.length) {
+        promises.push(
+          tx
+            .insert(journalAccounts)
+            .values(accountSchemas)
+            .onConflictDoNothing()
+        );
+      }
+      const accountIds = accountSchemas.map(({ accountId }) => accountId);
+      promises.push(
         tx
-          .insert(collaborators)
-          .values(collaboratorSchemas)
-          .onConflictDoNothing(),
-      ]);
+          .delete(journalAccounts)
+          .where(
+            and(
+              eq(journalAccounts.journalId, journal.id.value),
+              notInArray(journalAccounts.accountId, accountIds)
+            )
+          )
+      );
+      if (tagSchemas.length) {
+        promises.push(tx.insert(tags).values(tagSchemas).onConflictDoNothing());
+      }
+      const tagIds = tagSchemas
+        .map(({ id }) => id)
+        .filter(Boolean)
+        .map((id) => id!);
+      promises.push(
+        tx
+          .delete(tags)
+          .where(
+            and(
+              eq(tags.journalId, journal.id.value),
+              notInArray(tags.id, tagIds)
+            )
+          )
+      );
+      if (collaboratorSchemas.length) {
+        promises.push(
+          tx
+            .insert(collaborators)
+            .values(collaboratorSchemas)
+            .onConflictDoNothing()
+        );
+      }
+      const collaboratorIds = collaboratorSchemas.map(({ userId }) => userId);
+      promises.push(
+        tx
+          .delete(collaborators)
+          .where(
+            and(
+              eq(collaborators.journalId, journal.id.value),
+              notInArray(collaborators.userId, collaboratorIds)
+            )
+          )
+      );
+      await Promise.all(promises);
     });
   }
 }

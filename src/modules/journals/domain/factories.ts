@@ -11,7 +11,10 @@ export class TransactionFactory {
     if (journal.isArchived) {
       throw journalErrors.archivedJournal;
     }
-    if (!journal.hasCollaborator(props.paidBy)) {
+    if (
+      !journal.ownerId.equals(props.paidBy) &&
+      !journal.hasCollaborator(props.paidBy)
+    ) {
       throw formatError(journalErrors.journalNotAccessible, {
         user: props.paidBy.value,
       });

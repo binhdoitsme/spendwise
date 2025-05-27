@@ -21,12 +21,17 @@ export interface JournalBasicWithTransactionsDto extends JournalBasicDto {
   transactions: TransactionDetailedDto[];
 }
 
-export interface AccountBasicDto {
+export interface JournalAccountBasicDto {
   accountId: string;
   ownerId: string;
-  ownerEmail: string;
-  gracePeriodDays?: number;
-  createdAt: string;
+  displayName: string;
+  type: string;
+  owner: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }
 
 export interface TransactionDetailedDto {
@@ -35,20 +40,23 @@ export interface TransactionDetailedDto {
   amount: number;
   accountId: string;
   date: string;
+  paidBy: string;
   type: `${TransactionType}`;
   status: `${TransactionStatus}`;
   notes?: string;
   tags: string[];
 }
 
-export interface UserBasicDto {
+export interface JournalUserBasicDto {
+  id: string;
   email: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   avatarUrl?: string;
 }
 
 export interface CollaboratorBasicDto {
-  user: UserBasicDto;
+  user: JournalUserBasicDto;
   permission: string;
 }
 
@@ -61,12 +69,14 @@ export interface JournalDetailedDto {
   id: string;
   ownerId: string;
   ownerEmail: string;
+  ownerFirstName: string;
+  ownerLastName: string;
   title: string;
   currency: string;
   isArchived: boolean;
   createdAt: string;
   tags: TagDto[];
-  accounts: AccountBasicDto[];
+  accounts: JournalAccountBasicDto[];
   collaborators: CollaboratorBasicDto[];
   transactions: TransactionDetailedDto[];
 }
@@ -103,6 +113,5 @@ export interface TransactionCreateDto {
 export {
   mapJournalToJournalBasicDto,
   mapJournalToJournalBasicWithTransactionsDto,
-  mapRichJournalToJournalDetailedDto
+  mapRichJournalToJournalDetailedDto,
 } from "./mappers";
-

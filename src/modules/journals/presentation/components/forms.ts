@@ -1,6 +1,15 @@
+import { ISO_CURRENCIES } from "@/modules/shared/presentation/currencies";
 import { z } from "zod";
 
+export const journalFormSchema = z.object({
+  title: z.string().max(128).nonempty("Title is required"),
+  currency: z.enum(ISO_CURRENCIES),
+});
+
+export type JournalFormSchema = z.infer<typeof journalFormSchema>;
+
 export const transactionFormSchema = z.object({
+  id: z.string().optional(),
   title: z.string().nonempty("Name is required"),
   amount: z.number().min(0, "Amount must be positive"),
   date: z.date(),

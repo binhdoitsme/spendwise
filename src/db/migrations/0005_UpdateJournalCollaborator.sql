@@ -1,0 +1,1 @@
+ALTER TABLE "collaborators" RENAME COLUMN "email" TO "userId";

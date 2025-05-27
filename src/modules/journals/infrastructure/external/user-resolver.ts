@@ -1,17 +1,50 @@
+import { UserId } from "@/modules/shared/domain/identifiers";
 import { Email } from "@/modules/shared/domain/value-objects";
+import { UserRepository } from "@/modules/users/domain/repositories";
 import {
-  UserBasic,
-  UserResolver,
+  JournalUserBasic,
+  JournalUserResolver,
 } from "../../application/contracts/user-resolver";
 
-export class DrizzleUserResolver implements UserResolver {
-  // eslint-disable-next-line
-  async resolveOne(email: Email): Promise<UserBasic | undefined> {
-    throw "Not Implemented";
+export class DrizzleJournalUserResolver implements JournalUserResolver {
+  constructor(private readonly userRepository: UserRepository) {}
+  async resolveOne(userId: UserId): Promise<JournalUserBasic | undefined> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      return undefined;
+    }
+    return {
+      id: user.id,
+      email: user.email,
+      firstName: user.profile?.firstName ?? "",
+      lastName: user.profile?.lastName ?? "",
+      avatar: user.profile?.avatar
+        ? { url: user.profile.avatar.url.toString() }
+        : undefined,
+    };
   }
 
-  // eslint-disable-next-line
-  async resolveMany(emails: Email[]): Promise<UserBasic[]> {
-    throw "Not Implemented";
+  async resolveOneByEmail(email: Email): Promise<JournalUserBasic | undefined> {
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) {
+      return undefined;
+    }
+    return {
+      id: user.id,
+      email: user.email,
+      firstName: user.profile?.firstName ?? "",
+      lastName: user.profile?.lastName ?? "",
+      avatar: user.profile?.avatar
+        ? { url: user.profile.avatar.url.toString() }
+        : undefined,
+    };
+  }
+
+  async resolveMany(userIds: Set<UserId>): Promise<JournalUserBasic[]> {
+    return Promise.all(
+      Array.from(userIds).map((userId) => this.resolveOne(userId))
+    ).then((users) =>
+      users.filter((user) => !!user).map((user) => user as JournalUserBasic)
+    );
   }
 }

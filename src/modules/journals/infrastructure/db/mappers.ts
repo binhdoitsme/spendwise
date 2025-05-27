@@ -50,7 +50,7 @@ export const mapJournalToDomain = (schema: RichJournalSchema): Journal => {
     collaborators: schema.collaborators
       .map((collaborator) => mapCollaboratorToDomain(collaborator))
       .reduce<Map<string, Collaborator>>((current, next) => {
-        current.set(next.email.value, next);
+        current.set(next.userId.value, next);
         return current;
       }, new Map()),
     tags: schema.tags
@@ -80,13 +80,11 @@ export const mapJournalFromDomain = (
       journalId: journal.id.value,
       accountId: account.accountId.value,
       ownerId: account.ownerId.value,
-      ownerEmail: account.ownerEmail.value,
-      gracePeriodDays: account.gracePeriodDays ?? null,
       createdAt: account.createdAt.toJSDate(),
     })),
     Array.from(journal.collaborators.values()).map((collaborator) => ({
       journalId: journal.id.value,
-      email: collaborator.email.value,
+      userId: collaborator.userId.value,
       permission: collaborator.permission,
     })),
     Array.from(journal.tags.values()).map((tag) => ({
@@ -108,7 +106,7 @@ export const mapTransactionToDomain = (
     date: DateTime.fromJSDate(schema.date),
     account: new AccountId(schema.account),
     type: TransactionType[schema.type],
-    paidBy: Email.from(schema.paidBy),
+    paidBy: new UserId(schema.paidBy),
     tags: schema.tags ?? [],
     status: TransactionStatus[schema.status],
     notes: schema.notes ?? undefined,
@@ -131,7 +129,7 @@ export const mapTransactionFromDomain = (
     date: transaction.date.toJSDate(),
     account: transaction.account.value,
     type: transaction.type,
-    paidBy: transaction.paidBy.toString(),
+    paidBy: transaction.paidBy.value,
     tags: transaction.tags,
     status: transaction.status,
     notes: transaction.notes ?? null,
@@ -144,8 +142,6 @@ export const mapAccountToDomain = (schema: AccountSchema): JournalAccount => {
   return new JournalAccount(
     new AccountId(schema.accountId),
     new UserId(schema.ownerId),
-    Email.from(schema.ownerEmail),
-    schema.gracePeriodDays ?? undefined,
     DateTime.fromJSDate(schema.createdAt)
   );
 };
@@ -153,7 +149,7 @@ export const mapAccountToDomain = (schema: AccountSchema): JournalAccount => {
 export const mapCollaboratorToDomain = (
   schema: CollaboratorSchema
 ): Collaborator => {
-  return new Collaborator(Email.from(schema.email), schema.permission);
+  return new Collaborator(new UserId(schema.userId), schema.permission);
 };
 
 export const mapTagToDomain = (schema: TagSchema): Tag => {

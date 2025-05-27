@@ -1,132 +1,94 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import {
+  JournalAccountBasicDto,
+  JournalUserBasicDto,
   TagDto,
   TransactionDetailedDto,
 } from "@/modules/journals/application/dto/dtos.types";
-import {
-  Archive,
-  Copy,
-  Edit,
-  type LucideIcon,
-  MoreVertical,
-  Star,
-  Trash,
-} from "lucide-react";
+import { CreditCard, Wallet } from "lucide-react";
+import { Colorized } from "../tag/tag-colors";
 import { Tags } from "../tag/tag-item";
-
-// Define the command type for better type safety
-export type TransactionCommand = {
-  label: string;
-  icon?: LucideIcon;
-  onClick: () => void;
-  variant?: "default" | "destructive";
-  disabled?: boolean;
-  separator?: boolean;
-};
+import {
+  TransactionCommand,
+  TransactionCommands,
+} from "./transaction-commands";
+import { cn } from "@/lib/utils";
 
 export interface TransactionItemProps {
-  transaction: Omit<TransactionDetailedDto, "tags"> & { tags: TagDto[] };
+  transaction: TransactionDetailedDto & {
+    detailedTags: (TagDto & Colorized)[];
+    detailedPaidBy: JournalUserBasicDto;
+    detailedAccount: JournalAccountBasicDto;
+  };
   formatter: Intl.NumberFormat;
   commands?: TransactionCommand[];
+  onTitleClick?: () => void | Promise<void>;
+  onAccountClick?: () => void | Promise<void>;
 }
 
-const transactionCommands: TransactionCommand[] = [
-  {
-    label: "Edit",
-    icon: Edit,
-    onClick: () => console.log("Edit clicked"),
-  },
-  {
-    label: "Duplicate",
-    icon: Copy,
-    onClick: () => console.log("Duplicate clicked"),
-  },
-  {
-    label: "Star",
-    icon: Star,
-    onClick: () => console.log("Star clicked"),
-  },
-  {
-    label: "Archive",
-    icon: Archive,
-    onClick: () => console.log("Archive clicked"),
-    separator: true, // Adds a separator before this item
-  },
-  {
-    label: "Delete",
-    icon: Trash,
-    onClick: () => {
-      if (confirm("Are you sure you want to delete this record?")) {
-        console.log("Delete confirmed");
-      }
-    },
-    variant: "destructive", // Makes this item red
-  },
-];
-
 export function TransactionItem({
-  transaction: { accountId, amount: rawAmount, type, tags, title },
+  transaction,
   formatter,
-  commands = transactionCommands,
+  onTitleClick,
+  onAccountClick,
+  commands = [],
 }: TransactionItemProps) {
-  const account = accountId;
-  const amount = formatter.format(type !== "INCOME" ? -rawAmount : rawAmount);
+  const {
+    detailedPaidBy: { firstName, lastName },
+    detailedAccount,
+    amount,
+    type,
+    detailedTags,
+    title,
+  } = transaction;
+  const formattedAmount = formatter.format(
+    type !== "INCOME" ? -amount : amount
+  );
 
   return (
-    <div className="flex items-start justify-between">
-      <div className="flex flex-col gap-1">
-        <h4 className="text-md font-medium leading-none">{title}</h4>
-        <p className="text-sm text-muted-foreground">{account}</p>
-        <Tags tags={tags} />
-      </div>
-      <div className="flex flex-row justify-end gap-2 text-sm font-semibold min-w-[100px]">
-        <span
-          className={amount.startsWith("-") ? "text-red-500" : "text-green-600"}
+    <div className="grid grid-cols-9 items-start justify-between">
+      <div className="col-span-3 flex flex-col gap-1">
+        <h4
+          className={cn(
+            "text-md font-medium leading-none",
+            "cursor-pointer hover:text-muted-foreground transition-colors duration-150"
+          )}
+          onClick={onTitleClick}
         >
-          {amount}
+          {title}
+        </h4>
+        <p className="text-sm text-muted-foreground">
+          {firstName} {lastName}
+        </p>
+      </div>
+      <div
+        className={cn(
+          "col-span-2 flex items-center gap-2 text-sm",
+          "cursor-pointer hover:text-muted-foreground transition-colors duration-150"
+        )}
+        onClick={onAccountClick}
+      >
+        {detailedAccount.type.toLowerCase() === "cash" && <Wallet size="20" />}
+        {["credit", "debit"].includes(detailedAccount.type.toLowerCase()) && (
+          <CreditCard size="20" />
+        )}
+        {detailedAccount.displayName}
+      </div>
+      <div className="col-span-3 flex flex-col gap-1">
+        <Tags tags={detailedTags} />
+      </div>
+      <div className="col-span-1 flex flex-row justify-end gap-2 text-sm font-semibold min-w-[100px]">
+        <span
+          className={
+            formattedAmount.startsWith("-") ? "text-red-500" : "text-green-600"
+          }
+        >
+          {formattedAmount}
         </span>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-auto w-auto p-0">
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {commands.map((command, index) => (
-              <div key={index}>
-                {command.separator && index > 0 && <DropdownMenuSeparator />}
-                <DropdownMenuItem
-                  onClick={command.onClick}
-                  disabled={command.disabled}
-                  className={
-                    command.variant === "destructive" ? "text-red-600" : ""
-                  }
-                >
-                  {command.icon && (
-                    <command.icon
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        command.variant === "destructive" ? "text-red-600" : ""
-                      )}
-                    />
-                  )}
-                  {command.label}
-                </DropdownMenuItem>
-              </div>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {commands.length > 0 && (
+          <TransactionCommands commands={commands} transaction={transaction} />
+        )}
       </div>
     </div>
   );

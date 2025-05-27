@@ -4,13 +4,16 @@ import {
   IPasswordHasher,
   Password,
 } from "@/modules/shared/domain/value-objects";
+import { DateTime } from "luxon";
 import { userErrors } from "../../domain/errors";
+import { Gender } from "../../domain/profile";
 import { UserRepository } from "../../domain/repositories";
 import { User } from "../../domain/user";
 import {
   mapToUserBasicDto,
   mapToUserDetailedDto,
   UserCreateDto,
+  UserProfileDto,
 } from "../dto/dtos.types";
 
 export class UserServices {
@@ -50,5 +53,27 @@ export class UserServices {
       console.error(err);
       throw userErrors.unknownError;
     }
+  }
+
+  async updateUserProfile(
+    userId: string,
+    profile: UserProfileDto
+  ): Promise<void> {
+    const id = new UserId(userId);
+    const user = await this.repository.findById(id);
+    if (!user) {
+      throw userErrors.userNotFound;
+    }
+    user.updateProfile({
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      dob: DateTime.fromISO(profile.dob),
+      gender: profile.gender as Gender,
+      nationality: profile.nationality,
+      avatar: profile.avatarUrl
+        ? { url: new URL(profile.avatarUrl) }
+        : undefined,
+    });
+    await this.repository.save(user);
   }
 }

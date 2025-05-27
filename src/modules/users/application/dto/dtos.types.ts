@@ -12,7 +12,17 @@ interface AvatarDto {
 // Represents basic user information
 export interface UserBasicDto {
   email: string;
+  profileCompleted: boolean;
   avatar?: AvatarDto;
+}
+
+export interface UserProfileDto {
+  firstName: string;
+  lastName: string;
+  gender: string;
+  dob: string;
+  nationality: string;
+  avatarUrl?: string;
 }
 
 export function mapToUserBasicDto(user: User): UserBasicDto {
@@ -21,10 +31,12 @@ export function mapToUserBasicDto(user: User): UserBasicDto {
     avatar: user.profile?.avatar
       ? { url: user.profile.avatar.url.toString() }
       : undefined,
+    profileCompleted: !!user.profile,
   };
 }
 
 export interface UserDetailedDto {
+  profileCompleted: boolean;
   email: string;
   avatar?: AvatarDto;
   firstName?: string;
@@ -37,6 +49,7 @@ export interface UserDetailedDto {
 export function mapToUserDetailedDto(user: User): UserDetailedDto {
   const profile = user.profile;
   return {
+    profileCompleted: !!user.profile,
     email: user.email.value,
     avatar: user.profile?.avatar
       ? { url: user.profile.avatar.url.toString() }

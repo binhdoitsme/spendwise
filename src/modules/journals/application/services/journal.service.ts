@@ -1,31 +1,46 @@
 import { AccountId, UserId } from "@/modules/shared/domain/identifiers";
+import { ListingOptions } from "@/modules/shared/domain/specs";
 import { Email } from "@/modules/shared/domain/value-objects";
 import { DateTime } from "luxon";
 import { JournalCollaboratorPermission } from "../../domain/collaborator";
+import { journalErrors } from "../../domain/errors";
 import { TransactionFactory } from "../../domain/factories";
 import { Journal, JournalId } from "../../domain/journal";
 import { PayoffService } from "../../domain/payoff";
 import {
   JournalRepository,
-  ListingOptions,
   TransactionRepository,
 } from "../../domain/repositories";
 import { TransactionId, TransactionType } from "../../domain/transactions";
-import { UserResolver } from "../contracts/user-resolver";
+import { JournalAccountResolver } from "../contracts/account-resolver";
+import { JournalUserResolver } from "../contracts/user-resolver";
 import {
   JournalCreateDto,
   JournalEditDto,
   TransactionCreateDto,
   TransactionEditDto,
 } from "../dto/dtos.types";
-import { mapJournalToJournalBasicDto } from "../dto/mappers";
-import { sampleJournals } from "./seed-data";
+import {
+  mapJournalToJournalBasicDto,
+  mapRichJournalToJournalDetailedDto,
+  mapTransactionToDetailedDto,
+} from "../dto/mappers";
+
+export interface JournalTransactionSpecsInput {
+  query?: string;
+  creditOnly?: boolean;
+  dateRange?: {
+    start: string;
+    end: string;
+  };
+}
 
 export class JournalServices {
   constructor(
     private readonly journalRepository: JournalRepository,
     private readonly transactionRepository: TransactionRepository,
-    private readonly userResolver: UserResolver
+    private readonly userResolver: JournalUserResolver,
+    private readonly accountResolver: JournalAccountResolver
   ) {}
 
   private get journalNotFound() {
@@ -33,36 +48,92 @@ export class JournalServices {
   }
 
   async listJournals(userId: string) {
-    // return sampleJournals;
     const journals = await this.journalRepository.findByUser(
       new UserId(userId)
     );
     return journals.map(mapJournalToJournalBasicDto);
   }
 
-  // eslint-disable-next-line
-  async getJournalById(id: string, transactionOptions?: ListingOptions) {
-    return sampleJournals[0];
-    // const journalId = new JournalId(id);
-    // const journal = await this.journalRepository.findByIdWithTransactions(
-    //   journalId,
-    //   transactionOptions
-    // );
-    // if (!journal) {
-    //   throw this.journalNotFound;
-    // }
-    // const collaborators = await this.userResolver.resolveMany(
-    //   Array.from(journal.journal.collaborators.values()).map(
-    //     ({ email }) => email
-    //   )
-    // );
-    // return mapRichJournalToJournalDetailedDto(journal, collaborators);
+  async getJournalById(
+    id: string,
+    transactionOptions: ListingOptions = {
+      orderBy: "date",
+      orderDesc: true,
+    }
+  ) {
+    const journalId = new JournalId(id);
+    const journal = await this.journalRepository.findByIdWithTransactions(
+      journalId,
+      transactionOptions
+    );
+    if (!journal) {
+      throw this.journalNotFound;
+    }
+    const collaborators = await this.userResolver.resolveMany(
+      new Set(
+        Array.from(journal.journal.collaborators.keys()).map(
+          (id) => new UserId(id)
+        )
+      )
+    );
+    const accounts = await this.accountResolver.resolveMany(
+      Array.from(journal.journal.accounts.keys()).map((id) => new AccountId(id))
+    );
+    return mapRichJournalToJournalDetailedDto(journal, collaborators, accounts);
+  }
+
+  async getTransactionsByJournalId(
+    id: string,
+    specs: JournalTransactionSpecsInput,
+    options: ListingOptions = {
+      orderBy: "date",
+      orderDesc: true,
+    }
+  ) {
+    const journalId = new JournalId(id);
+    const journal = await this.getBasicJournal(id);
+    const accounts = await this.accountResolver.resolveMany(
+      [...journal.accounts.keys()].map((id) => new AccountId(id))
+    );
+    const accountIds = accounts
+      .filter((account) => account.type === "credit")
+      .map((account) => account.id.value);
+    const searchSpecs = {
+      accountIds: specs.creditOnly ? accountIds : undefined,
+      dateRange: specs.dateRange
+        ? {
+            start: DateTime.fromISO(specs.dateRange.start, { zone: "utc" }),
+            end: DateTime.fromISO(specs.dateRange.end, { zone: "utc" }),
+          }
+        : undefined,
+      query: specs.query,
+    };
+    const transactions = await this.transactionRepository.findBy(
+      journalId,
+      searchSpecs,
+      options
+    );
+    if (!transactions) {
+      throw this.journalNotFound;
+    }
+    return transactions.map(mapTransactionToDetailedDto);
   }
 
   private async getBasicJournal(id: string) {
     const journal = await this.journalRepository.findById(new JournalId(id));
     if (!journal) {
       throw this.journalNotFound;
+    }
+    return journal;
+  }
+
+  private async getOwnJournal(id: string, userId: string) {
+    const journal = await this.journalRepository.findById(new JournalId(id));
+    if (!journal) {
+      throw this.journalNotFound;
+    }
+    if (journal.ownerId.value !== userId) {
+      throw { code: 403, message: "You are not the owner of this journal" };
     }
     return journal;
   }
@@ -104,15 +175,72 @@ export class JournalServices {
     await this.journalRepository.save(journal);
   }
 
+  async linkAccount({
+    id,
+    accountId,
+    ownerId,
+  }: {
+    id: string;
+    accountId: string;
+    ownerId: string;
+  }) {
+    const journal = await this.getBasicJournal(id);
+    journal.linkAccount(new AccountId(accountId), new UserId(ownerId));
+    await this.journalRepository.save(journal);
+  }
+
+  async unlinkAccount(id: string, accountId: string) {
+    const richJournal = await this.journalRepository.findByIdWithTransactions(
+      new JournalId(id)
+    );
+    if (!richJournal) {
+      throw this.journalNotFound;
+    }
+    if (richJournal.transactions.some((t) => t.account.value === accountId)) {
+      throw journalErrors.accountAlreadyInUse;
+    }
+    const journal = await this.getBasicJournal(id);
+    journal.unlinkAccount(new AccountId(accountId));
+    await this.journalRepository.save(journal);
+  }
+
+  async inviteCollaborator({
+    journalId,
+    userId,
+    email,
+    permission,
+  }: {
+    journalId: string;
+    userId: string;
+    email: string;
+    permission: string;
+  }) {
+    const journal = await this.getOwnJournal(journalId, userId);
+    const invitedUser = await this.userResolver.resolveOneByEmail(
+      Email.from(email)
+    );
+    if (!invitedUser) {
+      throw { code: 404, message: "User not found" };
+    }
+    if (journal.hasCollaborator(invitedUser.id)) {
+      throw { code: 409, message: "User already invited" };
+    }
+    journal.addCollaborator(
+      invitedUser.id,
+      permission as JournalCollaboratorPermission
+    );
+    await this.journalRepository.save(journal);
+  }
+
   async createTransaction(journalId: string, data: TransactionCreateDto) {
     const journal = await this.getBasicJournal(journalId);
     const transaction = TransactionFactory.createTransaction(journal, {
       title: data.title,
       amount: data.amount,
-      date: DateTime.fromISO(data.date),
+      date: DateTime.fromISO(data.date, { zone: "utc" }),
       account: new AccountId(data.account),
       type: data.type as TransactionType,
-      paidBy: Email.from(data.paidBy),
+      paidBy: new UserId(data.paidBy),
       tags: data.tags ?? [],
       notes: data.notes,
       paidOffTransaction: undefined, // explicitly ask to mark as paid by/not paid by
@@ -135,7 +263,7 @@ export class JournalServices {
       date: data.date ? DateTime.fromISO(data.date) : undefined,
       account: data.account ? new AccountId(data.account) : undefined,
       type: data.type as TransactionType,
-      paidBy: data.paidBy ? Email.from(data.paidBy) : undefined,
+      paidBy: data.paidBy ? new UserId(data.paidBy) : undefined,
       tags: data.tags,
       notes: data.notes,
     });
@@ -194,18 +322,18 @@ export class JournalServices {
     await this.transactionRepository.delete(new TransactionId(transactionId));
   }
 
-  async addCollaborator(journalId: string, email: string, permission: string) {
+  async addCollaborator(journalId: string, userId: string, permission: string) {
     const journal = await this.getBasicJournal(journalId);
     journal.addCollaborator(
-      Email.from(email),
+      new UserId(userId),
       permission as JournalCollaboratorPermission
     );
     await this.journalRepository.save(journal);
   }
 
-  async removeCollaborator(journalId: string, email: string) {
+  async removeCollaborator(journalId: string, userId: string) {
     const journal = await this.getBasicJournal(journalId);
-    journal.removeCollaborator(Email.from(email));
+    journal.removeCollaborator(new UserId(userId));
     await this.journalRepository.save(journal);
   }
 
@@ -219,5 +347,24 @@ export class JournalServices {
     const journal = await this.getBasicJournal(journalId);
     journal.removeTags(tags);
     await this.journalRepository.save(journal);
+  }
+
+  async deleteTransaction(
+    userId: string,
+    transactionId: string,
+    removeRelated: boolean = false
+  ) {
+    const transaction = await this.transactionRepository.findById(
+      new TransactionId(transactionId)
+    );
+    if (!transaction) {
+      throw { code: 404, message: "Transaction not found" };
+    }
+    if (removeRelated) {
+      for (const relatedTransaction of transaction.relatedTransactions) {
+        await this.transactionRepository.delete(relatedTransaction);
+      }
+    }
+    await this.transactionRepository.delete(transaction.id);
   }
 }

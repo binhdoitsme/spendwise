@@ -1,14 +1,18 @@
+import { UserId } from "@/modules/shared/domain/identifiers";
 import { Email } from "@/modules/shared/domain/value-objects";
 
-export interface UserBasic {
+export interface JournalUserBasic {
+  id: UserId;
   email: Email;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   avatar?: {
     url: string;
   };
 }
 
-export abstract class UserResolver {
-  abstract resolveOne(email: Email): Promise<UserBasic | undefined>;
-  abstract resolveMany(emails: Email[]): Promise<UserBasic[]>;
+export abstract class JournalUserResolver {
+  abstract resolveOne(userId: UserId): Promise<JournalUserBasic | undefined>;
+  abstract resolveOneByEmail(email: Email): Promise<JournalUserBasic | undefined>;
+  abstract resolveMany(userIds: Set<UserId>): Promise<JournalUserBasic[]>;
 }

@@ -1,3 +1,5 @@
+import { Language } from "@/components/common/i18n";
+
 export interface SignUpLabels {
   signUpTitle: string;
   email: string;
@@ -11,7 +13,7 @@ export interface SignUpLabels {
   signUpButton: string;
 }
 
-export const signUpLabels: Record<string, SignUpLabels> = {
+export const signUpLabels: Record<Language, SignUpLabels> = {
   en: {
     signUpTitle: "Create your SpendWise account",
     email: "Email",
@@ -23,5 +25,17 @@ export const signUpLabels: Record<string, SignUpLabels> = {
     hasAccount: "Already had account?",
     signInButton: "Sign in",
     signUpButton: "Sign Up",
+  },
+  vi: {
+    signUpTitle: "Tạo tài khoản SpendWise của bạn",
+    email: "Email",
+    emailPlaceholder: "Nhập email của bạn",
+    password: "Mật khẩu",
+    passwordPlaceholder: "Nhập mật khẩu của bạn",
+    confirmPassword: "Xác nhận mật khẩu",
+    confirmPasswordPlaceholder: "Nhập lại mật khẩu của bạn",
+    hasAccount: "Đã có tài khoản?",
+    signInButton: "Đăng nhập",
+    signUpButton: "Đăng ký",
   },
 };

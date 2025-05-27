@@ -15,10 +15,10 @@ export const authUsers = pgView("auth_users", {
 }).as(sql`SELECT id, email, password FROM users`);
 
 export const refreshTokens = pgTable("refresh_token", {
-  id: text().primaryKey(),
-  token: varchar({ length: 128 }).unique().notNull(),
-  expiration: timestamp().notNull(),
-  isRevoked: boolean().default(false).notNull(),
-  userId: text().notNull(),
-  createdAt: timestamp().notNull(),
+  id: text("id").primaryKey(),
+  token: varchar("token", { length: 128 }).unique().notNull(),
+  expiration: timestamp("expiration").notNull(),
+  isRevoked: boolean("is_revoked").default(false).notNull(),
+  userId: text("user_id").notNull(),
+  createdAt: timestamp("created_at").notNull(),
 });

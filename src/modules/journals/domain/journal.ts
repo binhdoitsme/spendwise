@@ -5,6 +5,7 @@ import { ExcludeMethods } from "@/types";
 import { DateTime } from "luxon";
 import { JournalAccount } from "./account";
 import { Collaborator, JournalCollaboratorPermission } from "./collaborator";
+import { journalErrors } from "./errors";
 import { Tag } from "./tag";
 
 export class JournalId extends UUIDIdentifier {}
@@ -34,10 +35,9 @@ export class Journal {
     public isArchived: boolean = false,
     public readonly createdAt: DateTime = DateTime.utc()
   ) {
-    _collaborators.set(
-      ownerEmail.toString(),
-      new Collaborator(ownerEmail, "owner")
-    );
+    if (!_collaborators.has(ownerId.value)) {
+      _collaborators.set(ownerId.value, new Collaborator(ownerId, "owner"));
+    }
   }
 
   equals(other: Journal): boolean {
@@ -57,25 +57,25 @@ export class Journal {
     return new Map(this._collaborators);
   }
 
-  hasCollaborator(email: Email): boolean {
-    return this._collaborators.has(email.toString());
+  hasCollaborator(userId: UserId): boolean {
+    return this._collaborators.has(userId.value);
   }
 
-  addCollaborator(email: Email, permission: JournalCollaboratorPermission) {
-    if (email.equals(this.ownerEmail)) {
+  addCollaborator(userId: UserId, permission: JournalCollaboratorPermission) {
+    if (userId.equals(this.ownerId)) {
       throw Error("Cannot grant any more permission to yourself");
     }
     if (["owner"].includes(permission)) {
       throw Error("Cannot grant owner permission to others");
     }
-    this._collaborators.set(
-      email.toString(),
-      new Collaborator(email, permission)
-    );
+    this._collaborators.set(userId.value, new Collaborator(userId, permission));
   }
 
-  removeCollaborator(email: Email) {
-    return this._collaborators.delete(email.toString());
+  removeCollaborator(userId: UserId) {
+    if (userId.equals(this.ownerId)) {
+      throw Error("Cannot remove yourself as a collaborator");
+    }
+    return this._collaborators.delete(userId.value);
   }
   //#endregion Collaborators
 
@@ -111,22 +111,24 @@ export class Journal {
     return this._accounts.has(accountId.value);
   }
 
-  addAccount(
-    accountId: AccountId,
-    ownerEmail: Email,
-    ownerId: UserId,
-    gracePeriodDays?: number
-  ) {
-    const account = new JournalAccount(
-      accountId,
-      ownerId,
-      ownerEmail,
-      gracePeriodDays
-    );
+  linkAccount(accountId: AccountId, ownerId: UserId) {
+    if (this.isArchived) {
+      throw journalErrors.archivedJournal;
+    }
+    if (this._accounts.has(accountId.value)) {
+      throw journalErrors.accountAlreadyLinked;
+    }
+    const account = new JournalAccount(accountId, ownerId);
     this._accounts.set(account.accountId.value, account);
   }
 
-  removeAccount(accountId: AccountId) {
+  unlinkAccount(accountId: AccountId) {
+    if (this.isArchived) {
+      throw journalErrors.archivedJournal;
+    }
+    if (!this._accounts.has(accountId.value)) {
+      throw journalErrors.accountNotLinked;
+    }
     this._accounts.delete(accountId.value);
   }
   //#endregion Accounts

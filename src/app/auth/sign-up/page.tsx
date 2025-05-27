@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function SignUpPage() {
-  return <SignUpForm language="en" redirectTo="/auth/sign-in" />;
+  return <SignUpForm language="vi" redirectTo="/auth/sign-in" />;
 }

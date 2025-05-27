@@ -10,13 +10,20 @@ export function RedirectOnAuthExpiration() {
   const authContext = useAuthContext();
 
   useEffect(() => {
-    if (
-      !authContext.user &&
-      !["/404", "/"].includes(pathname) &&
-      !pathname.includes("/api")
-    ) {
+    const isAuthPath = pathname.startsWith("/auth");
+    const isPublicPath =
+      ["/404", "/"].includes(pathname) || pathname.includes("/api");
+
+    if (isAuthPath) {
+      return;
+    }
+
+    if (!authContext.user && !isPublicPath && !isAuthPath) {
       router.push("/auth/sign-in");
+    } else if (authContext.user && !authContext.user.profileCompleted) {
+      router.push("/users/complete-profile");
     }
   }, [authContext.user, router, pathname]);
-  return <></>;
+
+  return null;
 }

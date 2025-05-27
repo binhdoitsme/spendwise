@@ -1,14 +1,18 @@
 import { dbConnectionPool } from "@/db";
-import { Pool } from "pg";
-import { UserServices } from "./application/services/user.service";
 import { drizzle } from "drizzle-orm/node-postgres";
-import * as schema from "./infrastructure/db/schemas";
-import { DrizzleUserRepository } from "./infrastructure/db/repositories/user.repository";
+import { Pool } from "pg";
 import { BcryptPasswordHasher } from "../shared/infrastructure/password-hasher";
+import { UserServices } from "./application/services/user.service";
+import { DrizzleUserRepository } from "./infrastructure/db/repositories/user.repository";
+import * as schema from "./infrastructure/db/schemas";
+
+export function provideUserRepository(connectionPool: Pool) {
+  const dbInstance = drizzle(connectionPool, { schema });
+  return new DrizzleUserRepository(dbInstance);
+}
 
 export function provideUserServices(connectionPool: Pool = dbConnectionPool) {
-  const dbInstance = drizzle(connectionPool, { schema });
-  const userRepository = new DrizzleUserRepository(dbInstance);
+  const userRepository = provideUserRepository(connectionPool);
   const passwordHasher = new BcryptPasswordHasher();
   return new UserServices(userRepository, passwordHasher);
 }

@@ -9,4 +9,8 @@ export const userErrors = {
     code: "USER-001",
     message: "This email has already been taken",
   } as ApplicationError,
+  userNotFound: {
+    code: "USER-002",
+    message: "User not found",
+  } as ApplicationError,
 } as const;

@@ -17,7 +17,7 @@ function generateRandomToken(length: number): string {
 
 export class RefreshToken {
   private static readonly TOKEN_LENGTH = 128;
-  private static readonly TOKEN_VALID_HOURS = 72;
+  private static readonly TOKEN_VALID_HOURS = 24;
 
   private _isRevoked: boolean;
 
@@ -34,6 +34,10 @@ export class RefreshToken {
 
   get isRevoked(): boolean {
     return this._isRevoked;
+  }
+
+  public expired(datetime: DateTime) {
+    return this.expiration < datetime;
   }
 
   public revoke() {

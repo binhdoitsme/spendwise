@@ -6,18 +6,26 @@ import {
   numeric,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
-  varchar,
+  varchar
 } from "drizzle-orm/pg-core";
 
-export const journalAccounts = pgTable("journal_accounts", {
-  accountId: text().primaryKey(),
-  journalId: text().notNull(),
-  ownerId: text().notNull(),
-  ownerEmail: varchar({ length: 255 }).notNull(),
-  gracePeriodDays: numeric({ mode: "number" }),
-  createdAt: date({ mode: "date" }).notNull(),
-});
+export const journalAccounts = pgTable(
+  "journal_accounts",
+  {
+    accountId: text("account_id").notNull(),
+    journalId: text("journal_id").notNull(),
+    ownerId: text("owner_id").notNull(),
+    createdAt: date("created_at", { mode: "date" }).notNull(),
+  },
+  (table) => [
+    primaryKey({
+      name: "journal_account_composite_pk",
+      columns: [table.accountId, table.journalId],
+    }),
+  ]
+);
 
 export const journalPermissions = pgEnum("journal_permissions", [
   "owner",
@@ -26,26 +34,32 @@ export const journalPermissions = pgEnum("journal_permissions", [
 ]);
 
 export const collaborators = pgTable("collaborators", {
-  email: varchar({ length: 255 }).primaryKey(),
+  userId: varchar("user_id", { length: 255 }).primaryKey(),
   permission: journalPermissions().notNull(),
-  journalId: text().notNull(),
+  journalId: text("journal_id").notNull(),
 });
 
-export const tags = pgTable("tags", {
-  id: text().primaryKey(),
-  name: varchar({ length: 100 }).notNull(),
-  journalId: text().notNull(),
-});
+export const tags = pgTable(
+  "tags",
+  {
+    id: text("id"),
+    name: varchar("name", { length: 100 }).notNull(),
+    journalId: text("journal_id").notNull(),
+  },
+  (table) => [
+    primaryKey({ name: "tags_pkey", columns: [table.id, table.journalId] }),
+  ]
+);
 
 export const journals = pgTable("journals", {
-  id: text().primaryKey(),
-  ownerId: text().notNull(),
-  ownerEmail: varchar({ length: 255 }).notNull(),
-  title: varchar({ length: 200 }).notNull(),
-  currency: char({ length: 3 }).notNull(),
-  requiresApproval: boolean().default(false).notNull(),
-  isArchived: boolean().default(false).notNull(),
-  createdAt: date({ mode: "date" }).notNull(),
+  id: text("id").primaryKey(),
+  ownerId: text("owner_id").notNull(),
+  ownerEmail: varchar("owner_email", { length: 255 }).notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  currency: char("currency", { length: 3 }).notNull(),
+  requiresApproval: boolean("requires_approval").default(false).notNull(),
+  isArchived: boolean("is_archived").default(false).notNull(),
+  createdAt: date("created_at", { mode: "date" }).notNull(),
 });
 
 export const transactionTypeEnum = pgEnum("transaction_types", [
@@ -62,19 +76,19 @@ export const transactionStatusEnum = pgEnum("transaction_status", [
 ]);
 
 export const transactions = pgTable("transactions", {
-  id: text().primaryKey(),
-  journalId: text().notNull(),
-  title: varchar({ length: 200 }).notNull(),
-  amount: numeric({ mode: "number" }).notNull(),
-  date: date({ mode: "date" }).notNull(),
-  account: varchar({ length: 100 }).notNull(),
-  type: transactionTypeEnum().notNull(),
-  paidBy: varchar({ length: 255 }).notNull(),
-  tags: varchar().array(),
-  status: transactionStatusEnum().notNull(),
-  notes: text(),
-  paidOffTransaction: text(),
-  relatedTransactions: text().array(),
+  id: text("id").primaryKey(),
+  journalId: text("journal_id").notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  amount: numeric("amount", { mode: "number" }).notNull(),
+  date: date("date", { mode: "date" }).notNull(),
+  account: text("account").notNull(),
+  type: transactionTypeEnum("type").notNull(),
+  paidBy: varchar("paid_by", { length: 255 }).notNull(),
+  tags: varchar("tags").array(),
+  status: transactionStatusEnum("status").notNull(),
+  notes: text("notes"),
+  paidOffTransaction: text("paid_off_transaction"),
+  relatedTransactions: text("related_transactions").array(),
 });
 
 export const accountsRelations = relations(journalAccounts, ({ one }) => ({
