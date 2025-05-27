@@ -46,7 +46,8 @@ export function MonthlyUsage({
 
   const utilization = !item.creditLimit
     ? undefined
-    : Math.round((item.spentAmount.amount / item.creditLimit.amount) * 100);
+    : Math.round((item.spentAmount.amount / item.creditLimit.amount) * 10000) /
+      100;
   const barColor = !utilization
     ? undefined
     : utilization < 50
@@ -77,7 +78,7 @@ export function MonthlyUsage({
             </>
           )}
         </div>
-        {utilization && (
+        {utilization !== undefined && (
           <div className="text-sm text-muted-foreground">
             {labels.percentUsed(utilization)}
           </div>
