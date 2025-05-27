@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthContext } from "@/modules/auth/presentation/components/auth-context";
 import { UserApi } from "@/modules/users/presentation/api/user.api";
 import {
   ProfileForm,
@@ -11,6 +12,7 @@ import { toast } from "sonner";
 export default function CompleteProfilePage() {
   const api = new UserApi();
   const router = useRouter();
+  const authContext = useAuthContext();
 
   const handleCompleteProfile = async (data: ProfileFormSchema) => {
     try {
@@ -18,6 +20,7 @@ export default function CompleteProfilePage() {
         ...data,
         dob: data.dob.toISOString().split("T")[0],
       });
+      await api.getMyProfile().then((user) => authContext.setUser(user));
       toast.success("Successfully completed profile!");
       router.push("/journals");
     } catch (err) {
