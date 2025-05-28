@@ -82,7 +82,7 @@ function NewAccountDialogContent({
   handleRefreshJournal,
   handleRefreshAccounts,
 }: AccountDialogContentProps) {
-  const { loadingStart, loadingEnd } = useLoader();
+  const { loadingStart, loadingEnd, isLoading } = useLoader();
   const { language } = useI18n();
 
   const handleCreateAccount = async (
@@ -114,6 +114,7 @@ function NewAccountDialogContent({
         language={language}
         className="h-full mt-2"
         onSubmit={handleCreateAccount}
+        disabled={isLoading}
       />
     </>
   );

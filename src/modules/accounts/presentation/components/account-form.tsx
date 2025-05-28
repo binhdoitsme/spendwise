@@ -60,6 +60,7 @@ interface AccountFormProps extends Localizable {
   onSubmit: (values: AccountFormValues) => void | Promise<void>;
   className?: string;
   initialValues?: AccountFormValues;
+  disabled?: boolean;
 }
 
 export const AccountForm: React.FC<AccountFormProps> = ({
@@ -67,6 +68,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({
   className,
   initialValues,
   language = "en",
+  disabled = false,
 }) => {
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
@@ -74,6 +76,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({
       type: "cash",
       name: "",
     },
+    disabled,
   });
 
   const type = form.watch("type");
@@ -290,7 +293,9 @@ export const AccountForm: React.FC<AccountFormProps> = ({
           )}
         </div>
 
-        <Button type="submit">{labels.saveAccount}</Button>
+        <Button type="submit" disabled={disabled}>
+          {labels.saveAccount}
+        </Button>
       </form>
     </Form>
   );

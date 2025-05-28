@@ -18,9 +18,9 @@ export class AccountApi extends ApiClientWrapper {
   }
 
   async listAccounts() {
-    const response = await this.client.get<ResponseWithData<AccountBasicDto[]>>(
-      "/api/accounts"
-    );
-    return response.data.data;
+    const response = await this.client.get<
+      ResponseWithData<{ accounts: AccountBasicDto[] }>
+    >("/api/accounts");
+    return response.data.data.accounts;
   }
 }
