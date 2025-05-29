@@ -7,6 +7,28 @@ const LoaderContext = createContext({
   loadingEnd: () => {},
 });
 
+type LoadingHooks = {
+  loadingStart: () => void;
+  loadingEnd: () => void;
+};
+
+export function withLoading<Args extends unknown[], R>(
+  hooks: LoadingHooks
+) {
+  return function (
+    targetFn: (...args: Args) => R | Promise<R>
+  ): (...args: Args) => Promise<R> {
+    return async (...args: Args): Promise<R> => {
+      hooks.loadingStart();
+      try {
+        return await Promise.resolve(targetFn(...args));
+      } finally {
+        hooks.loadingEnd();
+      }
+    };
+  };
+}
+
 export const useLoader = () => useContext(LoaderContext);
 
 export const LoaderProvider = ({ children }: { children: React.ReactNode }) => {

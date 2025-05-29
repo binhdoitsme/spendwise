@@ -14,9 +14,10 @@ import {
   TransactionForm,
 } from "@/modules/journals/presentation/components/transaction/transaction-form";
 import { AccountSummary } from "@/modules/reports/application/dto/dtos.types";
+import { MonthlyUsage } from "@/modules/reports/presentation/components/monthly-usage";
 import { PaymentDueRow } from "@/modules/reports/presentation/components/payment-due";
 import { JournalDetailsPageLabels } from "./labels";
-import { MonthlyUsage } from "@/modules/reports/presentation/components/monthly-usage";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface BaseTransactionDialogProps {
   labels: JournalDetailsPageLabels;
@@ -210,6 +211,7 @@ export function ViewAccountReportDialog({
       </DialogHeader>
       <div />
       <div className="space-y-3">
+        {!accountReports && <Skeleton className="h-[4rem] w-full rounded-xl" />}
         {!!accountReports?.upcomingDues?.length && (
           <>
             <h2 className="text-lg font-semibold">{labels.dueSoon}</h2>
@@ -218,9 +220,9 @@ export function ViewAccountReportDialog({
                 <PaymentDueRow key={index} item={due} language={language} />
               ))}
             </div>
+            <Separator />
           </>
         )}
-        <Separator />
         {!!accountReports?.monthlySpends?.length && (
           <>
             <h2 className="text-lg font-semibold">{labels.history}</h2>
