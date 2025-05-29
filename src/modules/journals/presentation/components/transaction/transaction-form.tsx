@@ -27,12 +27,14 @@ import {
 } from "@/modules/journals/application/dto/dtos.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { transactionFormSchema, TransactionFormSchema } from "../forms";
 import { Colorized } from "../tag/tag-colors";
 import { Tags } from "../tag/tag-item";
 import { transactionLabels } from "./labels";
+import { LoadingSpinner } from "@/components/ui/spinner";
+import { withLoading } from "@/app/loader.context";
 
 export interface AccountSelectProps {
   accountId: string;
@@ -64,9 +66,13 @@ export function TransactionForm({
 }: TransactionFormProps) {
   const isDevMode = true;
   const labels = transactionLabels[language];
+  const [isLoading, setLoading] = useState(false);
+  const loadingStart = useCallback(() => setLoading(true), [setLoading]);
+  const loadingEnd = useCallback(() => setLoading(false), [setLoading]);
+
   const form = useForm<TransactionFormSchema>({
     resolver: zodResolver(transactionFormSchema),
-    disabled: isReadonly,
+    disabled: isLoading || isReadonly,
     defaultValues: transaction
       ? {
           id: transaction.id,
@@ -77,6 +83,7 @@ export function TransactionForm({
           account: transaction.accountId,
           tags: transaction.tags,
           type: transaction.type as "INCOME" | "EXPENSE",
+          notes: transaction.notes,
         }
       : {
           title: "",
@@ -86,6 +93,7 @@ export function TransactionForm({
           tags: [],
           type: "EXPENSE",
           paidBy: "",
+          notes: "",
         },
   });
   const paidByUser = form.watch("paidBy");
@@ -122,7 +130,15 @@ export function TransactionForm({
           </Button>
         </div>
       )}
-      <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        className="space-y-4"
+        onSubmit={form.handleSubmit(
+          withLoading<[TransactionFormSchema], void>({
+            loadingStart,
+            loadingEnd,
+          })(onSubmit)
+        )}
+      >
         <div className="max-h-[calc(100vh-300px)] overflow-y-scroll flex flex-col gap-2 p-1">
           <FormField
             name="type"
@@ -324,7 +340,10 @@ export function TransactionForm({
         </div>
         {!isReadonly && (
           <div className="flex justify-end">
-            <Button type="submit">{labels.saveTransaction}</Button>
+            <Button type="submit">
+              {isLoading && <LoadingSpinner />}
+              {labels.saveTransaction}
+            </Button>
           </div>
         )}
       </form>

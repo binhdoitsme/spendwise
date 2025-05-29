@@ -28,6 +28,7 @@ import {
 import { AccountSelectProps } from "@/modules/journals/presentation/components/transaction/transaction-form";
 import { TransactionItem } from "@/modules/journals/presentation/components/transaction/transaction-item";
 import { TransactionSearch } from "@/modules/journals/presentation/components/transaction/transaction-search";
+import { AccountSummary } from "@/modules/reports/application/dto/dtos.types";
 import { ReportsApi } from "@/modules/reports/presentation/contracts/reports.api";
 import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
 import { PlusIcon } from "lucide-react";
@@ -39,7 +40,6 @@ import {
   TransactionDialogContent,
   TransactionDialogType,
 } from "./transaction-dialogs";
-import { AccountSummary } from "@/modules/reports/application/dto/dtos.types";
 
 export interface TransactionTabProps {
   journal: JournalDetailedDto;
@@ -47,7 +47,9 @@ export interface TransactionTabProps {
   reportsApi: ReportsApi;
   currentFilters?: Partial<FilterSchema> & { query?: string };
   handleNoAccount: () => void;
-  handleRefreshJournal: () => void | Promise<void>;
+  handleRefreshJournal: (
+    subset?: ("account" | "transaction")[]
+  ) => void | Promise<void>;
   handleQuickFilters: (filters: FilterSchema) => Promise<void>;
   handleSearch: (query: string) => Promise<void>;
 }
@@ -72,7 +74,7 @@ export function TransactionTab({
     useState<AccountSummary>();
 
   const authContext = useAuthContext();
-  const { isLoading } = useLoader();
+  const { isLoading, loadingStart, loadingEnd } = useLoader();
   const { language } = useI18n();
   const labels = journalDetailsPageLabels[language];
 
@@ -122,6 +124,7 @@ export function TransactionTab({
   };
 
   const handleEditTransaction = async (data: TransactionFormSchema) => {
+    loadingStart();
     try {
       await journalApi.editTransaction(journal.id, data.id!, {
         ...data,
@@ -132,6 +135,8 @@ export function TransactionTab({
     } catch (error) {
       console.error(error);
       toast.error("Failed to edit transaction");
+    } finally {
+      loadingEnd();
     }
   };
 
@@ -173,6 +178,7 @@ export function TransactionTab({
   };
 
   const showAccountReportsDialog = async (accountId: string) => {
+    setCurrentAccountReports(undefined);
     setDialogType("accountReport");
     setOpen(true);
     const reports = await reportsApi.getPaymentSummary({ accountId });
