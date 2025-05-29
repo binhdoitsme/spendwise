@@ -64,7 +64,7 @@ export function TransactionForm({
   onNoAccount,
   onUnknownTag,
 }: TransactionFormProps) {
-  const isDevMode = true;
+  const isDevMode = process.env.NODE_ENV !== "production";
   const labels = transactionLabels[language];
   const [isLoading, setLoading] = useState(false);
   const loadingStart = useCallback(() => setLoading(true), [setLoading]);
@@ -340,7 +340,7 @@ export function TransactionForm({
         </div>
         {!isReadonly && (
           <div className="flex justify-end">
-            <Button type="submit">
+            <Button type="submit" disabled={isLoading}>
               {isLoading && <LoadingSpinner />}
               {labels.saveTransaction}
             </Button>
