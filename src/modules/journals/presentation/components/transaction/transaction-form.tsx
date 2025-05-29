@@ -340,7 +340,7 @@ export function TransactionForm({
         </div>
         {!isReadonly && (
           <div className="flex justify-end">
-            <Button type="submit">
+            <Button type="submit" disabled={isLoading}>
               {isLoading && <LoadingSpinner />}
               {labels.saveTransaction}
             </Button>
