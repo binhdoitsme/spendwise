@@ -1,4 +1,4 @@
-import { dbConnectionPool } from "@/db";
+import { getDbConnectionPool } from "@/db";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { provideAccountRepository } from "../accounts/account.module";
@@ -10,7 +10,7 @@ import { DrizzleReportAccountResolver } from "./infrastructure/external/account-
 import { DrizzleReportJournalResolver } from "./infrastructure/external/journal-resolver";
 
 export function provideAccountReportServices(
-  connectionPool: Pool = dbConnectionPool
+  connectionPool: Pool = getDbConnectionPool()
 ) {
   const dbInstance = drizzle(connectionPool, { schema });
   const accountReportRepository = new DrizzleAccountReportRepository(
