@@ -90,6 +90,11 @@ export function PaymentDueRow({ item, language }: PaymentDueProps) {
         <div className="font-medium flex items-center gap-2">
           <CreditCard className="w-4 h-4" /> {item.account.displayName}
         </div>
+        <div className="text-sm font-semibold text-muted-foreground">
+          {labels.statementPeriod}{" "}
+          {formatDueDate(item.statementPeriod.start, language)} -{" "}
+          {formatDueDate(item.statementPeriod.end, language)}
+        </div>
         <div className="text-sm text-muted-foreground">
           {labels.due} {formatDueDate(item.dueDate, language)}
         </div>

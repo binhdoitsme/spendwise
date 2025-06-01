@@ -1,4 +1,4 @@
-import { dbConnectionPool } from "@/db";
+import { getDbConnectionPool } from "@/db";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { BcryptPasswordHasher } from "../shared/infrastructure/password-hasher";
@@ -9,7 +9,7 @@ import * as schema from "./infrastructure/db/schemas";
 import { JwtTokenHandler } from "./infrastructure/external/jwt-token-handler";
 
 export function provideAuthServices(
-  connectionPool: Pool = dbConnectionPool
+  connectionPool: Pool = getDbConnectionPool()
 ): AuthServices {
   const dbInstance = drizzle(connectionPool, { schema });
   const userRepository = new DrizzleAuthUserRepository(dbInstance);

@@ -1,4 +1,4 @@
-import { dbConnectionPool } from "@/db";
+import { getDbConnectionPool } from "@/db";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { provideUserRepository } from "../users/users.module";
@@ -13,7 +13,7 @@ export function provideAccountRepository(connectionPool: Pool) {
 }
 
 export function provideAccountServices(
-  connectionPool: Pool = dbConnectionPool
+  connectionPool: Pool = getDbConnectionPool()
 ) {
   const accountRepository = provideAccountRepository(connectionPool);
   const userRepository = provideUserRepository(connectionPool);

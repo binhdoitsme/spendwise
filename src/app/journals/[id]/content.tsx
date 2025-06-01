@@ -100,16 +100,17 @@ export function FinanceJournalPageContent(
   const handleRefreshJournal = async () => {
     const dateRange = currentFilters ? toDateRange(currentFilters) : undefined;
     const now = DateTime.now();
-    const thisMonth = {
-      start: now.startOf("month").toISODate(),
+    const recent2Months = {
+      start: now.startOf("month").minus({ months: 1 }).toISODate(),
       end: now.endOf("month").toISODate(),
     };
+    console.log({ recent2Months });
     const [refreshedJournal, refreshedAccountSummary, refreshedTransactions] =
       await Promise.all([
         journalApi.getJournalById(props.journal.id),
         reportsApi.getPaymentSummary({
           journalId: props.journal.id,
-          monthRange: thisMonth,
+          period: recent2Months,
           accountTypes: ["credit", "loan"],
         }),
         journalApi.listTransactions(journal.id, {

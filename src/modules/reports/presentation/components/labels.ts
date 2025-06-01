@@ -5,6 +5,7 @@ export interface ReportingLabels {
   upcomingDues: string;
   usageThisMonth: (month: string) => string;
   noAccounts: string;
+  statementPeriod: string;
   due: string;
   dueToday: string;
   dueTomorrow: string;
@@ -20,6 +21,11 @@ export interface ReportingLabels {
   today: string;
   tomorrow: string;
   yesterday: string;
+
+  monthlySummary: string;
+  totalSpent: string;
+  topSpendingTags: string;
+  spendingByAccount: string;
 }
 
 export const reportingLabels: Record<Language, ReportingLabels> = {
@@ -28,6 +34,7 @@ export const reportingLabels: Record<Language, ReportingLabels> = {
     upcomingDues: "Upcoming Dues",
     usageThisMonth: (month) => `Usage This Month (${month})`,
     noAccounts: "No accounts to display.",
+    statementPeriod: "Statement Period:",
     due: "Due:",
     dueToday: "Due Today",
     dueTomorrow: "Due Tomorrow",
@@ -43,12 +50,17 @@ export const reportingLabels: Record<Language, ReportingLabels> = {
     today: "Today",
     tomorrow: "Tomorrow",
     yesterday: "Yesterday",
+    monthlySummary: "Monthly Summary",
+    totalSpent: "Total Expenses",
+    topSpendingTags: "Top Spending Tags",
+    spendingByAccount: "Spending by Account",
   },
   vi: {
     paymentSummary: "Tổng kết thanh toán",
     upcomingDues: "Các khoản đến hạn",
     usageThisMonth: (month) => `Sử dụng tháng này (${month})`,
     noAccounts: "Không có tài khoản để hiển thị.",
+    statementPeriod: "Kỳ sao kê:",
     due: "Đến hạn:",
     dueToday: "Đến hạn hôm nay",
     dueTomorrow: "Đến hạn ngày mai",
@@ -64,5 +76,9 @@ export const reportingLabels: Record<Language, ReportingLabels> = {
     today: "Hôm nay",
     tomorrow: "Ngày mai",
     yesterday: "Hôm qua",
+    monthlySummary: "Tóm tắt hàng tháng",
+    totalSpent: "Tổng chi tiêu",
+    topSpendingTags: "Hạng mục chi tiêu nhiều nhất",
+    spendingByAccount: "Phân bổ theo tài khoản",
   },
 };

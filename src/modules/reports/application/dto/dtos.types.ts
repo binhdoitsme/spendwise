@@ -4,7 +4,7 @@ export interface AccountSummaryQueryInput {
   journalId?: string;
   accountId?: string;
   accountTypes?: ("cash" | "debit" | "credit" | "loan")[];
-  monthRange?: {
+  period?: {
     start: string;
     end: string;
   };
@@ -12,6 +12,10 @@ export interface AccountSummaryQueryInput {
 
 export interface PaymentDue {
   account: { displayName: string; type: string };
+  statementPeriod: {
+    start: string; // ISO format
+    end: string; // ISO format
+  };
   dueDate: string; // ISO format
   dueAmount: MoneyAmount;
 }

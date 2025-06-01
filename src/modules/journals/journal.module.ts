@@ -1,4 +1,4 @@
-import { dbConnectionPool } from "@/db";
+import { getDbConnectionPool } from "@/db";
 import * as schema from "@/modules/journals/infrastructure/db/schemas";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
@@ -11,7 +11,7 @@ import { DrizzleJournalAccountResolver } from "./infrastructure/external/account
 import { DrizzleJournalUserResolver } from "./infrastructure/external/user-resolver";
 
 export function provideJournalServices(
-  connectionPool: Pool = dbConnectionPool
+  connectionPool: Pool = getDbConnectionPool()
 ): JournalServices {
   const dbInstance = drizzle(connectionPool, { schema });
   const journalRepository = provideJournalRepository(connectionPool);
