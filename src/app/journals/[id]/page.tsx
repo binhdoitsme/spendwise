@@ -20,13 +20,13 @@ export default async function FinanceJournalPage({
   const accounts = await accountService.getAccounts(userId!);
   const accountReportServices = provideAccountReportServices();
   const now = DateTime.now();
-  const thisMonth = {
-    start: now.startOf("month").toISODate(),
+  const recent2Months = {
+    start: now.startOf("month").minus({ months: 1 }).toISODate(),
     end: now.endOf("month").toISODate(),
   };
   const accountSummary = await accountReportServices.getMonthlyAccountSummary({
     journalId: id,
-    monthRange: thisMonth,
+    period: recent2Months,
     accountTypes: ["credit", "loan"],
   });
   return (

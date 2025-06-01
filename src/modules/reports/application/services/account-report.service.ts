@@ -32,21 +32,17 @@ export class AccountReportsServices {
     if (!accountIds) {
       throw reportErrors.accountIdNotProvided;
     }
-    const months = specs.monthRange
+    const period = specs.period
       ? Interval.fromDateTimes(
-          DateTime.fromISO(specs.monthRange.start).startOf("month"),
-          DateTime.fromISO(specs.monthRange.end).endOf("month")
+          DateTime.fromISO(specs.period.start, { zone: "utc" }),
+          DateTime.fromISO(specs.period.end, { zone: "utc" })
         )
-          .splitBy({ months: 1 })
-          .map((interval) => ({
-            year: interval.start!.year,
-            month: interval.start!.month,
-          }))
       : undefined;
+    console.log({ specs, period });
     const monthlyReports =
       await this.accountReportRepository.getMonthlyAccountReports({
         accountIds,
-        months,
+        period,
         accountTypes: specs.accountTypes ?? ["credit", "loan", "debit", "cash"],
       });
     const accounts = await this.accountResolver
@@ -62,7 +58,7 @@ export class AccountReportsServices {
         displayName: accounts[report.accountId.value].displayName,
         type: accounts[report.accountId.value].type,
       },
-      month: report.month.toFormat("yyyy-MM"),
+      month: report.period.start!.toFormat("yyyy-MM"),
       spentAmount: report.amount,
       creditLimit: report.limit,
     }));
@@ -73,6 +69,10 @@ export class AccountReportsServices {
         account: {
           displayName: accounts[report.accountId.value].displayName,
           type: accounts[report.accountId.value].type,
+        },
+        statementPeriod: {
+          start: report.period.start!.toISODate()!,
+          end: report.period.end!.toISODate()!,
         },
         dueAmount: report.amount,
         dueDate: report.dueDate!.toISODate()!,

@@ -1,11 +1,13 @@
-import { sql } from "drizzle-orm";
+import { MonthlyAccountReportSpecs } from "@/modules/reports/domain/account-report";
+import { and, gte, inArray, lte, SQL, sql } from "drizzle-orm";
 import { date, numeric, pgView, text } from "drizzle-orm/pg-core";
 
 export const monthlyAccountReports = pgView("monthly_account_reports", {
   accountId: text("account_id").notNull(),
   accountType: text("account_type").notNull(),
   userId: text("user_id").notNull(),
-  month: text("month").notNull(),
+  statementStartDate: date("statement_start_date", { mode: "date" }).notNull(),
+  statementEndDate: date("statement_end_date", { mode: "date" }).notNull(),
   transactionType: text("transaction_type").notNull(),
   dueDate: date("due_date", { mode: "date" }),
   journalId: text("journal_id").notNull(),
@@ -19,15 +21,57 @@ export const monthlyAccountReports = pgView("monthly_account_reports", {
     a.type AS account_type,
     a.user_id AS user_id,
     j.currency AS currency,
-    TO_CHAR(t.date, 'YYYYMM') AS "month",
     t.type AS "transaction_type",
+    -- Due Date Logic
     CASE WHEN a.type = 'credit' THEN
-      CONCAT(TO_CHAR(t.date + interval '1 month', 'YYYYMM'), LPAD((a.statement_day + a.grace_period_in_days - 1)::text, 2, '0'))::date
+      -- statement_end_date + grace_period_in_days
+      CASE WHEN a.statement_day IS NOT NULL THEN
+        CASE WHEN EXTRACT(DAY FROM t.date) >= a.statement_day THEN
+        (make_date (EXTRACT(YEAR FROM t.date + interval '1 month')::int,
+            EXTRACT(MONTH FROM t.date + interval '1 month')::int,
+            a.statement_day) - interval '1 day') + (a.grace_period_in_days || ' days')::interval
+      ELSE
+        (make_date (EXTRACT(YEAR FROM t.date)::int,
+            EXTRACT(MONTH FROM t.date)::int,
+            a.statement_day) - interval '1 day') + (a.grace_period_in_days || ' days')::interval
+        END
+      ELSE
+        ((DATE_TRUNC('month', t.date) + interval '1 month - 1 day')::date + a.grace_period_in_days)
+      END
     WHEN a.type = 'loan' THEN
       a.loan_end_date
     ELSE
       NULL
     END AS due_date,
+    -- Statement Period Start (use statement_day if available, else 1st of month)
+    CASE WHEN a.statement_day IS NOT NULL THEN
+      -- If today is June 1st and statement_day is 15, then last month's 15th
+      CASE WHEN EXTRACT(DAY FROM t.date) >= a.statement_day THEN
+        make_date (EXTRACT(YEAR FROM t.date)::int,
+          EXTRACT(MONTH FROM t.date)::int,
+          a.statement_day)
+      ELSE
+        make_date (EXTRACT(YEAR FROM t.date - interval '1 month')::int,
+          EXTRACT(MONTH FROM t.date - interval '1 month')::int,
+          a.statement_day)
+      END
+    ELSE
+      DATE_TRUNC('month', t.date)::date
+    END AS statement_start_date,
+    -- Statement Period End (1 day before next statement_day, or end of month)
+    CASE WHEN a.statement_day IS NOT NULL THEN
+      CASE WHEN EXTRACT(DAY FROM t.date) >= a.statement_day THEN
+      (make_date (EXTRACT(YEAR FROM t.date + interval '1 month')::int,
+          EXTRACT(MONTH FROM t.date + interval '1 month')::int,
+          a.statement_day) - interval '1 day')::date
+    ELSE
+      (make_date (EXTRACT(YEAR FROM t.date)::int,
+          EXTRACT(MONTH FROM t.date)::int,
+          a.statement_day) - interval '1 day')::date
+      END
+    ELSE
+      (DATE_TRUNC('month', t.date) + interval '1 month - 1 day')::date
+    END AS statement_end_date,
     ja.journal_id AS journal_id,
     SUM(
       CASE WHEN t.amount IS NOT NULL THEN
@@ -42,8 +86,7 @@ export const monthlyAccountReports = pgView("monthly_account_reports", {
         a. "limit"
       ELSE
         NULL
-      END) AS
-  LIMIT
+      END) AS limit
   FROM
     accounts a
     LEFT JOIN journal_accounts ja ON a.id = ja.account_id
@@ -56,9 +99,46 @@ export const monthlyAccountReports = pgView("monthly_account_reports", {
     ja.journal_id,
     t.type,
     j.currency,
-    "month",
-    "due_date"
+    statement_start_date,
+    statement_end_date,
+    due_date
   HAVING
     t.type IS NOT NULL
     AND j.currency IS NOT NULL`
 );
+
+export function mapToMonthlyAccountReportSQLConditions(
+  specs: MonthlyAccountReportSpecs
+) {
+  const conditions = new Array<SQL<unknown>>();
+  if (specs.accountIds) {
+    conditions.push(
+      inArray(
+        monthlyAccountReports.accountId,
+        specs.accountIds.map(({ value }) => value)
+      )
+    );
+  }
+  if (specs.accountTypes) {
+    conditions.push(
+      inArray(monthlyAccountReports.accountType, [
+        ...new Set(specs.accountTypes),
+      ])
+    );
+  }
+  if (specs.period) {
+    conditions.push(
+      and(
+        gte(
+          monthlyAccountReports.statementStartDate,
+          specs.period.start!.toJSDate()
+        ),
+        lte(
+          monthlyAccountReports.statementEndDate,
+          specs.period.end!.toJSDate()
+        )
+      )!
+    );
+  }
+  return conditions;
+}
