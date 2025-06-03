@@ -13,7 +13,7 @@ import {
   AccountSelectProps,
   TransactionForm,
 } from "@/modules/journals/presentation/components/transaction/transaction-form";
-import { AccountSummary } from "@/modules/reports/application/dto/dtos.types";
+import { AccountSummaryDto } from "@/modules/reports/application/dto/dtos.types";
 import { MonthlyUsage } from "@/modules/reports/presentation/components/monthly-usage";
 import { PaymentDueRow } from "@/modules/reports/presentation/components/payment-due";
 import { JournalDetailsPageLabels } from "./labels";
@@ -195,7 +195,7 @@ export function DeleteTransactionDialog({
 
 interface ViewAccountReportDialogProps {
   labels: JournalDetailsPageLabels;
-  accountReports?: AccountSummary;
+  accountReports?: AccountSummaryDto;
 }
 
 export function ViewAccountReportDialog({

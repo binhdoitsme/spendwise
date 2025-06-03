@@ -2,12 +2,17 @@ import { JournalId } from "@/modules/journals/domain/journal";
 import { AccountId } from "@/modules/shared/domain/identifiers";
 import { DateTime, Interval } from "luxon";
 import { reportErrors } from "../../domain/errors";
-import { AccountReportRepository } from "../../domain/repositories";
+import {
+  AccountReportRepository,
+  JournalReportRepository,
+} from "../../domain/repositories";
 import { AccountBasic, AccountResolver } from "../contracts/account-resolver";
 import { JournalResolver } from "../contracts/journal-resolver";
 import {
-  AccountSummary,
+  AccountSummaryDto,
   AccountSummaryQueryInput,
+  JournalSummaryDto,
+  JournalSummaryQueryInput,
   MonthlySpend,
   PaymentDue,
 } from "../dto/dtos.types";
@@ -15,13 +20,14 @@ import {
 export class AccountReportsServices {
   constructor(
     private readonly accountReportRepository: AccountReportRepository,
+    private readonly journalReportRepository: JournalReportRepository,
     private readonly accountResolver: AccountResolver,
     private readonly journalResolver: JournalResolver
   ) {}
 
   async getMonthlyAccountSummary(
     specs: AccountSummaryQueryInput
-  ): Promise<AccountSummary> {
+  ): Promise<AccountSummaryDto> {
     const accountIds = specs.journalId
       ? await this.journalResolver
           .resolveOne(new JournalId(specs.journalId))
@@ -38,7 +44,6 @@ export class AccountReportsServices {
           DateTime.fromISO(specs.period.end, { zone: "utc" })
         )
       : undefined;
-    console.log({ specs, period });
     const monthlyReports =
       await this.accountReportRepository.getMonthlyAccountReports({
         accountIds,
@@ -81,6 +86,41 @@ export class AccountReportsServices {
     return {
       monthlySpends,
       upcomingDues,
+    };
+  }
+
+  async getMonthlySummary(
+    specs: JournalSummaryQueryInput
+  ): Promise<JournalSummaryDto> {
+    const journalId = new JournalId(specs.journalId);
+    const month = DateTime.fromFormat(specs.month, "yyyyMM");
+    const summary = await this.journalReportRepository.getMonthlyJournalSummary(
+      {
+        month,
+        journalId,
+      }
+    );
+    const prevMonthSummary =
+      await this.journalReportRepository.getMonthlyJournalSummary({
+        month: month.minus({ months: 1 }),
+        journalId,
+      });
+    const journal = (await this.journalResolver.resolveOne(journalId))!;
+    const accounts = await this.accountResolver.resolveMany(journal.accountIds);
+    return {
+      accounts: accounts.map((account) => ({
+        id: account.id.value,
+        name: account.displayName,
+        value: summary?.amountsByAccount?.get(account.id.value)?.amount ?? 0,
+      })),
+      currency: journal.currency,
+      month: specs.month,
+      spendingTags: Array.from(summary?.amountsByTag.entries() ?? []).map(
+        ([tag, amount]) => ({ name: tag, amount: amount.amount })
+      ),
+      spentChange:
+        (summary?.total?.amount ?? 0) - (prevMonthSummary?.total?.amount ?? 0),
+      totalSpent: summary?.total?.amount ?? 0,
     };
   }
 }

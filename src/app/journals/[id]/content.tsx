@@ -11,10 +11,8 @@ import {
 } from "@/modules/journals/application/dto/dtos.types";
 import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
 import { Collaborators } from "@/modules/journals/presentation/components/collaborator-avatars";
-import { tagColors } from "@/modules/journals/presentation/components/tag/tag-colors";
-import { Tags } from "@/modules/journals/presentation/components/tag/tag-item";
 import { FilterSchema } from "@/modules/journals/presentation/components/transaction/transaction-filters";
-import { AccountSummary } from "@/modules/reports/application/dto/dtos.types";
+import { AccountSummaryDto } from "@/modules/reports/application/dto/dtos.types";
 import { ReportsApi } from "@/modules/reports/presentation/contracts/reports.api";
 import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
 import { DateTime } from "luxon";
@@ -28,7 +26,7 @@ import { TransactionTab } from "./transaction-tab";
 export interface FinanceJournalPageContentProps {
   journal: JournalDetailedDto;
   myAccounts: AccountBasicDto[];
-  accountSummary: AccountSummary;
+  accountSummary: AccountSummaryDto;
 }
 
 const toDateRange = (filters: Partial<FilterSchema>) => {
@@ -67,7 +65,7 @@ const toDateRange = (filters: Partial<FilterSchema>) => {
 export function FinanceJournalPageContent(
   props: FinanceJournalPageContentProps
 ) {
-  const [currentTab, setCurrentTab] = useState("summary");
+  const [currentTab, setCurrentTab] = useState("summary_transactions");
   const [journal, setJournal] = useState(props.journal);
   const [myAccounts, setMyAccounts] = useState(props.myAccounts);
   const [accountSummary, setAccountSummary] = useState(props.accountSummary);
@@ -92,10 +90,10 @@ export function FinanceJournalPageContent(
     authContext.user?.email,
     labels.you
   );
-  const colorizedTags = journal.tags.map((tag, index) => ({
-    ...tag,
-    color: tagColors[index],
-  }));
+  // const colorizedTags = journal.tags.map((tag, index) => ({
+  //   ...tag,
+  //   color: tagColors[index],
+  // }));
 
   const handleRefreshJournal = async () => {
     const dateRange = currentFilters ? toDateRange(currentFilters) : undefined;
@@ -104,7 +102,6 @@ export function FinanceJournalPageContent(
       start: now.startOf("month").minus({ months: 1 }).toISODate(),
       end: now.endOf("month").toISODate(),
     };
-    console.log({ recent2Months });
     const [refreshedJournal, refreshedAccountSummary, refreshedTransactions] =
       await Promise.all([
         journalApi.getJournalById(props.journal.id),
@@ -161,7 +158,7 @@ export function FinanceJournalPageContent(
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-[1000px] max-h-screen mx-auto">
+    <div className="p-6 space-y-6 max-w-[1600px] max-h-screen mx-auto">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold">
@@ -181,27 +178,49 @@ export function FinanceJournalPageContent(
             }))}
           />
         </div>
-        <Tags tags={colorizedTags} />
+        {/* <Tags tags={colorizedTags} /> */}
       </div>
 
       {/* Tabs */}
       <Tabs
         value={currentTab}
         // defaultValue="transactions"
-        defaultValue="summary"
+        defaultValue="summary_transactions"
         onValueChange={setCurrentTab}
         className="w-full"
       >
         <TabsList className="mb-2 gap-1">
-          <TabsTrigger value="summary">{labels.summary}</TabsTrigger>
-          <TabsTrigger value="transactions">{labels.transactions}</TabsTrigger>
+          {/* <TabsTrigger value="summary">{labels.summary}</TabsTrigger> */}
+          <TabsTrigger value="summary_transactions">
+            {labels.transactions}
+          </TabsTrigger>
           <TabsTrigger value="accounts">{labels.accounts}</TabsTrigger>
           <TabsTrigger value="access">{labels.access}</TabsTrigger>
           {/* <TabsTrigger value="settings">Settings</TabsTrigger> */}
         </TabsList>
 
-        <TabsContent value="summary">
-          <SummaryTab accountSummary={accountSummary} />
+        <TabsContent value="summary_transactions">
+          <div className="grid grid-cols-11">
+            <div className="col-span-5 pr-4 border-r">
+              <SummaryTab
+                accountSummary={accountSummary}
+                reportsApi={reportsApi}
+                journalId={journal.id}
+              />
+            </div>
+            <div className="col-span-6 pl-4 border-l">
+              <TransactionTab
+                journal={journal}
+                journalApi={journalApi}
+                reportsApi={reportsApi}
+                currentFilters={currentFilters}
+                handleSearch={handleSearch}
+                handleQuickFilters={handleQuickFilters}
+                handleRefreshJournal={handleRefreshJournal}
+                handleNoAccount={() => setCurrentTab("accounts")}
+              />
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="accounts">
@@ -221,19 +240,6 @@ export function FinanceJournalPageContent(
             journal={journal}
             api={journalApi}
             handleRefreshJournal={handleRefreshJournal}
-          />
-        </TabsContent>
-
-        <TabsContent value="transactions">
-          <TransactionTab
-            journal={journal}
-            journalApi={journalApi}
-            reportsApi={reportsApi}
-            currentFilters={currentFilters}
-            handleSearch={handleSearch}
-            handleQuickFilters={handleQuickFilters}
-            handleRefreshJournal={handleRefreshJournal}
-            handleNoAccount={() => setCurrentTab("accounts")}
           />
         </TabsContent>
       </Tabs>

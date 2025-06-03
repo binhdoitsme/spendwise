@@ -8,6 +8,7 @@ import { DrizzleAccountReportRepository } from "./infrastructure/db/repositories
 import * as schema from "./infrastructure/db/schemas";
 import { DrizzleReportAccountResolver } from "./infrastructure/external/account-resolver";
 import { DrizzleReportJournalResolver } from "./infrastructure/external/journal-resolver";
+import { DrizzleJournalReportRepository } from "./infrastructure/db/repositories/journal-report.repository";
 
 export function provideAccountReportServices(
   connectionPool: Pool = getDbConnectionPool()
@@ -16,12 +17,16 @@ export function provideAccountReportServices(
   const accountReportRepository = new DrizzleAccountReportRepository(
     dbInstance
   );
+  const journalReportRepository = new DrizzleJournalReportRepository(
+    dbInstance
+  );
   const journalRepository = provideJournalRepository(connectionPool);
   const journalResolver = new DrizzleReportJournalResolver(journalRepository);
   const accountRepository = provideAccountRepository(connectionPool);
   const accountResolver = new DrizzleReportAccountResolver(accountRepository);
   return new AccountReportsServices(
     accountReportRepository,
+    journalReportRepository,
     accountResolver,
     journalResolver
   );

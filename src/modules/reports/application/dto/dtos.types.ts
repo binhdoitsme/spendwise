@@ -4,10 +4,16 @@ export interface AccountSummaryQueryInput {
   journalId?: string;
   accountId?: string;
   accountTypes?: ("cash" | "debit" | "credit" | "loan")[];
+  dimension?: "month" | "statement";
   period?: {
     start: string;
     end: string;
   };
+}
+
+export interface JournalSummaryQueryInput {
+  journalId: string;
+  month: string;
 }
 
 export interface PaymentDue {
@@ -27,7 +33,22 @@ export interface MonthlySpend {
   creditLimit?: MoneyAmount;
 }
 
-export interface AccountSummary {
+export interface AccountSummaryDto {
   upcomingDues: PaymentDue[];
   monthlySpends: MonthlySpend[];
+}
+
+export interface AccountSpentDto {
+  id: string;
+  name: string;
+  value: number;
+}
+
+export interface JournalSummaryDto {
+  month: string;
+  totalSpent: number;
+  spentChange: number;
+  spendingTags: { name: string; amount: number }[];
+  accounts: AccountSpentDto[];
+  currency: string;
 }

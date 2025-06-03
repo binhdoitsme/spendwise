@@ -11,7 +11,7 @@ export type JournalFormSchema = z.infer<typeof journalFormSchema>;
 export const transactionFormSchema = z.object({
   id: z.string().optional(),
   title: z.string().nonempty("Name is required"),
-  amount: z.number().min(0, "Amount must be positive"),
+  amount: z.number(),
   date: z.date(),
   account: z.string().nonempty("Account is required"),
   tags: z.array(z.string()).nonempty(),
