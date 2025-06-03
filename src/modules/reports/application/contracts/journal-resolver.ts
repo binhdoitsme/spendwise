@@ -4,6 +4,7 @@ import { AccountId } from "@/modules/shared/domain/identifiers";
 export interface JournalBasic {
   id: JournalId;
   accountIds: AccountId[];
+  currency: string;
 }
 
 export abstract class JournalResolver {

@@ -28,10 +28,10 @@ import {
 import { AccountSelectProps } from "@/modules/journals/presentation/components/transaction/transaction-form";
 import { TransactionItem } from "@/modules/journals/presentation/components/transaction/transaction-item";
 import { TransactionSearch } from "@/modules/journals/presentation/components/transaction/transaction-search";
-import { AccountSummary } from "@/modules/reports/application/dto/dtos.types";
+import { AccountSummaryDto } from "@/modules/reports/application/dto/dtos.types";
 import { ReportsApi } from "@/modules/reports/presentation/contracts/reports.api";
 import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
-import { PlusIcon } from "lucide-react";
+import { Banknote, PlusIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -71,7 +71,7 @@ export function TransactionTab({
   const [selectedTransaction, setSelectedTransaction] =
     useState<TransactionDetailedDto>();
   const [currentAccountReports, setCurrentAccountReports] =
-    useState<AccountSummary>();
+    useState<AccountSummaryDto>();
 
   const authContext = useAuthContext();
   const { isLoading, loadingStart, loadingEnd } = useLoader();
@@ -257,7 +257,12 @@ export function TransactionTab({
   );
 
   return (
-    <>
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <Banknote className="w-5 h-5" /> {labels.transactions}
+        </h2>
+      </div>
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
         <div className="flex flex-1 gap-2 w-full md:max-w-md">
           <TransactionSearch
@@ -334,7 +339,7 @@ export function TransactionTab({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { duration: 0.125 } }}
               exit={{ opacity: 0 }}
-              className="max-h-[calc(100vh-450px)] overflow-scroll pr-2"
+              className="max-h-[calc(100vh-400px)] overflow-scroll pr-2"
             >
               <div className="space-y-4">
                 {Object.entries(groupedByDate).length === 0 && (
@@ -377,6 +382,6 @@ export function TransactionTab({
           )}
         </AnimatePresence>
       </div>
-    </>
+    </div>
   );
 }

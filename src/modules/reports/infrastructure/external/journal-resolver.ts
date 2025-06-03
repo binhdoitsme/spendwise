@@ -1,4 +1,7 @@
-import { JournalResolver, JournalBasic } from "../../application/contracts/journal-resolver";
+import {
+  JournalResolver,
+  JournalBasic,
+} from "../../application/contracts/journal-resolver";
 import { JournalRepository } from "@/modules/journals/domain/repositories";
 import { JournalId } from "@/modules/journals/domain/journal";
 import { AccountId } from "@/modules/shared/domain/identifiers";
@@ -14,6 +17,7 @@ export class DrizzleReportJournalResolver implements JournalResolver {
       accountIds: Array.from(journal.accounts.keys()).map(
         (accountId) => new AccountId(accountId)
       ),
+      currency: journal.currency,
     };
   }
 }
