@@ -9,55 +9,24 @@ import type {
 } from "@/modules/reports/application/dto/dtos.types";
 import { MonthlySummary } from "@/modules/reports/presentation/components/monthly-summary";
 import { PaymentDueRow } from "@/modules/reports/presentation/components/payment-due";
-import { ReportsApi } from "@/modules/reports/presentation/contracts/reports.api";
 import { CalendarClock, Notebook } from "lucide-react";
-import { DateTime } from "luxon";
-import { useEffect, useState } from "react";
 import { journalDetailsPageLabels } from "./labels";
-
-// const getThisMonth = (date: Date, language: string) => {
-//   switch (language) {
-//     case "vi":
-//       return date.toLocaleDateString("vi-VN", {
-//         month: "long",
-//         year: "numeric",
-//       });
-//     default:
-//       return date.toLocaleDateString("en-US", {
-//         month: "long",
-//         year: "numeric",
-//       });
-//   }
-// };
-
-// const capitalize = (value: string) =>
-//   value.slice(0, 1).toUpperCase() + value.slice(1);
 
 export function SummaryTab({
   accountSummary,
-  reportsApi,
-  journalId,
+  monthlySummary,
+  handleNextMonth,
+  handlePrevMonth,
 }: {
   accountSummary: AccountSummaryDto;
-  reportsApi: ReportsApi;
-  journalId: string;
+  monthlySummary: JournalSummaryDto;
+  handleNextMonth: () => void;
+  handlePrevMonth: () => void;
 }) {
   const { language } = useI18n();
   const labels = journalDetailsPageLabels[language];
   // const thisMonth = capitalize(getThisMonth(new Date(), language));
-  const { isLoading, loadingStart, loadingEnd } = useLoader();
-  const [month, setMonth] = useState(DateTime.utc().minus({ months: 1 }));
-  const [monthlySummary, setMonthlySummary] = useState<JournalSummaryDto>();
-
-  useEffect(() => {
-    reportsApi
-      .getJournalSummary({
-        journalId,
-        month: month.toFormat("yyyyMM"),
-      })
-      .then((summary) => setMonthlySummary(summary))
-      .finally(() => loadingEnd());
-  }, [month, reportsApi, journalId, loadingEnd]);
+  const { isLoading } = useLoader();
 
   return (
     <div className="space-y-4">
@@ -67,6 +36,14 @@ export function SummaryTab({
         </h2>
       </div>
       <div className="overflow-scroll max-h-[calc(100vh-400px)] space-y-4">
+        {monthlySummary && (
+          <MonthlySummary
+            monthlySummary={monthlySummary}
+            isNavigatingMonth={isLoading}
+            handleNextMonth={handleNextMonth}
+            handlePrevMonth={handlePrevMonth}
+          />
+        )}
         {!accountSummary?.upcomingDues?.length &&
         !accountSummary?.monthlySpends?.length ? (
           <div className="text-center text-muted-foreground">
@@ -105,20 +82,6 @@ export function SummaryTab({
                 )}
               </CardContent>
             </Card> */}
-            {monthlySummary && (
-              <MonthlySummary
-                monthlySummary={monthlySummary}
-                isNavigatingMonth={isLoading}
-                handleNextMonth={() => {
-                  loadingStart();
-                  setMonth((month) => month.plus({ months: 1 }));
-                }}
-                handlePrevMonth={() => {
-                  loadingStart();
-                  setMonth((month) => month.minus({ months: 1 }));
-                }}
-              />
-            )}
           </>
         )}
       </div>

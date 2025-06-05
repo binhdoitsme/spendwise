@@ -1,12 +1,8 @@
 import { provideJournalServices } from "@/modules/journals/journal.module";
-import { NextRequest } from "next/server";
 import { ok } from "../../api-responses";
 
 // GET /journals/{id} -- get journal details by ID
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET({ params }: { params: Promise<{ id: string }> }) {
   const journalId = (await params).id;
   const journalService = provideJournalServices();
   const journal = await journalService.getJournalById(journalId);

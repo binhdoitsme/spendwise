@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 
 const LoaderContext = createContext({
   isLoading: false,
@@ -12,9 +12,7 @@ type LoadingHooks = {
   loadingEnd: () => void;
 };
 
-export function withLoading<Args extends unknown[], R>(
-  hooks: LoadingHooks
-) {
+export function withLoading<Args extends unknown[], R>(hooks: LoadingHooks) {
   return function (
     targetFn: (...args: Args) => R | Promise<R>
   ): (...args: Args) => Promise<R> {
@@ -38,8 +36,8 @@ export const LoaderProvider = ({ children }: { children: React.ReactNode }) => {
     <LoaderContext.Provider
       value={{
         isLoading,
-        loadingStart: () => setLoading(true),
-        loadingEnd: () => setLoading(false),
+        loadingStart: useCallback(() => setLoading(true), []),
+        loadingEnd: useCallback(() => setLoading(false), []),
       }}
     >
       {children}

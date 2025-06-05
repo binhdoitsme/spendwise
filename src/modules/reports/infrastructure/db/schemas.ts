@@ -1,5 +1,5 @@
 import { MonthlyAccountReportSpecs } from "@/modules/reports/domain/account-report";
-import { and, gte, inArray, lte, SQL, sql } from "drizzle-orm";
+import { and, between, inArray, SQL, sql } from "drizzle-orm";
 import { date, integer, numeric, pgView, text } from "drizzle-orm/pg-core";
 
 export const monthlyAccountReports = pgView("monthly_account_reports", {
@@ -129,12 +129,9 @@ export function mapToMonthlyAccountReportSQLConditions(
   if (specs.period) {
     conditions.push(
       and(
-        gte(
+        between(
           monthlyAccountReports.statementStartDate,
-          specs.period.start!.toJSDate()
-        ),
-        lte(
-          monthlyAccountReports.statementEndDate,
+          specs.period.start!.toJSDate(),
           specs.period.end!.toJSDate()
         )
       )!

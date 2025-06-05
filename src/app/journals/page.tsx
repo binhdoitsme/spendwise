@@ -52,7 +52,6 @@ export default function JournalListPage() {
   }, []);
 
   useEffect(() => {
-    console.log(labels.title);
     if (mounted) {
       document.title = labels.title;
     }

@@ -17,7 +17,7 @@ import {
   PaymentDue,
 } from "../dto/dtos.types";
 
-export class AccountReportsServices {
+export class ReportServices {
   constructor(
     private readonly accountReportRepository: AccountReportRepository,
     private readonly journalReportRepository: JournalReportRepository,
