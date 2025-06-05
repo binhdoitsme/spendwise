@@ -93,7 +93,7 @@ export class ReportServices {
     specs: JournalSummaryQueryInput
   ): Promise<JournalSummaryDto> {
     const journalId = new JournalId(specs.journalId);
-    const month = DateTime.fromFormat(specs.month, "yyyyMM");
+    const month = DateTime.fromFormat(specs.month, "yyyyMM", { zone: "utc" });
     const summary = await this.journalReportRepository.getMonthlyJournalSummary(
       {
         month,
