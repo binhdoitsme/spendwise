@@ -33,7 +33,7 @@ import { ReportsApi } from "@/modules/reports/presentation/contracts/reports.api
 import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
 import { Banknote, PlusIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { journalDetailsPageLabels } from "./labels";
 import {
@@ -70,8 +70,12 @@ export function TransactionTab({
   );
   const [selectedTransaction, setSelectedTransaction] =
     useState<TransactionDetailedDto>();
+  const [selectedAccountId, setSelectedAccountId] = useState<string>();
   const [currentAccountReports, setCurrentAccountReports] =
     useState<AccountSummaryDto>();
+  const [accountReportsCache, setAccountReportsCache] = useState<{
+    [key: string]: AccountSummaryDto;
+  }>({});
 
   const authContext = useAuthContext();
   const { isLoading, loadingStart, loadingEnd } = useLoader();
@@ -178,12 +182,27 @@ export function TransactionTab({
   };
 
   const showAccountReportsDialog = async (accountId: string) => {
-    setCurrentAccountReports(undefined);
+    setSelectedAccountId(accountId);
     setDialogType("accountReport");
     setOpen(true);
-    const reports = await reportsApi.getPaymentSummary({ accountId });
-    setCurrentAccountReports(reports);
   };
+
+  useEffect(() => {
+    setCurrentAccountReports(undefined);
+    if (selectedAccountId && !(selectedAccountId in accountReportsCache)) {
+      reportsApi
+        .getPaymentSummary({ accountId: selectedAccountId })
+        .then((reports) => {
+          setCurrentAccountReports(reports);
+          setAccountReportsCache((current) => ({
+            ...current,
+            [selectedAccountId]: reports,
+          }));
+        });
+    } else if (selectedAccountId) {
+      setCurrentAccountReports(accountReportsCache[selectedAccountId]);
+    }
+  }, [accountReportsCache, selectedAccountId, reportsApi]);
 
   const selectableAccounts = journal.accounts
     .map(({ ownerId, displayName, accountId }) => ({

@@ -4,19 +4,20 @@ import { useI18n } from "@/components/common/i18n";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccountBasicDto } from "@/modules/accounts/application/dto/dtos.types";
 import { AccountApi } from "@/modules/accounts/presentation/api/account.api";
+import { JournalAggregateApi } from "@/modules/aggregations/presentation/contracts/journal-reports.api";
 import { useAuthContext } from "@/modules/auth/presentation/components/auth-context";
-import {
-  JournalDetailedDto,
-  TransactionDetailedDto,
-} from "@/modules/journals/application/dto/dtos.types";
+import { JournalDetailedDto } from "@/modules/journals/application/dto/dtos.types";
 import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
 import { Collaborators } from "@/modules/journals/presentation/components/collaborator-avatars";
 import { FilterSchema } from "@/modules/journals/presentation/components/transaction/transaction-filters";
-import { AccountSummaryDto } from "@/modules/reports/application/dto/dtos.types";
+import {
+  AccountSummaryDto,
+  JournalSummaryDto,
+} from "@/modules/reports/application/dto/dtos.types";
 import { ReportsApi } from "@/modules/reports/presentation/contracts/reports.api";
 import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
 import { DateTime } from "luxon";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AccessTab } from "./access-tab";
 import { AccountTab } from "./account-tab";
 import { journalDetailsPageLabels } from "./labels";
@@ -27,6 +28,8 @@ export interface FinanceJournalPageContentProps {
   journal: JournalDetailedDto;
   myAccounts: AccountBasicDto[];
   accountSummary: AccountSummaryDto;
+  month: string;
+  journalSummary: JournalSummaryDto;
 }
 
 const toDateRange = (filters: Partial<FilterSchema>) => {
@@ -69,12 +72,17 @@ export function FinanceJournalPageContent(
   const [journal, setJournal] = useState(props.journal);
   const [myAccounts, setMyAccounts] = useState(props.myAccounts);
   const [accountSummary, setAccountSummary] = useState(props.accountSummary);
+  const [month, setMonth] = useState(
+    DateTime.fromFormat(props.month, "yyyyMM")
+  );
+  const [journalSummary, setJournalSummary] = useState(props.journalSummary);
   const [currentFilters, setFilters] = useState<
     Partial<FilterSchema> & { query?: string }
   >();
 
   const journalApi = useMemo(() => new JournalApi(), []);
   const accountApi = useMemo(() => new AccountApi(), []);
+  const journalReportApi = useMemo(() => new JournalAggregateApi(), []);
   const reportsApi = useMemo(() => new ReportsApi(), []);
 
   const authContext = useAuthContext();
@@ -90,45 +98,30 @@ export function FinanceJournalPageContent(
     authContext.user?.email,
     labels.you
   );
-  // const colorizedTags = journal.tags.map((tag, index) => ({
-  //   ...tag,
-  //   color: tagColors[index],
-  // }));
 
   const handleRefreshJournal = async () => {
-    const dateRange = currentFilters ? toDateRange(currentFilters) : undefined;
-    const now = DateTime.now();
-    const recent2Months = {
-      start: now.startOf("month").minus({ months: 1 }).toISODate(),
-      end: now.endOf("month").toISODate(),
-    };
-    const [refreshedJournal, refreshedAccountSummary, refreshedTransactions] =
-      await Promise.all([
-        journalApi.getJournalById(props.journal.id),
-        reportsApi.getPaymentSummary({
-          journalId: props.journal.id,
-          period: recent2Months,
-          accountTypes: ["credit", "loan"],
-        }),
-        journalApi.listTransactions(journal.id, {
-          creditOnly: currentFilters?.showCredit,
-          dateRange: dateRange,
-          query: currentFilters?.query,
-        }),
-      ]);
-    setJournal({ ...refreshedJournal, transactions: refreshedTransactions });
+    // console.trace("Here");
+    loadingStart();
+    const {
+      journal: refreshedJournal,
+      accountSummary: refreshedAccountSummary,
+      journalSummary: refreshedJournalSummary,
+    } = await journalReportApi.getAggregatedJournal({
+      journalId: journal.id,
+      month: month.toFormat("yyyyMM"),
+      creditOnly: currentFilters?.showCredit,
+      query: currentFilters?.query,
+      today: DateTime.now().toISODate(),
+    });
+    setJournal(refreshedJournal);
     setAccountSummary(refreshedAccountSummary);
+    setJournalSummary(refreshedJournalSummary);
+    loadingEnd();
   };
 
   const handleRefreshAccounts = async () => {
     const refreshedAccountList = await accountApi.listAccounts();
     setMyAccounts(refreshedAccountList);
-  };
-
-  const refreshTransactionList = async (
-    transactions: TransactionDetailedDto[]
-  ) => {
-    setJournal({ ...journal, transactions });
   };
 
   const handleQuickFilters = async (filters: FilterSchema) => {
@@ -139,7 +132,7 @@ export function FinanceJournalPageContent(
       dateRange: dateRange,
       query: currentFilters?.query,
     });
-    await refreshTransactionList(transactions);
+    setJournal({ ...journal, transactions });
     setFilters({ ...currentFilters, ...filters });
     loadingEnd();
   };
@@ -152,10 +145,38 @@ export function FinanceJournalPageContent(
       dateRange: dateRange,
       query,
     });
-    await refreshTransactionList(transactions);
+    setJournal({ ...journal, transactions });
     setFilters({ ...currentFilters, query });
     loadingEnd();
   };
+
+  useEffect(() => {
+    (async () => {
+      loadingStart();
+      const {
+        journal: refreshedJournal,
+        accountSummary: refreshedAccountSummary,
+        journalSummary: refreshedJournalSummary,
+      } = await journalReportApi.getAggregatedJournal({
+        journalId: journal.id,
+        today: DateTime.now().toISODate(),
+        month: month.toFormat("yyyyMM"),
+        creditOnly: currentFilters?.showCredit,
+        query: currentFilters?.query,
+      });
+      setJournal(refreshedJournal);
+      setAccountSummary(refreshedAccountSummary);
+      setJournalSummary(refreshedJournalSummary);
+      loadingEnd();
+    })();
+  }, [
+    currentFilters,
+    month,
+    journal.id,
+    journalReportApi,
+    loadingStart,
+    loadingEnd,
+  ]);
 
   return (
     <div className="p-6 space-y-6 max-w-[1600px] max-h-screen mx-auto">
@@ -204,8 +225,13 @@ export function FinanceJournalPageContent(
             <div className="col-span-5 pr-4 border-r">
               <SummaryTab
                 accountSummary={accountSummary}
-                reportsApi={reportsApi}
-                journalId={journal.id}
+                monthlySummary={journalSummary}
+                handleNextMonth={() =>
+                  setMonth((month) => month.plus({ months: 1 }))
+                }
+                handlePrevMonth={() =>
+                  setMonth((month) => month.minus({ months: 1 }))
+                }
               />
             </div>
             <div className="col-span-6 pl-4 border-l">
