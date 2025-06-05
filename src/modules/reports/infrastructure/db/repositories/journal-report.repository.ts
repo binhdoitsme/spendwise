@@ -23,11 +23,14 @@ export class DrizzleJournalReportRepository implements JournalReportRepository {
     specs: MonthlyJournalReportSpecs
   ): Promise<MonthlyJournalSummary | undefined> {
     const { journalId, month } = specs;
-    const monthStart = DateTime.fromObject({
-      year: month.year,
-      month: month.month,
-      day: 1,
-    });
+    const monthStart = DateTime.fromObject(
+      {
+        year: month.year,
+        month: month.month,
+        day: 1,
+      },
+      { zone: "utc" }
+    );
     const periodStart = monthStart.toJSDate();
     const periodEnd = monthStart.plus({ months: 1 }).toJSDate();
     const journalAccountReports = await this.dbInstance
