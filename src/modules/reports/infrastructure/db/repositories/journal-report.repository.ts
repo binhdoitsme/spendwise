@@ -7,7 +7,7 @@ import {
   ISOCurrency,
   MoneyAmount,
 } from "@/modules/shared/presentation/currencies";
-import { and, between, eq } from "drizzle-orm";
+import { and, between, eq, gte, lt } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { DateTime } from "luxon";
 import * as schema from "../schemas";
@@ -39,7 +39,8 @@ export class DrizzleJournalReportRepository implements JournalReportRepository {
       .where(
         and(
           eq(monthlyJournalAccountReport.journalId, journalId.value),
-          between(monthlyJournalAccountReport.month, periodStart, periodEnd)
+          gte(monthlyJournalAccountReport.month, periodStart),
+          lt(monthlyJournalAccountReport.month, periodEnd)
         )
       );
     const journalTagReports = await this.dbInstance
