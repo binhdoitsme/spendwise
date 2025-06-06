@@ -5,10 +5,10 @@ import { provideAccountRepository } from "../accounts/account.module";
 import { provideJournalRepository } from "../journals/journal.module";
 import { ReportServices } from "./application/services/account-report.service";
 import { DrizzleAccountReportRepository } from "./infrastructure/db/repositories/account-report.repository";
+import { DrizzleJournalReportRepository } from "./infrastructure/db/repositories/journal-report.repository";
 import * as schema from "./infrastructure/db/schemas";
 import { DrizzleReportAccountResolver } from "./infrastructure/external/account-resolver";
 import { DrizzleReportJournalResolver } from "./infrastructure/external/journal-resolver";
-import { DrizzleJournalReportRepository } from "./infrastructure/db/repositories/journal-report.repository";
 
 export function provideReportServices(
   connectionPool: Pool = getDbConnectionPool()
