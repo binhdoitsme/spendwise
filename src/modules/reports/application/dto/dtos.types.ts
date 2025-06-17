@@ -17,13 +17,15 @@ export interface JournalSummaryQueryInput {
 }
 
 export interface PaymentDue {
-  account: { displayName: string; type: string };
+  account: { id: string; displayName: string; type: string };
   statementPeriod: {
     start: string; // ISO format
     end: string; // ISO format
   };
+  statementMonth: string; // yyyyMM format
   dueDate: string; // ISO format
   dueAmount: MoneyAmount;
+  isPaidOff: boolean;
 }
 
 export interface MonthlySpend {

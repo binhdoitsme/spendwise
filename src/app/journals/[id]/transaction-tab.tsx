@@ -81,10 +81,9 @@ export function TransactionTab({
   const { isLoading, loadingStart, loadingEnd } = useLoader();
   const { language } = useI18n();
   const labels = journalDetailsPageLabels[language];
-
   const colorizedTags = journal.tags.map((tag, index) => ({
     ...tag,
-    color: tagColors[index],
+    color: tagColors[index % tagColors.length],
   }));
 
   const handleCreateTransaction = async (data: TransactionFormSchema) => {
@@ -381,10 +380,12 @@ export function TransactionTab({
                           key={transaction.id}
                           transaction={{
                             ...transaction,
-                            detailedTags: transaction.tags.map(
-                              (tag) =>
-                                colorizedTags.find(({ id }) => id === tag)!
-                            ),
+                            detailedTags: transaction.tags
+                              .map(
+                                (tag) =>
+                                  colorizedTags.find(({ id }) => id === tag)!
+                              )
+                              .filter(Boolean),
                             detailedPaidBy: collaborators[transaction.paidBy],
                             detailedAccount: accounts[transaction.accountId],
                           }}

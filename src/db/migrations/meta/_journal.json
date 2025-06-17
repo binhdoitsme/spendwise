@@ -71,6 +71,20 @@
       "when": 1748966090794,
       "tag": "0009_AddJournalAccountAndTagReportView",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1750173165710,
+      "tag": "0010_AddRepayment",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1750176297417,
+      "tag": "0011_AddRepaymentStatus",
+      "breakpoints": true
     }
   ]
 }

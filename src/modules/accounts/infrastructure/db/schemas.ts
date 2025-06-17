@@ -53,7 +53,7 @@ export function mapAccountToDomain(row: typeof accounts.$inferSelect) {
         new UserId(row.userId),
         new AccountId(row.id),
         row.isActive,
-        DateTime.fromJSDate(row.createdAt)
+        DateTime.fromJSDate(row.createdAt, { zone: "utc" })
       );
     case "debit":
       return Account.debit(
@@ -63,7 +63,7 @@ export function mapAccountToDomain(row: typeof accounts.$inferSelect) {
         new UserId(row.userId),
         new AccountId(row.id),
         row.isActive,
-        DateTime.fromJSDate(row.createdAt)
+        DateTime.fromJSDate(row.createdAt, { zone: "utc" })
       );
     case "credit":
       return Account.credit(
@@ -72,24 +72,24 @@ export function mapAccountToDomain(row: typeof accounts.$inferSelect) {
         row.last4!,
         row.statementDay!,
         row.gracePeriodInDays!,
-        DateTime.fromJSDate(row.creditExpirationDate!),
+        DateTime.fromJSDate(row.creditExpirationDate!, { zone: "utc" }),
         new UserId(row.userId),
         row.limit ?? undefined,
         new AccountId(row.id),
         row.isActive,
-        DateTime.fromJSDate(row.createdAt)
+        DateTime.fromJSDate(row.createdAt, { zone: "utc" })
       );
     case "loan":
       return Account.loan(
         row.name,
         row.bankName!,
-        DateTime.fromJSDate(row.loanStartDate!),
-        DateTime.fromJSDate(row.loanEndDate!),
+        DateTime.fromJSDate(row.loanStartDate!, { zone: "utc" }),
+        DateTime.fromJSDate(row.loanEndDate!, { zone: "utc" }),
         row.originalAmount!,
         new UserId(row.userId),
         new AccountId(row.id),
         row.isActive,
-        DateTime.fromJSDate(row.createdAt)
+        DateTime.fromJSDate(row.createdAt, { zone: "utc" })
       );
   }
   throw Error(`Unknown account type: ${row.type}`);

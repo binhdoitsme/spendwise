@@ -17,6 +17,7 @@ export interface ReportingLabels {
   spent: string;
   limit: string;
   markAsPaid: string;
+  successfullyPaid: string;
   percentUsed: (percent: number) => string;
   today: string;
   tomorrow: string;
@@ -46,6 +47,7 @@ export const reportingLabels: Record<Language, ReportingLabels> = {
     spent: "Spent:",
     limit: "Limit:",
     markAsPaid: "Mark as Paid",
+    successfullyPaid: "Paid off",
     percentUsed: (percent) => `${percent}% used`,
     today: "Today",
     tomorrow: "Tomorrow",
@@ -72,6 +74,7 @@ export const reportingLabels: Record<Language, ReportingLabels> = {
     spent: "Đã chi:",
     limit: "Hạn mức:",
     markAsPaid: "Thanh toán",
+    successfullyPaid: "Đã thanh toán",
     percentUsed: (percent) => `Đã tiêu: ${percent}%`,
     today: "Hôm nay",
     tomorrow: "Ngày mai",

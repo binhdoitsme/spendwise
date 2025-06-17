@@ -4,6 +4,10 @@ import {
   JournalAccountResolver,
 } from "../../application/contracts/account-resolver";
 import { AccountRepository } from "@/modules/accounts/domain/repositories";
+import {
+  AccountType,
+  CreditAccountData,
+} from "@/modules/accounts/domain/account";
 
 export class DrizzleJournalAccountResolver implements JournalAccountResolver {
   constructor(private readonly accountRepository: AccountRepository) {}
@@ -17,6 +21,10 @@ export class DrizzleJournalAccountResolver implements JournalAccountResolver {
       id,
       displayName: account.getDisplayName(),
       type: account.type,
+      statementDay:
+        account.type === AccountType.CREDIT
+          ? (account.data as CreditAccountData).statementDay
+          : 1,
     };
   }
 
@@ -26,6 +34,10 @@ export class DrizzleJournalAccountResolver implements JournalAccountResolver {
       id: account.id,
       displayName: account.getDisplayName(),
       type: account.type,
+      statementDay:
+        account.type === AccountType.CREDIT
+          ? (account.data as CreditAccountData).statementDay
+          : 1,
     }));
   }
 }

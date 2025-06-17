@@ -1,7 +1,7 @@
 import { Language, Localizable } from "@/components/common/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CreditCard } from "lucide-react";
+import { CheckCircle, CreditCard } from "lucide-react";
 import { useMemo } from "react";
 import { PaymentDue } from "../../application/dto/dtos.types";
 import { reportingLabels } from "./labels";
@@ -72,9 +72,16 @@ function StatusBadge({
 
 export interface PaymentDueProps extends Localizable {
   item: PaymentDue;
+  format?: "compact" | "full";
+  handlePayoffButton?: () => void | Promise<void>;
 }
 
-export function PaymentDueRow({ item, language }: PaymentDueProps) {
+export function PaymentDueRow({
+  item,
+  format = "full",
+  language,
+  handlePayoffButton,
+}: PaymentDueProps) {
   const labels = reportingLabels[language];
   const currencyFormatter = useMemo(
     () =>
@@ -84,6 +91,7 @@ export function PaymentDueRow({ item, language }: PaymentDueProps) {
       }),
     [item.dueAmount.currency]
   );
+  console.log({ item });
   return (
     <div className="flex justify-between items-start border-b pb-3 last:border-b-0 last:pb-0">
       <div>
@@ -98,9 +106,11 @@ export function PaymentDueRow({ item, language }: PaymentDueProps) {
         <div className="text-sm text-muted-foreground">
           {labels.due} {formatDueDate(item.dueDate, language)}
         </div>
-        <div className="mt-1">
-          <StatusBadge dueDate={item.dueDate} language={language} />
-        </div>
+        {format === "full" && (
+          <div className="mt-1">
+            <StatusBadge dueDate={item.dueDate} language={language} />
+          </div>
+        )}
       </div>
       <div className="flex flex-col items-end justify-between gap-2 h-full">
         <div className="font-semibold flex justify-end gap-2">
@@ -109,7 +119,21 @@ export function PaymentDueRow({ item, language }: PaymentDueProps) {
             <MoreHorizontal />
           </Button> */}
         </div>
-        <Button variant="outline">{labels.markAsPaid}</Button>
+        {format === "full" && !item.isPaidOff && (
+          <Button variant="outline" onClick={handlePayoffButton}>
+            {labels.markAsPaid}
+          </Button>
+        )}
+        {format === "full" && item.isPaidOff && (
+          <Button
+            className="disabled:border-green-600 disabled:text-green-600"
+            variant="outline"
+            disabled
+            onClick={handlePayoffButton}
+          >
+            <CheckCircle /> {labels.successfullyPaid}
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -8,7 +8,8 @@ import {
   pgTable,
   primaryKey,
   text,
-  varchar
+  unique,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const journalAccounts = pgTable(
@@ -87,9 +88,32 @@ export const transactions = pgTable("transactions", {
   tags: varchar("tags").array(),
   status: transactionStatusEnum("status").notNull(),
   notes: text("notes"),
-  paidOffTransaction: text("paid_off_transaction"),
-  relatedTransactions: text("related_transactions").array(),
 });
+
+export const repayments = pgTable(
+  "repayments",
+  {
+    id: text("id").primaryKey(),
+    currency: text("currency").notNull(),
+    accountId: text("account_id").notNull(),
+    journalId: text("journal_id").notNull(),
+    amount: numeric("amount", { mode: "number" }).notNull(),
+    date: date("date", { mode: "date" }).notNull(),
+    statementPeriodStart: date("statement_period_start", {
+      mode: "date",
+    }).notNull(),
+    statementPeriodEnd: date("statement_period_end", {
+      mode: "date",
+    }).notNull(),
+  },
+  (t) => [
+    unique("repayment_keys").on(
+      t.accountId,
+      t.journalId,
+      t.statementPeriodStart
+    ),
+  ]
+);
 
 export const accountsRelations = relations(journalAccounts, ({ one }) => ({
   journal: one(journals, {
@@ -117,6 +141,14 @@ export const journalsRelations = relations(journals, ({ many }) => ({
   accounts: many(journalAccounts),
   collaborators: many(collaborators),
   transactions: many(transactions),
+  repayments: many(repayments),
+}));
+
+export const repaymentsRelations = relations(repayments, ({ one }) => ({
+  journal: one(journals, {
+    fields: [repayments.journalId],
+    references: [journals.id],
+  }),
 }));
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({

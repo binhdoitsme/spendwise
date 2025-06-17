@@ -26,4 +26,8 @@ export const journalErrors = {
     code: "TX-006",
     message: "Account is already in use in some transactions",
   } as ApplicationError,
+  accountNotFound: {
+    code: "TX-007",
+    message: "Account is not found",
+  },
 } as const;

@@ -1,12 +1,12 @@
 import { AccountId, UserId } from "@/modules/shared/domain/identifiers";
 import { ListingOptions } from "@/modules/shared/domain/specs";
 import { Email } from "@/modules/shared/domain/value-objects";
-import { DateTime } from "luxon";
+import { DateTime, Interval } from "luxon";
 import { JournalCollaboratorPermission } from "../../domain/collaborator";
 import { journalErrors } from "../../domain/errors";
 import { TransactionFactory } from "../../domain/factories";
 import { Journal, JournalId } from "../../domain/journal";
-import { PayoffService } from "../../domain/payoff";
+import { RepaymentService } from "../../domain/repayments";
 import {
   JournalRepository,
   TransactionRepository,
@@ -17,6 +17,7 @@ import { JournalUserResolver } from "../contracts/user-resolver";
 import {
   JournalCreateDto,
   JournalEditDto,
+  RepaymentPayload,
   TransactionCreateDto,
   TransactionEditDto,
 } from "../dto/dtos.types";
@@ -99,7 +100,9 @@ export class JournalServices {
       .filter((account) => account.type === "credit")
       .map((account) => account.id.value);
     const searchSpecs = {
-      accountIds: specs.creditOnly ? accountIds : undefined,
+      accountIds: specs.creditOnly
+        ? accountIds.map((id) => new AccountId(id))
+        : undefined,
       dateRange: specs.dateRange
         ? {
             start: DateTime.fromISO(specs.dateRange.start, { zone: "utc" }),
@@ -243,8 +246,6 @@ export class JournalServices {
       paidBy: new UserId(data.paidBy),
       tags: data.tags ?? [],
       notes: data.notes,
-      paidOffTransaction: undefined, // explicitly ask to mark as paid by/not paid by
-      relatedTransactions: [],
     });
     await this.transactionRepository.save(transaction);
     return transaction.id.value;
@@ -270,52 +271,36 @@ export class JournalServices {
     await this.transactionRepository.save(transaction);
   }
 
-  async markAsPaidOff(paidOffTransactionId: string, transactionIds: string[]) {
-    const paidOffTransactionIdObj = new TransactionId(paidOffTransactionId);
-    const paidOffTransaction = await this.transactionRepository.findById(
-      paidOffTransactionIdObj
+  async createRepayment(payload: RepaymentPayload) {
+    const { accountId, statementMonth } = payload;
+    const account = await this.accountResolver.resolveOne(
+      new AccountId(accountId)
     );
-    if (!paidOffTransaction) {
-      throw { code: 404, message: "Paid-off transaction not found" };
+    if (!account) {
+      throw journalErrors.accountNotFound;
     }
-    const alreadyPaidByPaidOffTransaction =
-      await this.transactionRepository.findAllByIds(
-        paidOffTransaction.relatedTransactions
-      );
-    const toBePaidOffTransactions =
-      await this.transactionRepository.findAllByIds(
-        transactionIds.map((id) => new TransactionId(id))
-      );
-    PayoffService.markAsPayoffTransaction(
-      paidOffTransaction,
-      alreadyPaidByPaidOffTransaction,
-      toBePaidOffTransactions
-    );
-    for (const transaction of toBePaidOffTransactions) {
-      await this.transactionRepository.save(transaction);
-    }
-  }
-
-  async clearPayoffStatus(transactionId: string) {
-    const transaction = await this.transactionRepository.findById(
-      new TransactionId(transactionId)
-    );
-    if (!transaction) {
-      throw { code: 404, message: "Transaction not found" };
-    }
-    if (!transaction.paidOffTransaction) {
-      return;
-    }
-    const paidOffTransaction = await this.transactionRepository.findById(
-      transaction.paidOffTransaction
-    );
-    if (!paidOffTransaction) {
-      throw { code: 404, message: "Paid-off transaction not found" };
-    }
-
-    PayoffService.clearPayoffStatus(transaction, paidOffTransaction);
-    await this.transactionRepository.save(transaction);
-    await this.transactionRepository.save(paidOffTransaction);
+    const statementMonthStart = DateTime.fromFormat(statementMonth, "yyyyMM", {
+      zone: "utc",
+    }).set({ day: account?.statementDay });
+    const statementMonthEnd = statementMonthStart.plus({ months: 1 });
+    const journal = await this.getBasicJournal(payload.journalId);
+    const transactions = await this.transactionRepository.findBy(journal.id, {
+      accountIds: [account.id],
+      dateRange: {
+        start: statementMonthStart!,
+        end: statementMonthEnd!,
+      },
+    });
+    const repayment = RepaymentService.createRepayment(journal, {
+      transactions,
+      statementPeriod: Interval.fromDateTimes(
+        statementMonthStart,
+        statementMonthEnd
+      ),
+      date: DateTime.fromISO(payload.paymentDate, { zone: "utc" }),
+    });
+    await this.journalRepository.save(journal);
+    return { id: repayment.id.value };
   }
 
   async removeTransaction(transactionId: string) {
@@ -349,22 +334,12 @@ export class JournalServices {
     await this.journalRepository.save(journal);
   }
 
-  async deleteTransaction(
-    userId: string,
-    transactionId: string,
-    removeRelated: boolean = false
-  ) {
+  async deleteTransaction(userId: string, transactionId: string) {
     const transaction = await this.transactionRepository.findById(
       new TransactionId(transactionId)
     );
     if (!transaction) {
       throw { code: 404, message: "Transaction not found" };
     }
-    if (removeRelated) {
-      for (const relatedTransaction of transaction.relatedTransactions) {
-        await this.transactionRepository.delete(relatedTransaction);
-      }
-    }
-    await this.transactionRepository.delete(transaction.id);
   }
 }
