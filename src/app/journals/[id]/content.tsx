@@ -18,6 +18,7 @@ import { ReportsApi } from "@/modules/reports/presentation/contracts/reports.api
 import { convertToCurrentUser } from "@/modules/users/presentation/components/display-user";
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { AccessTab } from "./access-tab";
 import { AccountTab } from "./account-tab";
 import { journalDetailsPageLabels } from "./labels";
@@ -150,6 +151,49 @@ export function FinanceJournalPageContent(
     loadingEnd();
   };
 
+  const handleRepayment = async ({
+    accountId,
+    statementMonth,
+    date,
+  }: {
+    accountId: string;
+    paymentAccountId: string;
+    paymentPaidBy: string;
+    statementMonth: string;
+    date: Date;
+  }) => {
+    try {
+      await journalApi.createRepayment({
+        journalId: journal.id,
+        accountId,
+        paymentDate: DateTime.fromJSDate(date, { zone: "utc" }).toISODate()!,
+        statementMonth,
+      });
+      setAccountSummary((summary) => {
+        const updatedAccountDueIndex = summary.upcomingDues.findIndex(
+          (due) =>
+            due.account.id === accountId &&
+            due.statementMonth === statementMonth
+        );
+        return {
+          ...summary,
+          upcomingDues: [
+            ...summary.upcomingDues.slice(0, updatedAccountDueIndex),
+            {
+              ...summary.upcomingDues[updatedAccountDueIndex],
+              isPaidOff: true,
+            },
+            ...summary.upcomingDues.slice(updatedAccountDueIndex + 1),
+          ],
+        };
+      });
+      toast("Successfully paid off!");
+    } catch (e) {
+      toast.error(`Error ${e}`);
+      throw e;
+    }
+  };
+
   useEffect(() => {
     (async () => {
       loadingStart();
@@ -232,6 +276,9 @@ export function FinanceJournalPageContent(
                 handlePrevMonth={() =>
                   setMonth((month) => month.minus({ months: 1 }))
                 }
+                handleRepayment={handleRepayment}
+                journalAccounts={journal.accounts}
+                journalCollaborators={journal.collaborators}
               />
             </div>
             <div className="col-span-6 pl-4 border-l">

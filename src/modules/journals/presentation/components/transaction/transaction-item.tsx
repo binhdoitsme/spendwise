@@ -45,6 +45,7 @@ export function TransactionItem({
   const formattedAmount = formatter.format(
     type !== "INCOME" ? -amount : amount
   );
+  console.log({transaction})
 
   return (
     <div className="grid grid-cols-9 items-start justify-between">

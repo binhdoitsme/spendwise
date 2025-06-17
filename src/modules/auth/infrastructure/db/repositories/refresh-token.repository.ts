@@ -59,10 +59,10 @@ export class DrizzleRefreshTokenRepository implements RefreshTokenRepository {
   ): RefreshToken {
     return new RefreshToken(
       tokenSchema.token,
-      DateTime.fromJSDate(tokenSchema.expiration),
+      DateTime.fromJSDate(tokenSchema.expiration, { zone: "utc" }),
       new UserId(tokenSchema.userId),
       new RefreshTokenId(tokenSchema.id),
-      DateTime.fromJSDate(tokenSchema.createdAt),
+      DateTime.fromJSDate(tokenSchema.createdAt, { zone: "utc" }),
       tokenSchema.isRevoked
     );
   }

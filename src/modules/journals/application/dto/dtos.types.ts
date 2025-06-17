@@ -110,6 +110,13 @@ export interface TransactionCreateDto {
   notes?: string;
 }
 
+export interface RepaymentPayload {
+  journalId: string;
+  accountId: string;
+  statementMonth: string;
+  paymentDate: string;
+}
+
 export {
   mapJournalToJournalBasicDto,
   mapJournalToJournalBasicWithTransactionsDto,

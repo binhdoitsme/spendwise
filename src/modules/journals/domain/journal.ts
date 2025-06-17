@@ -6,6 +6,7 @@ import { DateTime } from "luxon";
 import { JournalAccount } from "./account";
 import { Collaborator, JournalCollaboratorPermission } from "./collaborator";
 import { journalErrors } from "./errors";
+import { Repayment } from "./repayments";
 import { Tag } from "./tag";
 
 export class JournalId extends UUIDIdentifier {}
@@ -28,6 +29,7 @@ export class Journal {
     readonly ownerEmail: Email,
     public title: string,
     public currency: string, // Added currency field
+    private _repayments: Repayment[] = [],
     private _tags: Map<string, Tag> = new Map(),
     private _accounts: Map<string, JournalAccount> = new Map(),
     private _collaborators: Map<string, Collaborator> = new Map(),
@@ -133,6 +135,22 @@ export class Journal {
   }
   //#endregion Accounts
 
+  get repayments() {
+    return [...this._repayments];
+  }
+
+  addRepayment(repayment: Repayment) {
+    const existing = this._repayments.find(
+      (r) =>
+        r.accountId.equals(repayment.accountId) &&
+        r.journalId.equals(repayment.journalId) &&
+        r.statementPeriod.equals(repayment.statementPeriod)
+    );
+    if (!existing) {
+      this._repayments.push(repayment);
+    }
+  }
+
   static create(props: JournalCreate) {
     const id = new JournalId();
     return new Journal(
@@ -151,6 +169,7 @@ export class Journal {
       props.ownerEmail,
       props.title,
       props.currency,
+      props.repayments,
       props.tags,
       props.accounts,
       props.collaborators,

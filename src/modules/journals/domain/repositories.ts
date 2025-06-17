@@ -1,4 +1,4 @@
-import { UserId } from "@/modules/shared/domain/identifiers";
+import { AccountId, UserId } from "@/modules/shared/domain/identifiers";
 import { ListingOptions } from "@/modules/shared/domain/specs";
 import { DateTime } from "luxon";
 import { Journal, JournalId } from "./journal";
@@ -16,7 +16,7 @@ export abstract class JournalRepository {
 }
 
 export interface TransactionSearchSpecs {
-  accountIds?: string[];
+  accountIds?: AccountId[];
   query?: string;
   dateRange?: {
     start: DateTime;
@@ -34,7 +34,7 @@ export abstract class TransactionRepository {
   abstract findBy(
     journalId: JournalId,
     specs: TransactionSearchSpecs,
-    options: ListingOptions
+    options?: ListingOptions
   ): Promise<Transaction[]>;
   abstract save(transaction: Transaction): Promise<void>;
   abstract delete(transactionId: TransactionId): Promise<void>;

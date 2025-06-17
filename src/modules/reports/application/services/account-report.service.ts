@@ -72,6 +72,7 @@ export class ReportServices {
       .filter((report) => !!report.dueDate)
       .map((report) => ({
         account: {
+          id: report.accountId.value,
           displayName: accounts[report.accountId.value].displayName,
           type: accounts[report.accountId.value].type,
         },
@@ -79,8 +80,10 @@ export class ReportServices {
           start: report.period.start!.toISODate()!,
           end: report.period.end!.toISODate()!,
         },
+        statementMonth: report.period.start!.toFormat("yyyyMM"),
         dueAmount: report.amount,
         dueDate: report.dueDate!.toISODate()!,
+        isPaidOff: report.repaymentStatus,
       }));
 
     return {

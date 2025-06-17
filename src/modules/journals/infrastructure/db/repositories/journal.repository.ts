@@ -8,6 +8,7 @@ import { RichJournal } from "../../../domain/rich-journal";
 import {
   mapJournalFromDomain,
   mapJournalToDomain,
+  mapRepaymentFromDomain,
   mapTransactionToDomain,
 } from "../mappers";
 import * as schema from "../schemas";
@@ -23,6 +24,7 @@ export class DrizzleJournalRepository implements JournalRepository {
         accounts: true,
         collaborators: true,
         tags: true,
+        repayments: true,
       },
     });
     return schema ? mapJournalToDomain(schema) : undefined;
@@ -48,6 +50,7 @@ export class DrizzleJournalRepository implements JournalRepository {
         accounts: true,
         collaborators: true,
         tags: true,
+        repayments: true,
       },
     });
     const transactions = await this.dbInstance.query.transactions.findMany({
@@ -100,6 +103,7 @@ export class DrizzleJournalRepository implements JournalRepository {
         accounts: true,
         collaborators: true,
         tags: true,
+        repayments: true,
       },
     });
 
@@ -176,6 +180,21 @@ export class DrizzleJournalRepository implements JournalRepository {
               notInArray(collaborators.userId, collaboratorIds)
             )
           )
+      );
+      const repayments = journal.repayments.map(mapRepaymentFromDomain);
+      // TODO: do NOT insert duplicate rows w.r.t [account_id, journal_id, statement_period]
+      promises.push(
+        tx
+          .insert(schema.repayments)
+          .values(repayments)
+          .onConflictDoUpdate({
+            target: [
+              schema.repayments.accountId,
+              schema.repayments.journalId,
+              schema.repayments.statementPeriodStart,
+            ],
+            set: { amount: schema.repayments.amount },
+          })
       );
       await Promise.all(promises);
     });

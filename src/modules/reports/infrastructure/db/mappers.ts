@@ -19,6 +19,7 @@ export const mapToMonthlyAccountReport = (
       DateTime.fromJSDate(result.statementStartDate, { zone: "utc" }),
       DateTime.fromJSDate(result.statementEndDate, { zone: "utc" })
     ),
+    result.repaymentStatus,
     !!result.dueDate
       ? DateTime.fromJSDate(result.dueDate).setZone("utc", {
           keepLocalTime: true,

@@ -31,8 +31,6 @@ interface TransactionProps {
   tags: string[];
   status: TransactionStatus;
   notes?: string;
-  paidOffTransaction?: TransactionId;
-  relatedTransactions: TransactionId[];
 }
 
 export type TransactionCreate = Omit<TransactionProps, "id" | "status">;
@@ -51,9 +49,7 @@ export class Transaction implements TransactionProps {
     public paidBy: UserId,
     public tags: string[],
     private _status: TransactionStatus,
-    public notes?: string,
-    private _paidOffTransaction?: TransactionId,
-    private _relatedTransactions: TransactionId[] = [] // Added field
+    public notes?: string
   ) {}
 
   static create(
@@ -75,9 +71,7 @@ export class Transaction implements TransactionProps {
       props.paidBy,
       props.tags,
       status,
-      props.notes,
-      props.paidOffTransaction,
-      props.relatedTransactions
+      props.notes
     );
   }
 
@@ -93,9 +87,7 @@ export class Transaction implements TransactionProps {
       props.paidBy,
       props.tags,
       props.status,
-      props.notes,
-      props.paidOffTransaction,
-      props.relatedTransactions
+      props.notes
     );
   }
 
@@ -126,33 +118,5 @@ export class Transaction implements TransactionProps {
     this.tags = updates.tags ?? this.tags;
     this.notes = updates.notes ?? this.notes;
     return true;
-  }
-
-  get paidOffTransaction() {
-    return this._paidOffTransaction;
-  }
-
-  markPaidOffBy(transaction: Transaction) {
-    this._paidOffTransaction = transaction.id;
-  }
-
-  clearPayoffStatus() {
-    this._paidOffTransaction = undefined;
-  }
-
-  get relatedTransactions(): TransactionId[] {
-    return [...this._relatedTransactions];
-  }
-
-  addRelatedTransaction(transactionId: TransactionId) {
-    if (!this._relatedTransactions.some((id) => id.equals(transactionId))) {
-      this._relatedTransactions.push(transactionId);
-    }
-  }
-
-  removeRelatedTransaction(transactionId: TransactionId) {
-    this._relatedTransactions = this._relatedTransactions.filter(
-      (id) => !id.equals(transactionId)
-    );
   }
 }

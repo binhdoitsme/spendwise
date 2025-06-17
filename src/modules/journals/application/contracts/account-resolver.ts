@@ -4,6 +4,7 @@ export interface AccountBasic {
   id: AccountId;
   displayName: string;
   type: string;
+  statementDay: number;
 }
 
 export abstract class JournalAccountResolver {

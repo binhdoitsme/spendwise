@@ -15,6 +15,7 @@ export class MonthlyAccountReport {
     readonly journalId: JournalId,
     readonly amount: MoneyAmount,
     readonly period: Interval,
+    readonly repaymentStatus: boolean,
     readonly dueDate?: DateTime,
     readonly limit?: MoneyAmount
   ) {}

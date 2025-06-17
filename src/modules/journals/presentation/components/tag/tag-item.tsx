@@ -56,7 +56,7 @@ export function Tags({
           <Plus />
         </Badge>
       )}
-      {visibleTags.map((tag) => (
+      {visibleTags.filter(Boolean).map((tag) => (
         <TagItem key={tag.id} tag={tag} />
       ))}
       {handleManageTags && <ManageTagsButton onClick={handleManageTags} />}

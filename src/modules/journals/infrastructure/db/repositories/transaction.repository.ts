@@ -46,7 +46,12 @@ export class DrizzleTransactionRepository implements TransactionRepository {
     const conditions = [eq(transactions.journalId, journalId.value)];
 
     if (specs.accountIds) {
-      conditions.push(inArray(transactions.account, specs.accountIds));
+      conditions.push(
+        inArray(
+          transactions.account,
+          specs.accountIds.map(({ value }) => value)
+        )
+      );
     }
     if (specs.query) {
       const query = specs.query.toLowerCase();
@@ -69,13 +74,13 @@ export class DrizzleTransactionRepository implements TransactionRepository {
       .select()
       .from(transactions)
       .where(and(...conditions));
-    if (options.limit) {
+    if (options?.limit) {
       query.limit(options.limit);
     }
-    if (options.offset) {
+    if (options?.offset) {
       query.offset(options.offset);
     }
-    if (options.orderBy) {
+    if (options?.orderBy) {
       const orderBy = options.orderDesc ? desc : asc;
       const orderKey =
         options.orderBy as keyof typeof transactions.$inferSelect;

@@ -5,6 +5,7 @@ import { ListingOptions } from "@/modules/shared/domain/specs";
 import {
   JournalBasicDto,
   JournalDetailedDto,
+  RepaymentPayload,
   TransactionCreateDto,
   TransactionDetailedDto,
 } from "../../application/dto/dtos.types";
@@ -147,5 +148,13 @@ export class JournalApi extends ApiClientWrapper {
       url: `/api/journals/${journalId}/transactions/${transactionId}`,
     });
     console.log({ resp });
+  }
+
+  async createRepayment(payload: RepaymentPayload): Promise<string> {
+    const resp = await this.client.post<ResponseWithData<{ id: string }>>(
+      `/api/journals/${payload.journalId}/repayments`,
+      payload
+    );
+    return resp.data.data.id;
   }
 }

@@ -1,9 +1,10 @@
 import { AccountId, UserId } from "@/modules/shared/domain/identifiers";
 import { Email } from "@/modules/shared/domain/value-objects";
-import { DateTime } from "luxon";
+import { DateTime, Interval } from "luxon";
 import { JournalAccount } from "../../domain/account";
 import { Collaborator } from "../../domain/collaborator";
 import { Journal, JournalId as JournalDomainId } from "../../domain/journal";
+import { Repayment } from "../../domain/repayments";
 import { Tag } from "../../domain/tag";
 import {
   Transaction,
@@ -15,6 +16,7 @@ import {
   collaborators,
   journalAccounts,
   journals,
+  repayments,
   tags,
   transactions,
 } from "./schemas";
@@ -28,8 +30,10 @@ type RichJournalSchema = JournalSchema & {
   [collaborators._.name]: CollaboratorSchema[];
   [tags._.name]: TagSchema[];
   accounts: AccountSchema[];
+  repayments: RepaymentSchema[];
 };
 type TransactionSchema = typeof transactions.$inferSelect;
+type RepaymentSchema = typeof repayments.$inferSelect;
 
 export const mapJournalToDomain = (schema: RichJournalSchema): Journal => {
   return Journal.restore({
@@ -40,7 +44,7 @@ export const mapJournalToDomain = (schema: RichJournalSchema): Journal => {
     currency: schema.currency,
     requiresApproval: schema.requiresApproval,
     isArchived: schema.isArchived,
-    createdAt: DateTime.fromJSDate(schema.createdAt),
+    createdAt: DateTime.fromJSDate(schema.createdAt, { zone: "utc" }),
     accounts: schema.accounts
       .map((account) => mapAccountToDomain(account))
       .reduce<Map<string, JournalAccount>>((current, next) => {
@@ -59,6 +63,7 @@ export const mapJournalToDomain = (schema: RichJournalSchema): Journal => {
         current.set(next.id, next);
         return current;
       }, new Map()),
+    repayments: schema.repayments.map(mapRepaymentToDomain),
   });
 };
 
@@ -103,18 +108,13 @@ export const mapTransactionToDomain = (
     journalId: new JournalDomainId(schema.journalId),
     title: schema.title,
     amount: schema.amount,
-    date: DateTime.fromJSDate(schema.date),
+    date: DateTime.fromJSDate(schema.date, { zone: "utc" }),
     account: new AccountId(schema.account),
     type: TransactionType[schema.type],
     paidBy: new UserId(schema.paidBy),
     tags: schema.tags ?? [],
     status: TransactionStatus[schema.status],
     notes: schema.notes ?? undefined,
-    paidOffTransaction: schema.paidOffTransaction
-      ? new TransactionId(schema.paidOffTransaction)
-      : undefined,
-    relatedTransactions:
-      schema.relatedTransactions?.map((id) => new TransactionId(id)) ?? [],
   });
 };
 
@@ -133,8 +133,6 @@ export const mapTransactionFromDomain = (
     tags: transaction.tags,
     status: transaction.status,
     notes: transaction.notes ?? null,
-    paidOffTransaction: transaction.paidOffTransaction?.value ?? null,
-    relatedTransactions: transaction.relatedTransactions.map((id) => id.value),
   };
 };
 
@@ -142,7 +140,7 @@ export const mapAccountToDomain = (schema: AccountSchema): JournalAccount => {
   return new JournalAccount(
     new AccountId(schema.accountId),
     new UserId(schema.ownerId),
-    DateTime.fromJSDate(schema.createdAt)
+    DateTime.fromJSDate(schema.createdAt, { zone: "utc" })
   );
 };
 
@@ -154,4 +152,34 @@ export const mapCollaboratorToDomain = (
 
 export const mapTagToDomain = (schema: TagSchema): Tag => {
   return new Tag(schema.name);
+};
+
+export const mapRepaymentToDomain = (schema: RepaymentSchema): Repayment => {
+  return Repayment.restore({
+    id: schema.id,
+    accountId: schema.accountId,
+    journalId: schema.journalId,
+    amount: schema.amount,
+    currency: schema.currency,
+    date: DateTime.fromJSDate(schema.date, { zone: "utc" }),
+    statementPeriod: Interval.fromDateTimes(
+      DateTime.fromJSDate(schema.statementPeriodStart, { zone: "utc" }),
+      DateTime.fromJSDate(schema.statementPeriodEnd, { zone: "utc" })
+    ),
+  });
+};
+
+export const mapRepaymentFromDomain = (
+  repayment: Repayment
+): RepaymentSchema => {
+  return {
+    id: repayment.id.value,
+    accountId: repayment.accountId.value,
+    journalId: repayment.journalId.value,
+    amount: repayment.amount.amount,
+    currency: repayment.amount.currency,
+    date: repayment.date.toJSDate(),
+    statementPeriodStart: repayment.statementPeriod.start!.toJSDate(),
+    statementPeriodEnd: repayment.statementPeriod.end!.toJSDate(),
+  };
 };
