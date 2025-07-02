@@ -45,6 +45,7 @@ export const mapJournalToDomain = (schema: RichJournalSchema): Journal => {
     requiresApproval: schema.requiresApproval,
     isArchived: schema.isArchived,
     createdAt: DateTime.fromJSDate(schema.createdAt, { zone: "utc" }),
+    updatedAt: DateTime.fromJSDate(schema.updatedAt!, { zone: "utc" }),
     accounts: schema.accounts
       .map((account) => mapAccountToDomain(account))
       .reduce<Map<string, JournalAccount>>((current, next) => {
@@ -80,6 +81,7 @@ export const mapJournalFromDomain = (
       requiresApproval: journal.requiresApproval,
       isArchived: journal.isArchived,
       createdAt: journal.createdAt.toJSDate(),
+      updatedAt: journal.updatedAt?.toJSDate(),
     },
     Array.from(journal.accounts.values()).map((account) => ({
       journalId: journal.id.value,

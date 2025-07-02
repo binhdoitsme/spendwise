@@ -123,6 +123,7 @@ export class DrizzleJournalRepository implements JournalRepository {
             title: journalSchema.title,
             requiresApproval: journalSchema.requiresApproval,
             isArchived: journalSchema.isArchived,
+            updatedAt: journalSchema.updatedAt,
           },
         });
       const promises = new Array<Promise<unknown>>();

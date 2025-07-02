@@ -55,6 +55,21 @@ export class JournalServices {
     return journals.map(mapJournalToJournalBasicDto);
   }
 
+  async getJournalMeta(id: string): Promise<{ id: string; etag: string }> {
+    const journalId = new JournalId(id);
+    const journal = await this.journalRepository.findById(journalId);
+    if (!journal) {
+      throw this.journalNotFound;
+    }
+    const etag = Buffer.from(
+      `${id}|${journal.updatedAt.toFormat("yyyyMMddHHmmss")}`
+    ).toString("base64");
+    return {
+      id,
+      etag,
+    };
+  }
+
   async getJournalById(
     id: string,
     transactionOptions: ListingOptions = {
@@ -236,7 +251,12 @@ export class JournalServices {
   }
 
   async createTransaction(journalId: string, data: TransactionCreateDto) {
-    const journal = await this.getBasicJournal(journalId);
+    const journal = await this.journalRepository.findById(
+      new JournalId(journalId)
+    );
+    if (!journal) {
+      throw this.journalNotFound;
+    }
     const transaction = TransactionFactory.createTransaction(journal, {
       title: data.title,
       amount: data.amount,
@@ -247,8 +267,12 @@ export class JournalServices {
       tags: data.tags ?? [],
       notes: data.notes,
     });
-    await this.transactionRepository.save(transaction);
-    return transaction.id.value;
+    journal.updated();
+    await Promise.all([
+      this.transactionRepository.save(transaction),
+      this.journalRepository.save(journal),
+    ]);
+    return mapTransactionToDetailedDto(transaction);
   }
 
   async editTransaction(transactionId: string, data: TransactionEditDto) {
@@ -257,6 +281,12 @@ export class JournalServices {
     );
     if (!transaction) {
       throw { code: 404, message: "Transaction not found" };
+    }
+    const journal = await this.journalRepository.findById(
+      transaction.journalId
+    );
+    if (!journal) {
+      throw this.journalNotFound;
     }
     transaction.edit({
       title: data.title,
@@ -268,7 +298,11 @@ export class JournalServices {
       tags: data.tags,
       notes: data.notes,
     });
-    await this.transactionRepository.save(transaction);
+    journal.updated();
+    await Promise.all([
+      this.transactionRepository.save(transaction),
+      this.journalRepository.save(journal),
+    ]);
   }
 
   async createRepayment(payload: RepaymentPayload) {
@@ -299,12 +333,9 @@ export class JournalServices {
       ),
       date: DateTime.fromISO(payload.paymentDate, { zone: "utc" }),
     });
+    journal.updated();
     await this.journalRepository.save(journal);
     return { id: repayment.id.value };
-  }
-
-  async removeTransaction(transactionId: string) {
-    await this.transactionRepository.delete(new TransactionId(transactionId));
   }
 
   async addCollaborator(journalId: string, userId: string, permission: string) {
@@ -341,5 +372,14 @@ export class JournalServices {
     if (!transaction) {
       throw { code: 404, message: "Transaction not found" };
     }
+    const journal = await this.journalRepository.findById(
+      transaction.journalId
+    );
+    if (!journal) {
+      throw this.journalNotFound;
+    }
+    await this.transactionRepository.delete(transaction.id);
+    journal?.updated();
+    await this.journalRepository.save(journal);
   }
 }

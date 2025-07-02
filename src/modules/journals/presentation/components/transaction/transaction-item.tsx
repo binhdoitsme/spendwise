@@ -45,7 +45,6 @@ export function TransactionItem({
   const formattedAmount = formatter.format(
     type !== "INCOME" ? -amount : amount
   );
-  console.log({transaction})
 
   return (
     <div className="grid grid-cols-9 items-start justify-between">
@@ -57,39 +56,49 @@ export function TransactionItem({
           )}
           onClick={onTitleClick}
         >
-          {title}
+          {title.length > 30 ? `${title.slice(0, 30)}...` : title}
         </h4>
         <p className="text-sm text-muted-foreground">
           {firstName} {lastName}
         </p>
       </div>
-      <div
-        className={cn(
-          "col-span-2 flex items-center gap-2 text-sm",
-          "cursor-pointer hover:text-muted-foreground transition-colors duration-150"
-        )}
-        onClick={onAccountClick}
-      >
-        {detailedAccount.type.toLowerCase() === "cash" && <Wallet size="20" />}
-        {["credit", "debit"].includes(detailedAccount.type.toLowerCase()) && (
-          <CreditCard size="20" />
-        )}
-        {detailedAccount.displayName}
-      </div>
-      <div className="col-span-3 flex flex-col gap-1">
-        <Tags tags={detailedTags} />
-      </div>
-      <div className="col-span-1 flex flex-row justify-end gap-2 text-sm font-semibold min-w-[100px]">
-        <span
-          className={
-            formattedAmount.startsWith("-") ? "text-red-500" : "text-green-600"
-          }
+      <div className="col-span-6 grid grid-cols-1 md:grid-cols-6">
+        <div
+          className={cn(
+            "col-span-6 md:col-span-2 flex items-center justify-end md:justify-start gap-2 text-sm",
+            "cursor-pointer hover:text-muted-foreground transition-colors duration-150",
+            "order-2 md:order-none"
+          )}
+          onClick={onAccountClick}
         >
-          {formattedAmount}
-        </span>
-        {commands.length > 0 && (
-          <TransactionCommands commands={commands} transaction={transaction} />
-        )}
+          {detailedAccount.type.toLowerCase() === "cash" && (
+            <Wallet size="20" />
+          )}
+          {["credit", "debit"].includes(detailedAccount.type.toLowerCase()) && (
+            <CreditCard size="20" />
+          )}
+          {detailedAccount.displayName}
+        </div>
+        <div className="col-span-6 md:col-span-3 order-3 md:order-none flex flex-col justify-end md:justify-start gap-1">
+          <Tags tags={detailedTags} />
+        </div>
+        <div className="col-span-6 md:col-span-1 order-1 md:order-none flex flex-row justify-end gap-2 text-sm font-semibold h-fit">
+          <span
+            className={
+              formattedAmount.startsWith("-")
+                ? "text-red-500"
+                : "text-green-600"
+            }
+          >
+            {formattedAmount}
+          </span>
+          {commands.length > 0 && (
+            <TransactionCommands
+              commands={commands}
+              transaction={transaction}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
