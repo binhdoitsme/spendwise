@@ -39,7 +39,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased p-0 overflow-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased p-0 overflow-hidden h-screen flex flex-col`}
       >
         <AuthProvider initialUser={user}>
           <I18nProvider language="vi">

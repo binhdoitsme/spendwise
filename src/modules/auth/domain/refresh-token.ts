@@ -36,6 +36,10 @@ export class RefreshToken {
     return this._isRevoked;
   }
 
+  isNearlyExpired(datetime: DateTime): boolean {
+    return this.expiration.diff(datetime, "days").days < 1;
+  }
+
   public expired(datetime: DateTime) {
     return this.expiration < datetime;
   }

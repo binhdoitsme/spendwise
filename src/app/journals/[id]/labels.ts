@@ -26,6 +26,7 @@ export interface JournalDetailsPageLabels {
 
   newTransaction: string;
   noTransactions: string;
+  noMatchedTransactions: string;
   transactionDetails: string;
   editTransaction: string;
   confirmDelete: string;
@@ -74,6 +75,7 @@ export const journalDetailsPageLabels: Record<
     newTransaction: "New Transaction",
     noTransactions:
       "It's empty here. Click + New Transaction to start recording your expenses!",
+    noMatchedTransactions: "No matched transactions found.",
     transactionDetails: "Transaction Details",
     editTransaction: "Edit Transaction",
     confirmDelete: "Confirm delete transaction",
@@ -116,6 +118,7 @@ export const journalDetailsPageLabels: Record<
     newTransaction: "Tạo giao dịch mới",
     noTransactions:
       "Chưa có giao dịch nào. Nhấn + Tạo giao dịch mới để bắt đầu ghi lại chi tiêu của bạn!",
+    noMatchedTransactions: "Không tìm thấy giao dịch nào phù hợp.",
     transactionDetails: "Chi tiết giao dịch",
     editTransaction: "Chỉnh sửa giao dịch",
     confirmDelete: "Xác nhận xóa giao dịch",

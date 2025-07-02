@@ -52,12 +52,12 @@ export function MonthlySummary(props: MonthlySummaryProps) {
   return (
     <Card className="gap-4">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+          <CardTitle className="w-full md:w-fit text-lg flex items-center gap-2">
             <ChartColumnBig />
             {labels.monthlySummary}
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="w-full md:w-fit flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
@@ -89,7 +89,7 @@ export function MonthlySummary(props: MonthlySummaryProps) {
         </div>
       </CardHeader>
       <Separator />
-      <CardContent className="grid grid-cols-2 gap-4 justify-between">
+      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-between">
         <div className="space-y-4">
           <div className="space-y-1">
             <h3 className="font-semibold">{labels.totalSpent}</h3>
@@ -119,7 +119,6 @@ export function MonthlySummary(props: MonthlySummaryProps) {
                 </div>
               </div>
             )}
-            <div className="w-full h-[6.5rem]"></div>
           </div>
           <Separator />
           {props.isNavigatingMonth && (
@@ -149,7 +148,7 @@ export function MonthlySummary(props: MonthlySummaryProps) {
           <div>
             <h3 className="font-semibold">{labels.spendingByAccount}</h3>
             <div className="flex flex-col items-center gap-4">
-              <ResponsiveContainer width={240} height={240}>
+              <ResponsiveContainer aspect={1} width={240}>
                 <PieChart>
                   <Pie data={accounts} dataKey="value" outerRadius={100}>
                     {accounts.map((entry, index) => (

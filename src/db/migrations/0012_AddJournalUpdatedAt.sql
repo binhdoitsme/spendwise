@@ -1,0 +1,1 @@
+ALTER TABLE "journals" ADD COLUMN "updated_at" timestamp DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC');

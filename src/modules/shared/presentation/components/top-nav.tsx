@@ -9,6 +9,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { spendwiseIDb } from "./indexed-db";
 import { topNavigationLabels, TopNavigationLabels } from "./top-nav-labels";
 
 type NavItem = {
@@ -43,6 +44,7 @@ export function TopNavigationBar() {
         method: "DELETE",
       });
       if (response.ok) {
+        await spendwiseIDb.delete();
         authContext.setUser();
         router.push("/auth/sign-in"); // Redirect to sign-in page after logout
       } else {

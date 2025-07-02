@@ -73,6 +73,11 @@ export async function PATCH(request: NextRequest) {
 
   const cookieStore = await cookies();
   cookieStore.set("accessToken", tokens.accessToken, accessTokenCookieConfig);
+  cookieStore.set(
+    "refreshToken",
+    tokens.refreshToken,
+    refreshTokenCookieConfig
+  );
   return new Response(null, { status: 204 });
 }
 
