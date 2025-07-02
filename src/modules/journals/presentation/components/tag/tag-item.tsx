@@ -46,7 +46,7 @@ export function Tags({
 }) {
   const visibleTags = tags.slice(0, maxVisibleTags);
   return (
-    <div className="flex gap-2 flex-wrap">
+    <div className="flex justify-end md:justify-start gap-2 md:flex-wrap">
       {!!handleAddTag && (
         <Badge
           variant="outline"

@@ -11,9 +11,9 @@ export async function POST(
   const journalService = provideJournalServices();
   const journalId = (await params).id;
   const body = (await request.json()) as TransactionCreateDto;
-  const transactionId = await journalService.createTransaction(
+  const transaction = await journalService.createTransaction(
     journalId as string,
     body
   );
-  return created({ transactionId });
+  return created({ transaction });
 }

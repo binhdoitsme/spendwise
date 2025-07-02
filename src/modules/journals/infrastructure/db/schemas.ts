@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   char,
@@ -8,6 +8,7 @@ import {
   pgTable,
   primaryKey,
   text,
+  timestamp,
   unique,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -61,6 +62,9 @@ export const journals = pgTable("journals", {
   requiresApproval: boolean("requires_approval").default(false).notNull(),
   isArchived: boolean("is_archived").default(false).notNull(),
   createdAt: date("created_at", { mode: "date" }).notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).default(
+    sql`(CURRENT_TIMESTAMP AT TIME ZONE 'UTC')`
+  ),
 });
 
 export const transactionTypeEnum = pgEnum("transaction_types", [

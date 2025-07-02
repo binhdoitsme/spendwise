@@ -16,7 +16,7 @@ import {
 import { AccountSummaryDto } from "@/modules/reports/application/dto/dtos.types";
 import { MonthlyUsage } from "@/modules/reports/presentation/components/monthly-usage";
 import { PaymentDueRow } from "@/modules/reports/presentation/components/payment-due";
-import { JournalDetailsPageLabels } from "./labels";
+import { JournalDetailsPageLabels } from "./[id]/labels";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface BaseTransactionDialogProps {

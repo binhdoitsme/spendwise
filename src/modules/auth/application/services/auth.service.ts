@@ -39,13 +39,20 @@ export class AuthServices {
   }
 
   async refreshSession(token: string): Promise<UserTokens | undefined> {
-    const refreshToken = await this.refreshTokenRepository.findByToken(token);
-    if (!refreshToken || refreshToken.expired(DateTime.utc())) {
+    let refreshToken = await this.refreshTokenRepository.findByToken(token);
+    const now = DateTime.utc();
+    if (!refreshToken || refreshToken.expired(now)) {
       return undefined;
     }
     const user = await this.userRepository.findById(refreshToken.userId);
     if (!user) {
       return undefined;
+    }
+    if (refreshToken.isNearlyExpired(now)) {
+      const oldId = refreshToken.id;
+      refreshToken = RefreshToken.new(user.id);
+      await this.refreshTokenRepository.delete(oldId);
+      await this.refreshTokenRepository.save(refreshToken);
     }
     const payload: UserPayload = {
       userId: user.id.value,

@@ -17,12 +17,14 @@ export class JournalApi extends ApiClientWrapper {
     journalId: string,
     tx: Omit<TransactionCreateDto, "journalId">
   ) {
-    const resp = await this.client.request({
+    const resp = await this.client.request<
+      ResponseWithData<{ transaction: TransactionDetailedDto }>
+    >({
       method: "POST",
       url: `/api/journals/${journalId}/transactions`,
       data: tx,
     });
-    console.log({ resp });
+    return resp.data.data;
   }
 
   async createJournal(data: JournalFormSchema) {

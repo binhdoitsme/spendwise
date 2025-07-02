@@ -35,7 +35,8 @@ export class Journal {
     private _collaborators: Map<string, Collaborator> = new Map(),
     private _requiresApproval: boolean = false,
     public isArchived: boolean = false,
-    public readonly createdAt: DateTime = DateTime.utc()
+    public readonly createdAt: DateTime = DateTime.utc(),
+    public updatedAt: DateTime = DateTime.utc()
   ) {
     if (!_collaborators.has(ownerId.value)) {
       _collaborators.set(ownerId.value, new Collaborator(ownerId, "owner"));
@@ -151,6 +152,10 @@ export class Journal {
     }
   }
 
+  updated(at: DateTime = DateTime.utc()) {
+    this.updatedAt = at;
+  }
+
   static create(props: JournalCreate) {
     const id = new JournalId();
     return new Journal(
@@ -175,7 +180,8 @@ export class Journal {
       props.collaborators,
       props.requiresApproval,
       props.isArchived,
-      props.createdAt
+      props.createdAt,
+      props.updatedAt
     );
   }
 }
