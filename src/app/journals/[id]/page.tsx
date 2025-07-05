@@ -13,7 +13,7 @@ export default async function FinanceJournalPage({
   const accountReportServices = provideReportServices();
   const now = DateTime.now();
   const recent2Months = {
-    start: now.startOf("month").minus({ months: 1 }).toISODate(),
+    start: now.startOf("month").minus({ months: 3 }).toISODate(),
     end: now.endOf("month").toISODate(),
   };
   const accountSummary = await accountReportServices.getMonthlyAccountSummary({

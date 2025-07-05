@@ -1,7 +1,7 @@
 import { Language } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -23,7 +23,6 @@ import {
   TransactionDetailedDto,
 } from "@/modules/journals/application/dto/dtos.types";
 import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
-import { RepaymentForm } from "@/modules/journals/presentation/components/repayment/repayment-form";
 import { tagColors } from "@/modules/journals/presentation/components/tag/tag-colors";
 import {
   deleteTransaction,
@@ -180,15 +179,8 @@ export function TransactionTabV2({
   const nextMonth = () => setMonth((month) => month.plus({ months: 1 }));
 
   const [accountSummary, setAccountSummary] = useState(props.accountSummary);
-  const selectedAccountUpcomingDue = useMemo(
-    () =>
-      selectedAccountId
-        ? accountSummary.upcomingDues.find(
-            (item) => item.account.id === selectedAccountId
-          )!
-        : undefined,
-    [selectedAccountId, accountSummary]
-  );
+  const [selectedAccountIdMonth, setSelectedAccountIdMonth] =
+    useState<string>();
 
   const reportsApi = useMemo(() => new ReportsApi(), []);
   const [currentAccountReports, setCurrentAccountReports] =
@@ -214,6 +206,27 @@ export function TransactionTabV2({
       setCurrentAccountReports(accountReportsCache[selectedAccountId]);
     }
   }, [accountReportsCache, selectedAccountId, reportsApi]);
+
+  const selectedAccountUpcomingDue = useMemo(() => {
+    return selectedAccountId
+      ? accountSummary.upcomingDues.find(
+          (item) =>
+            item?.account?.id === selectedAccountId &&
+            item?.statementMonth === selectedAccountIdMonth
+        ) ??
+          currentAccountReports?.upcomingDues.find(
+            (item) =>
+              item.account.id === selectedAccountId &&
+              item.statementMonth === selectedAccountIdMonth
+          ) ??
+          undefined
+      : undefined;
+  }, [
+    selectedAccountId,
+    selectedAccountIdMonth,
+    accountSummary,
+    currentAccountReports,
+  ]);
 
   const now = DateTime.now();
   const thisMonth = now.startOf("month");
@@ -275,6 +288,11 @@ export function TransactionTabV2({
         };
       });
       toast("Successfully paid off!");
+      setOpen(false);
+      setAccountReportsCache((value) => {
+        delete value[accountId];
+        return { ...value };
+      });
     } catch (e) {
       toast.error(`Error ${e}`);
       throw e;
@@ -314,10 +332,11 @@ export function TransactionTabV2({
               <CardContent className="space-y-4">
                 {accountSummary?.upcomingDues
                   ?.filter(
-                    ({ statementPeriod: { start, end } }) =>
+                    ({ statementPeriod }) =>
+                      !!statementPeriod &&
                       !Interval.fromDateTimes(
-                        DateTime.fromISO(start),
-                        DateTime.fromISO(end)
+                        DateTime.fromISO(statementPeriod.start),
+                        DateTime.fromISO(statementPeriod.end)
                       ).contains(now)
                   )
                   ?.map((item, index) => (
@@ -327,50 +346,14 @@ export function TransactionTabV2({
                       language={language}
                       handlePayoffButton={() => {
                         setSelectedAccountId(item.account.id);
+                        setSelectedAccountIdMonth(item.statementMonth);
                         setDialogType("repayment");
+                        setOpen(true);
                       }}
                     />
                   )) ?? (
                   <Skeleton className="h-[4rem] w-full col-span-1 rounded-xl" />
                 )}
-                <Dialog
-                  open={!!selectedAccountId && dialogType === "repayment"}
-                  onOpenChange={(open) => {
-                    if (!open) {
-                      setSelectedAccountId(undefined);
-                    }
-                  }}
-                >
-                  <DialogContent>
-                    <DialogTitle>{labels.creditRepayment}</DialogTitle>
-                    {selectedAccountId && selectedAccountUpcomingDue && (
-                      <>
-                        <PaymentDueRow
-                          format="compact"
-                          item={selectedAccountUpcomingDue}
-                          language={language}
-                        />
-                        <RepaymentForm
-                          language={language}
-                          statementMonth={
-                            selectedAccountUpcomingDue.statementMonth
-                          }
-                          accountId={selectedAccountId}
-                          handleCreateRepayment={async (payload) => {
-                            try {
-                              await handleRepayment(payload);
-                              setSelectedAccountId(undefined);
-                            } catch {}
-                          }}
-                          accounts={selectableAccounts}
-                          collaborators={journal.collaborators.map(
-                            ({ user }) => user
-                          )}
-                        />
-                      </>
-                    )}
-                  </DialogContent>
-                </Dialog>
               </CardContent>
             </Card>
 
@@ -544,6 +527,11 @@ export function TransactionTabV2({
           {dialogType && (
             <TransactionDialogContent
               accountReports={currentAccountReports}
+              setDialogType={setDialogType}
+              setSelectedAccountId={setSelectedAccountId}
+              setSelectedAccountIdMonth={setSelectedAccountIdMonth}
+              handleRepayment={handleRepayment}
+              selectedAccountUpcomingDue={selectedAccountUpcomingDue}
               dialogType={dialogType}
               labels={labels}
               language={language}

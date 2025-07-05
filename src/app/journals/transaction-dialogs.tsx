@@ -2,22 +2,26 @@ import { Language, useI18n } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   JournalUserBasicDto,
   TagDto,
   TransactionDetailedDto,
 } from "@/modules/journals/application/dto/dtos.types";
 import { TransactionFormSchema } from "@/modules/journals/presentation/components/forms";
+import { RepaymentForm } from "@/modules/journals/presentation/components/repayment/repayment-form";
 import { Color } from "@/modules/journals/presentation/components/tag/tag-colors";
 import {
   AccountSelectProps,
   TransactionForm,
 } from "@/modules/journals/presentation/components/transaction/transaction-form";
-import { AccountSummaryDto } from "@/modules/reports/application/dto/dtos.types";
+import {
+  AccountSummaryDto,
+  PaymentDue,
+} from "@/modules/reports/application/dto/dtos.types";
 import { MonthlyUsage } from "@/modules/reports/presentation/components/monthly-usage";
 import { PaymentDueRow } from "@/modules/reports/presentation/components/payment-due";
 import { JournalDetailsPageLabels } from "./[id]/labels";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface BaseTransactionDialogProps {
   labels: JournalDetailsPageLabels;
@@ -196,11 +200,17 @@ export function DeleteTransactionDialog({
 interface ViewAccountReportDialogProps {
   labels: JournalDetailsPageLabels;
   accountReports?: AccountSummaryDto;
+  setDialogType: (value: TransactionDialogType) => void;
+  setSelectedAccountId: (value: string) => void;
+  setSelectedAccountIdMonth: (value: string) => void;
 }
 
 export function ViewAccountReportDialog({
   labels,
   accountReports,
+  setDialogType,
+  setSelectedAccountId,
+  setSelectedAccountIdMonth,
 }: ViewAccountReportDialogProps) {
   const { language } = useI18n();
 
@@ -217,7 +227,16 @@ export function ViewAccountReportDialog({
             <h2 className="text-lg font-semibold">{labels.dueSoon}</h2>
             <div>
               {accountReports.upcomingDues.map((due, index) => (
-                <PaymentDueRow key={index} item={due} language={language} />
+                <PaymentDueRow
+                  key={index}
+                  item={due}
+                  language={language}
+                  handlePayoffButton={() => {
+                    setSelectedAccountId(due.account.id);
+                    setSelectedAccountIdMonth(due.statementMonth);
+                    setDialogType("repayment");
+                  }}
+                />
               ))}
             </div>
             <Separator />
@@ -243,6 +262,66 @@ export function ViewAccountReportDialog({
   );
 }
 
+export type AccountRepaymentDialogProps = {
+  labels: JournalDetailsPageLabels;
+  language: Language;
+  collaborators: JournalUserBasicDto[];
+  selectableAccounts: Record<string, AccountSelectProps[]>;
+  handleRepayment: ({
+    accountId,
+    statementMonth,
+    date,
+  }: {
+    accountId: string;
+    paymentAccountId: string;
+    paymentPaidBy: string;
+    statementMonth: string;
+    date: Date;
+  }) => Promise<void>;
+  selectedAccountUpcomingDue: PaymentDue | undefined;
+};
+
+export function AccountRepaymentDialog({
+  labels,
+  language,
+  collaborators,
+  selectableAccounts,
+  selectedAccountUpcomingDue,
+  handleRepayment,
+}: AccountRepaymentDialogProps) {
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle>{labels.creditRepayment}</DialogTitle>
+      </DialogHeader>
+      {selectedAccountUpcomingDue && (
+        <>
+          <PaymentDueRow
+            format="compact"
+            item={selectedAccountUpcomingDue}
+            language={language}
+          />
+          <RepaymentForm
+            language={language}
+            statementMonth={selectedAccountUpcomingDue.statementMonth}
+            accountId={selectedAccountUpcomingDue.account.id}
+            handleCreateRepayment={async (payload) => {
+              try {
+                await handleRepayment(payload);
+                // setSelectedAccountId(undefined);
+              } catch (e) {
+                console.error(e);
+              }
+            }}
+            accounts={selectableAccounts}
+            collaborators={collaborators}
+          />
+        </>
+      )}
+    </>
+  );
+}
+
 export type TransactionDialogType =
   | "new"
   | "view"
@@ -259,7 +338,8 @@ type TransactionDialogContentProps = {
     transaction: TransactionDetailedDto;
   }> &
   DeleteTransactionDialogProps &
-  ViewAccountReportDialogProps;
+  ViewAccountReportDialogProps &
+  AccountRepaymentDialogProps;
 
 export function TransactionDialogContent({
   dialogType,
@@ -292,6 +372,8 @@ export function TransactionDialogContent({
       );
     case "accountReport":
       return <ViewAccountReportDialog {...props} />;
+    case "repayment":
+      return <AccountRepaymentDialog {...props} />;
     default:
       return null;
   }
