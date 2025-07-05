@@ -75,36 +75,38 @@ export function AccountTab(props: AccountTabProps) {
   }, [dialogType]);
 
   return (
-    <div className="w-full h-full">
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button
-            className="w-full md:w-auto gap-0"
-            onClick={() => setDialogType("newAccount")}
-          >
-            <PlusIcon className="w-4 h-4 mr-2" /> {labels.newAccount}
-          </Button>
-        </DialogTrigger>
-        <DialogTrigger asChild>
-          <Button
-            className="w-full md:w-auto gap-0 mx-2"
-            variant="outline"
-            onClick={() => setDialogType("linkAccount")}
-            disabled={linkableAccounts.length === 0}
-          >
-            <Link className="w-4 h-4 mr-2" /> {labels.linkAccount}
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-lg">
-          <AccountDialogContent
-            dialogType={dialogType}
-            setOpen={setOpen}
-            linkableAccounts={linkableAccounts}
-            {...props}
-          />
-        </DialogContent>
-      </Dialog>
-      <div className="w-full max-h-[calc(100vh-500px)] overflow-scroll">
+    <div className="w-full h-full flex flex-col">
+      <div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button
+              className="w-full md:w-auto gap-0"
+              onClick={() => setDialogType("newAccount")}
+            >
+              <PlusIcon className="w-4 h-4 mr-2" /> {labels.newAccount}
+            </Button>
+          </DialogTrigger>
+          <DialogTrigger asChild>
+            <Button
+              className="w-full md:w-auto gap-0 mx-2"
+              variant="outline"
+              onClick={() => setDialogType("linkAccount")}
+              disabled={linkableAccounts.length === 0}
+            >
+              <Link className="w-4 h-4 mr-2" /> {labels.linkAccount}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-lg">
+            <AccountDialogContent
+              dialogType={dialogType}
+              setOpen={setOpen}
+              linkableAccounts={linkableAccounts}
+              {...props}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+      <div className="w-full flex-1 overflow-scroll">
         {journalAccounts.length === 0 && (
           <p className="mt-4 italic opacity-50">{labels.noAccounts}</p>
         )}

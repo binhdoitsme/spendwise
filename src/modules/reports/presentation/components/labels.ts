@@ -14,6 +14,7 @@ export interface ReportingLabels {
   overdueYesterday: string;
   dueInDays: (days: number) => string;
   notYetDue: string;
+  currentPeriod: string;
   spent: string;
   limit: string;
   markAsPaid: string;
@@ -44,6 +45,7 @@ export const reportingLabels: Record<Language, ReportingLabels> = {
     overdueYesterday: "Overdue (Yesterday)",
     dueInDays: (days) => `Due in ${days} days`,
     notYetDue: "Not yet due",
+    currentPeriod: "Current Period",
     spent: "Spent:",
     limit: "Limit:",
     markAsPaid: "Mark as Paid",
@@ -71,6 +73,7 @@ export const reportingLabels: Record<Language, ReportingLabels> = {
     overdueYesterday: "Quá hạn (Hôm qua)",
     dueInDays: (days) => `Đến hạn sau ${days} ngày`,
     notYetDue: "Chưa đến hạn",
+    currentPeriod: "Kỳ hiện tại",
     spent: "Đã chi:",
     limit: "Hạn mức:",
     markAsPaid: "Thanh toán",

@@ -68,7 +68,10 @@ export class ReportServices {
       creditLimit: report.limit,
     }));
 
-    const upcomingDues: PaymentDue[] = monthlyReports
+    const now = DateTime.now();
+    const currentMonth = now.toFormat("yyyyMM");
+
+    let upcomingDues: PaymentDue[] = monthlyReports
       .filter((report) => !!report.dueDate)
       .map((report) => ({
         account: {
@@ -85,6 +88,15 @@ export class ReportServices {
         dueDate: report.dueDate!.toISODate()!,
         isPaidOff: report.repaymentStatus,
       }));
+
+    // Sort: current month to bottom, then ascending by dueDate
+    upcomingDues = upcomingDues.sort((a, b) => {
+      const aIsCurrent = a.statementMonth === currentMonth ? 1 : 0;
+      const bIsCurrent = b.statementMonth === currentMonth ? 1 : 0;
+      if (aIsCurrent !== bIsCurrent) return aIsCurrent - bIsCurrent;
+      // Otherwise, sort by dueDate ascending
+      return a.dueDate.localeCompare(b.dueDate);
+    });
 
     return {
       monthlySpends,

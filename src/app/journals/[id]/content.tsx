@@ -10,19 +10,23 @@ import {
 } from "@/modules/journals/application/dto/dtos.types";
 import { JournalApi } from "@/modules/journals/presentation/api/journal.api";
 import { Collaborators } from "@/modules/journals/presentation/components/collaborator-avatars";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AccessTab } from "./access-tab";
 import { AccountTab } from "./account-tab";
 import { useJournalData } from "./hooks";
 import { journalDetailsPageLabels } from "./labels";
 import { TransactionTabV2 } from "./transaction-tab";
+import { AccountSummaryDto } from "@/modules/reports/application/dto/dtos.types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function FinanceJournalPageContent({
   etag,
   id,
+  accountSummary,
 }: {
   etag: string;
   id: string;
+  accountSummary: AccountSummaryDto;
 }) {
   const authContext = useAuthContext();
   const { language } = useI18n();
@@ -39,14 +43,14 @@ export function FinanceJournalPageContent({
     }, {} as Record<string, JournalUserBasicDto>) ?? {};
 
   // Owner info
-  const owner: JournalUserBasicDto = journal
+  const owner: JournalUserBasicDto | undefined = journal
     ? {
         id: journal.ownerId,
         email: journal.ownerEmail,
         firstName: journal.ownerFirstName,
         lastName: journal.ownerLastName,
       }
-    : { id: "", email: "", firstName: "", lastName: "" };
+    : undefined;
 
   // Accounts as array
   const accounts = journal?.accounts ?? [];
@@ -64,8 +68,8 @@ export function FinanceJournalPageContent({
   const myAccounts: AccountBasicDto[] = [];
 
   // Use real API instances or stubs
-  const accountApi = {} as AccountApi;
-  const journalApi = {} as JournalApi;
+  const accountApi = useMemo(() => new AccountApi(), []);
+  const journalApi = useMemo(() => new JournalApi(), []);
   const handleRefreshJournal = () => {};
   const handleRefreshAccounts = () => {};
 
@@ -76,12 +80,20 @@ export function FinanceJournalPageContent({
     <div className="p-6 space-y-6 w-full max-w-[1600px] overflow-auto mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">
-          {labels.title}: {journal?.title}
-        </h1>
-        <p className="text-muted-foreground">
-          {labels.owner}: {owner.firstName} {owner.lastName} ({owner.email})
-        </p>
+        <div className="flex gap-1 items-center">
+          <h1 className="text-2xl font-bold">{labels.title}:</h1>
+          {journal && <h1 className="text-2xl font-bold">{journal.title}</h1>}
+          {!journal && <Skeleton className="h-6 w-64" />}
+        </div>
+        <div className="flex gap-1 items-center">
+          <p className="text-muted-foreground">{labels.owner}:</p>
+          {owner && (
+            <p className="text-muted-foreground">
+              {owner.firstName} {owner.lastName} ({owner.email})
+            </p>
+          )}
+          {!owner && <Skeleton className="h-4 w-64" />}
+        </div>
         <div className="mt-1 mb-3">
           <Collaborators
             size="sm"
@@ -95,9 +107,9 @@ export function FinanceJournalPageContent({
         value={currentTab}
         defaultValue="summary_transactions"
         onValueChange={setCurrentTab}
-        className="w-full"
+        className="w-full flex-1 flex flex-col overflow-none gap-2"
       >
-        <TabsList className="mb-2 gap-1">
+        <TabsList className="gap-1">
           <TabsTrigger value="summary_transactions">
             {labels.transactions}
           </TabsTrigger>
@@ -109,12 +121,14 @@ export function FinanceJournalPageContent({
           {journal && (
             <TransactionTabV2
               journal={journal}
+              journalApi={journalApi}
               transactions={mappedTransactions}
               collaborators={collaborators}
-              owner={owner}
+              owner={owner!}
               language={language}
               labels={labels}
               authContext={authContext}
+              accountSummary={accountSummary}
             />
           )}
         </TabsContent>
