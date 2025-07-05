@@ -424,12 +424,12 @@ export function TransactionTabV2({
                 <PopoverTrigger asChild>
                   <Button variant="outline">
                     <Filter />
-                    Filter by Account
+                    {labels.filterByAccount}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-72 space-y-3" align="end">
                   <div>
-                    <h3>Filter by account</h3>
+                    <h3 className="font-bold">{labels.filterByAccount}</h3>
                   </div>
                   <Form {...accountFilterForm}>
                     <form
@@ -540,7 +540,7 @@ export function TransactionTabV2({
         </div>
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg overflow-x-visible">
+        <DialogContent className="sm:max-w-lg overflow-x-scroll">
           {dialogType && (
             <TransactionDialogContent
               accountReports={currentAccountReports}

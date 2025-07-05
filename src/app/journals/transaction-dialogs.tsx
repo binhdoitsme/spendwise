@@ -77,7 +77,7 @@ export function ViewTransactionDialog({
   onUnknownTag,
 }: ViewTransactionDialogProps) {
   return (
-    <>
+    <div className="w-full overflow-scroll">
       <DialogHeader>
         <DialogTitle>{labels.transactionDetails}</DialogTitle>
       </DialogHeader>
@@ -92,7 +92,7 @@ export function ViewTransactionDialog({
         onUnknownTag={onUnknownTag}
         onSubmit={() => Promise.resolve()} // Placeholder since form is readonly
       />
-    </>
+    </div>
   );
 }
 
