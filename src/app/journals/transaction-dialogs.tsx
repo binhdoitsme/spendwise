@@ -210,7 +210,7 @@ export function ViewAccountReportDialog({
         <DialogTitle>{labels.accountSummary}</DialogTitle>
       </DialogHeader>
       <div />
-      <div className="space-y-3">
+      <div className="space-y-3 h-96 overflow-scroll">
         {!accountReports && <Skeleton className="h-[4rem] w-full rounded-xl" />}
         {!!accountReports?.upcomingDues?.length && (
           <>
@@ -249,7 +249,8 @@ export type TransactionDialogType =
   | "edit"
   | "duplicate"
   | "delete"
-  | "accountReport";
+  | "accountReport"
+  | "repayment";
 
 type TransactionDialogContentProps = {
   dialogType: TransactionDialogType;
