@@ -46,6 +46,8 @@ export interface JournalDetailsPageLabels {
   dueSoon: string;
   history: string;
   creditRepayment: string;
+
+  filterByAccount: string;
 }
 
 export const journalDetailsPageLabels: Record<
@@ -95,6 +97,7 @@ export const journalDetailsPageLabels: Record<
     dueSoon: "Due Soon",
     history: "History",
     creditRepayment: "Credit Repayment",
+    filterByAccount: "Filter by Account",
   },
   vi: {
     title: "Sổ chi tiêu",
@@ -139,5 +142,6 @@ export const journalDetailsPageLabels: Record<
     dueSoon: "Sắp đến hạn",
     history: "Lịch sử tiêu dùng",
     creditRepayment: "Thanh toán tín dụng",
+    filterByAccount: "Lọc theo tài khoản",
   },
 };
