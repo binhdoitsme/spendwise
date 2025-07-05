@@ -5,6 +5,7 @@ import { CheckCircle, CreditCard } from "lucide-react";
 import { useMemo } from "react";
 import { PaymentDue } from "../../application/dto/dtos.types";
 import { reportingLabels } from "./labels";
+import { DateTime, Interval } from "luxon";
 
 function formatDueDate(isoDate: string, language: Language): string {
   const labels = reportingLabels[language];
@@ -32,12 +33,17 @@ function formatDueDate(isoDate: string, language: Language): string {
 
 function StatusBadge({
   dueDate,
+  isCurrentPeriod,
   language,
 }: {
   dueDate: string;
+  isCurrentPeriod: boolean;
   language: Language;
 }) {
   const labels = reportingLabels[language];
+  if (isCurrentPeriod) {
+    return <Badge variant="secondary">{labels.currentPeriod}</Badge>;
+  }
   const today = new Date();
   const date = new Date(dueDate);
   const diffDays = Math.floor(
@@ -91,9 +97,17 @@ export function PaymentDueRow({
       }),
     [item.dueAmount.currency]
   );
-  console.log({ item });
+  const statementPeriodStart = DateTime.fromISO(item.statementPeriod.start);
+  const statementPeriodEnd = DateTime.fromISO(item.statementPeriod.end);
+  const statementPeriod = Interval.fromDateTimes(
+    statementPeriodStart,
+    statementPeriodEnd
+  );
+  const now = DateTime.now();
+  const isCurrentPeriod = statementPeriod.contains(now);
+
   return (
-    <div className="flex justify-between items-start border-b pb-3 last:border-b-0 last:pb-0">
+    <div className="flex justify-between items-start border-b pb-3 last:border-b-0 last:pb-0 mt-3">
       <div>
         <div className="font-medium flex items-center gap-2">
           <CreditCard className="w-4 h-4" /> {item.account.displayName}
@@ -106,9 +120,13 @@ export function PaymentDueRow({
         <div className="text-sm text-muted-foreground">
           {labels.due} {formatDueDate(item.dueDate, language)}
         </div>
-        {format === "full" && (
+        {format === "full" && !item.isPaidOff && (
           <div className="mt-1">
-            <StatusBadge dueDate={item.dueDate} language={language} />
+            <StatusBadge
+              dueDate={item.dueDate}
+              language={language}
+              isCurrentPeriod={isCurrentPeriod}
+            />
           </div>
         )}
       </div>
@@ -119,7 +137,7 @@ export function PaymentDueRow({
             <MoreHorizontal />
           </Button> */}
         </div>
-        {format === "full" && !item.isPaidOff && (
+        {format === "full" && !item.isPaidOff && !isCurrentPeriod && (
           <Button variant="outline" onClick={handlePayoffButton}>
             {labels.markAsPaid}
           </Button>

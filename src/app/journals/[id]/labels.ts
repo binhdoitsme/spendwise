@@ -45,6 +45,7 @@ export interface JournalDetailsPageLabels {
   accountSummary: string;
   dueSoon: string;
   history: string;
+  creditRepayment: string;
 }
 
 export const journalDetailsPageLabels: Record<
@@ -93,6 +94,7 @@ export const journalDetailsPageLabels: Record<
     accountSummary: "Account Summary",
     dueSoon: "Due Soon",
     history: "History",
+    creditRepayment: "Credit Repayment",
   },
   vi: {
     title: "Sổ chi tiêu",
@@ -136,5 +138,6 @@ export const journalDetailsPageLabels: Record<
     accountSummary: "Tổng quan tài khoản",
     dueSoon: "Sắp đến hạn",
     history: "Lịch sử tiêu dùng",
+    creditRepayment: "Thanh toán tín dụng",
   },
 };

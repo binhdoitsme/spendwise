@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -26,7 +27,7 @@ export function Collaborators({
   maxDisplayed = 3,
   size = "md",
 }: CollaboratorsProps) {
-  if (!collaborators.length) return null;
+  if (!collaborators.length) return <Skeleton className="h-4 w-64" />;
 
   const displayedCollaborators = collaborators.slice(0, maxDisplayed);
   const remainingCount = collaborators.length - maxDisplayed;
