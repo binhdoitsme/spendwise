@@ -39,7 +39,7 @@ export interface JournalDetailsPageLabels {
   summary: string;
   paymentSummary: string;
   upcomingDues: string;
-  usageThisMonth: (month: string) => string;
+  usageWithinMonth: (month: string) => string;
   noCreditOrLoanAccounts: string;
 
   accountSummary: string;
@@ -48,6 +48,8 @@ export interface JournalDetailsPageLabels {
   creditRepayment: string;
 
   filterByAccount: string;
+
+  addCategory: string;
 }
 
 export const journalDetailsPageLabels: Record<
@@ -91,13 +93,14 @@ export const journalDetailsPageLabels: Record<
     summary: "Summary",
     paymentSummary: "Payment Summary",
     upcomingDues: "Upcoming Dues",
-    usageThisMonth: (month) => `Usage This Month (${month})`,
+    usageWithinMonth: (month) => `Usage Breakdown (${month})`,
     noCreditOrLoanAccounts: "No credit or loan accounts to display.",
     accountSummary: "Account Summary",
     dueSoon: "Due Soon",
     history: "History",
     creditRepayment: "Credit Repayment",
     filterByAccount: "Filter by Account",
+    addCategory: "Add Category",
   },
   vi: {
     title: "Sổ chi tiêu",
@@ -135,7 +138,7 @@ export const journalDetailsPageLabels: Record<
     summary: "Tổng quan",
     paymentSummary: "Tổng quan thanh toán",
     upcomingDues: "Các khoản đến hạn",
-    usageThisMonth: (month) => `Đã tiêu tháng này (${month})`,
+    usageWithinMonth: (month) => `Đã tiêu (${month})`,
     noCreditOrLoanAccounts:
       "Không có tài khoản tín dụng hoặc vay nào để hiển thị.",
     accountSummary: "Tổng quan tài khoản",
@@ -143,5 +146,6 @@ export const journalDetailsPageLabels: Record<
     history: "Lịch sử tiêu dùng",
     creditRepayment: "Thanh toán tín dụng",
     filterByAccount: "Lọc theo tài khoản",
+    addCategory: "Thêm quỹ",
   },
 };

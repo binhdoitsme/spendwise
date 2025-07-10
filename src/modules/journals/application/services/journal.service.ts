@@ -1,4 +1,8 @@
-import { AccountId, UserId } from "@/modules/shared/domain/identifiers";
+import {
+  AccountId,
+  SpendingCategoryId,
+  UserId,
+} from "@/modules/shared/domain/identifiers";
 import { ListingOptions } from "@/modules/shared/domain/specs";
 import { Email } from "@/modules/shared/domain/value-objects";
 import { DateTime, Interval } from "luxon";
@@ -266,6 +270,9 @@ export class JournalServices {
       paidBy: new UserId(data.paidBy),
       tags: data.tags ?? [],
       notes: data.notes,
+      categoryId: data.categoryId
+        ? new SpendingCategoryId(data.categoryId)
+        : undefined,
     });
     journal.updated();
     await Promise.all([
@@ -297,6 +304,9 @@ export class JournalServices {
       paidBy: data.paidBy ? new UserId(data.paidBy) : undefined,
       tags: data.tags,
       notes: data.notes,
+      categoryId: data.categoryId
+        ? new SpendingCategoryId(data.categoryId)
+        : undefined,
     });
     journal.updated();
     await Promise.all([

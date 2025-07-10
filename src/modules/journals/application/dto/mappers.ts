@@ -89,6 +89,7 @@ export function mapRichJournalToJournalDetailedDto(
       accountId: transaction.account.value,
       paidBy: transaction.paidBy.value,
       tags: transaction.tags,
+      categoryId: transaction.categoryId?.value,
     })),
   };
 }

@@ -92,6 +92,7 @@ export const transactions = pgTable("transactions", {
   tags: varchar("tags").array(),
   status: transactionStatusEnum("status").notNull(),
   notes: text("notes"),
+  categoryId: text("category_id"),
 });
 
 export const repayments = pgTable(

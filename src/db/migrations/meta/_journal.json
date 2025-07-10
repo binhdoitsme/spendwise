@@ -92,6 +92,20 @@
       "when": 1751334782946,
       "tag": "0012_AddJournalUpdatedAt",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1751991147054,
+      "tag": "0013_AddSpendingCategorySchema",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1751991572851,
+      "tag": "0014_AddSpendingCategorySpends",
+      "breakpoints": true
     }
   ]
 }

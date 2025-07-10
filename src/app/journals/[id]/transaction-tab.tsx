@@ -1,7 +1,12 @@
 import { Language } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -38,17 +43,23 @@ import {
   JournalSummaryDto,
 } from "@/modules/reports/application/dto/dtos.types";
 import { MonthlySummary } from "@/modules/reports/presentation/components/monthly-summary";
-import { MonthlyUsage } from "@/modules/reports/presentation/components/monthly-usage";
 import { PaymentDueRow } from "@/modules/reports/presentation/components/payment-due";
 import { ReportsApi } from "@/modules/reports/presentation/contracts/reports.api";
+import { SpendingCategoryDto } from "@/modules/shared/application/dto/dtos.types";
 import { IndexedDbJournal } from "@/modules/shared/presentation/components/indexed-db";
+import { ISOCurrency } from "@/modules/shared/presentation/currencies";
+import { SpendingCategoryApi } from "@/modules/spending-categories/presentation/api/spending-category.api";
+import { SpendingCategory } from "@/modules/spending-categories/presentation/components/spending-category";
+import { SpendingCategoryForm } from "@/modules/spending-categories/presentation/components/spending-category-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DialogTrigger } from "@radix-ui/react-dialog";
 import {
   Banknote,
   CalendarClock,
   ChartNoAxesCombined,
   Filter,
   Notebook,
+  Plus,
   PlusIcon,
 } from "lucide-react";
 import { DateTime, Interval } from "luxon";
@@ -173,7 +184,6 @@ export function TransactionTabV2({
   const accounts = journal?.accounts.reduce<
     Record<string, JournalAccountBasicDto>
   >((current, next) => ({ ...current, [next.accountId]: next }), {});
-  console.log({ accounts });
 
   const prevMonth = () => setMonth((month) => month.minus({ months: 1 }));
   const nextMonth = () => setMonth((month) => month.plus({ months: 1 }));
@@ -229,7 +239,6 @@ export function TransactionTabV2({
   ]);
 
   const now = DateTime.now();
-  const thisMonth = now.startOf("month");
 
   const accountFilterSchema = z.object({ accountId: z.string().optional() });
   const accountFilterForm = useForm<z.infer<typeof accountFilterSchema>>({
@@ -299,6 +308,24 @@ export function TransactionTabV2({
     }
   };
 
+  const spendingCategoryApi = useMemo(() => new SpendingCategoryApi(), []);
+  const [spendingCategories, setSpendingCategories] = useState<
+    SpendingCategoryDto[]
+  >([]);
+
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [isSavingCategory, setIsSavingCategory] = useState(false);
+
+  useEffect(() => {
+    if (isSavingCategory) return;
+    spendingCategoryApi
+      .getSpendingCategoriesByJournal(journal.id)
+      .then(({ spendingCategories }) => {
+        console.log("Spending categories:", spendingCategories);
+        setSpendingCategories(spendingCategories);
+      });
+  }, [spendingCategoryApi, journal.id, transactions, isSavingCategory]);
+
   return (
     <div className="flex flex-col md:flex-row md:max-h-screen">
       <div className="flex-1 py-2 px-4 gap-4 flex flex-col overflow-y-scroll">
@@ -322,6 +349,79 @@ export function TransactionTabV2({
           </div>
         ) : (
           <>
+            <Card className="gap-3">
+              <CardHeader>
+                <CardTitle className="text-md flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <ChartNoAxesCombined />{" "}
+                    {labels.usageWithinMonth(
+                      month.setLocale(language).toLocaleString({
+                        month: "long",
+                        year: "numeric",
+                      })
+                    )}
+                  </div>
+                  <Dialog
+                    open={isAddingCategory}
+                    onOpenChange={setIsAddingCategory}
+                  >
+                    <DialogTrigger asChild>
+                      <Button variant="outline">
+                        <Plus /> {labels.addCategory}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogTitle>
+                        <DialogHeader>{labels.addCategory}</DialogHeader>
+                      </DialogTitle>
+                      <SpendingCategoryForm
+                        isLoading={isSavingCategory}
+                        language={language}
+                        onSubmit={async (data) => {
+                          setIsSavingCategory(true);
+                          await spendingCategoryApi
+                            .createSpendingCategory(journal.id, {
+                              name: data.name,
+                              limit: data.limit,
+                              currency: journal.currency as ISOCurrency,
+                            })
+                            .then(() => {
+                              toast.success("Category created successfully!");
+                              setIsAddingCategory(false);
+                              setIsSavingCategory(false);
+                            });
+                        }}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </CardTitle>
+              </CardHeader>
+              <Separator />
+              <CardContent className="space-y-4">
+                {spendingCategories?.map((category) => (
+                  <SpendingCategory
+                    key={category.id}
+                    language={language}
+                    category={category}
+                    spent={category.monthlySpent[month.toFormat("yyyyMM")]}
+                    handleDelete={async (categoryId) => {
+                      await spendingCategoryApi
+                        .deleteSpendingCategory(journal.id, categoryId)
+                        .then(() => {
+                          setSpendingCategories((categories) =>
+                            categories.filter((cat) => cat.id !== categoryId)
+                          );
+                          toast.success("Category deleted successfully!");
+                        })
+                        .catch((error) => {
+                          toast.error(`Error deleting category: ${error}`);
+                        });
+                    }}
+                  />
+                ))}
+              </CardContent>
+            </Card>
+
             <Card className="gap-3">
               <CardHeader>
                 <CardTitle className="text-md flex gap-2 items-center">
@@ -351,37 +451,6 @@ export function TransactionTabV2({
                         setOpen(true);
                       }}
                     />
-                  )) ?? (
-                  <Skeleton className="h-[4rem] w-full col-span-1 rounded-xl" />
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="gap-3">
-              <CardHeader>
-                <CardTitle className="text-md flex items-center gap-2">
-                  <ChartNoAxesCombined />{" "}
-                  {labels.usageThisMonth(
-                    thisMonth.setLocale(language).toLocaleString({
-                      month: "long",
-                      year: "numeric",
-                    })
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <Separator />
-              <CardContent className="space-y-4">
-                {accountSummary?.monthlySpends
-                  ?.filter(({ month }) => {
-                    const monthStart = DateTime.fromISO(month);
-                    const monthPeriod = Interval.fromDateTimes(
-                      monthStart,
-                      monthStart.plus({ months: 1 })
-                    );
-                    return monthPeriod.contains(now);
-                  })
-                  .map((item, index) => (
-                    <MonthlyUsage key={index} item={item} language={language} />
                   )) ?? (
                   <Skeleton className="h-[4rem] w-full col-span-1 rounded-xl" />
                 )}
@@ -490,11 +559,11 @@ export function TransactionTabV2({
                   {records.map((transaction) => (
                     <TransactionItem
                       key={transaction.id}
-                      onTitleClick={() =>
+                      onTitleClick={() => {
                         actions.showViewTransactionDialog(
                           transaction as unknown as TransactionDetailedDto
-                        )
-                      }
+                        );
+                      }}
                       onAccountClick={() =>
                         actions.showAccountReportsDialog(transaction.accountId)
                       }
@@ -540,6 +609,7 @@ export function TransactionTabV2({
               collaborators={
                 journal?.collaborators.map(({ user }) => user) ?? []
               }
+              spendingCategories={spendingCategories}
               transaction={selectedTransaction as TransactionDetailedDto}
               onSubmit={
                 dialogType === "edit"

@@ -1,0 +1,908 @@
+{
+  "id": "a7c666c0-0f1c-44a8-a2ef-3f7b982cee1e",
+  "prevId": "b9bf46cc-4800-40da-a700-339305b2502b",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.accounts": {
+      "name": "accounts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "bank_name": {
+          "name": "bank_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last4": {
+          "name": "last4",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "statement_day": {
+          "name": "statement_day",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "grace_period_in_days": {
+          "name": "grace_period_in_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "credit_expiration_date": {
+          "name": "credit_expiration_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "limit": {
+          "name": "limit",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "loan_start_date": {
+          "name": "loan_start_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "loan_end_date": {
+          "name": "loan_end_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "original_amount": {
+          "name": "original_amount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.refresh_token": {
+      "name": "refresh_token",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "token": {
+          "name": "token",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expiration": {
+          "name": "expiration",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_revoked": {
+          "name": "is_revoked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "refresh_token_token_unique": {
+          "name": "refresh_token_token_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.collaborators": {
+      "name": "collaborators",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(255)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "permission": {
+          "name": "permission",
+          "type": "journal_permissions",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "journal_id": {
+          "name": "journal_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.journal_accounts": {
+      "name": "journal_accounts",
+      "schema": "",
+      "columns": {
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "journal_id": {
+          "name": "journal_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "journal_account_composite_pk": {
+          "name": "journal_account_composite_pk",
+          "columns": [
+            "account_id",
+            "journal_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.journals": {
+      "name": "journals",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner_email": {
+          "name": "owner_email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "requires_approval": {
+          "name": "requires_approval",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_archived": {
+          "name": "is_archived",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "(CURRENT_TIMESTAMP AT TIME ZONE 'UTC')"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.repayments": {
+      "name": "repayments",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "journal_id": {
+          "name": "journal_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "statement_period_start": {
+          "name": "statement_period_start",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "statement_period_end": {
+          "name": "statement_period_end",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "repayment_keys": {
+          "name": "repayment_keys",
+          "nullsNotDistinct": false,
+          "columns": [
+            "account_id",
+            "journal_id",
+            "statement_period_start"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tags": {
+      "name": "tags",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "journal_id": {
+          "name": "journal_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "tags_pkey": {
+          "name": "tags_pkey",
+          "columns": [
+            "id",
+            "journal_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.transactions": {
+      "name": "transactions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "journal_id": {
+          "name": "journal_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account": {
+          "name": "account",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "transaction_types",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "paid_by": {
+          "name": "paid_by",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tags": {
+          "name": "tags",
+          "type": "varchar[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "transaction_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.spending_categories": {
+      "name": "spending_categories",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "journal_id": {
+          "name": "journal_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "limit": {
+          "name": "limit",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.profiles": {
+      "name": "profiles",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gender": {
+          "name": "gender",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dob": {
+          "name": "dob",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nationality": {
+          "name": "nationality",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "avatar_url": {
+          "name": "avatar_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.journal_permissions": {
+      "name": "journal_permissions",
+      "schema": "public",
+      "values": [
+        "owner",
+        "read",
+        "write"
+      ]
+    },
+    "public.transaction_status": {
+      "name": "transaction_status",
+      "schema": "public",
+      "values": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED",
+        "AUTO_APPROVED"
+      ]
+    },
+    "public.transaction_types": {
+      "name": "transaction_types",
+      "schema": "public",
+      "values": [
+        "INCOME",
+        "EXPENSE",
+        "TRANSFER"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {
+    "public.auth_users": {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "definition": "SELECT id, email, password FROM users",
+      "name": "auth_users",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": false
+    },
+    "public.monthly_account_reports": {
+      "columns": {
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_type": {
+          "name": "account_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "statement_start_date": {
+          "name": "statement_start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "statement_end_date": {
+          "name": "statement_end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transaction_type": {
+          "name": "transaction_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "due_date": {
+          "name": "due_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "journal_id": {
+          "name": "journal_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_amount": {
+          "name": "total_amount",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "limit": {
+          "name": "limit",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "repayment_status": {
+          "name": "repayment_status",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "definition": "\n  SELECT\n    a.id AS account_id,\n    a.type AS account_type,\n    a.user_id AS user_id,\n    j.currency AS currency,\n    t.type AS \"transaction_type\",\n    -- Due Date Logic\n    CASE WHEN a.type = 'credit' THEN\n      -- statement_end_date + grace_period_in_days\n      CASE WHEN a.statement_day IS NOT NULL THEN\n        CASE WHEN EXTRACT(DAY FROM t.date) >= a.statement_day THEN\n        (make_date (EXTRACT(YEAR FROM t.date + interval '1 month')::int,\n            EXTRACT(MONTH FROM t.date + interval '1 month')::int,\n            a.statement_day) - interval '1 day') + (a.grace_period_in_days || ' days')::interval\n      ELSE\n        (make_date (EXTRACT(YEAR FROM t.date)::int,\n            EXTRACT(MONTH FROM t.date)::int,\n            a.statement_day) - interval '1 day') + (a.grace_period_in_days || ' days')::interval\n        END\n      ELSE\n        ((DATE_TRUNC('month', t.date) + interval '1 month - 1 day')::date + a.grace_period_in_days)\n      END\n    WHEN a.type = 'loan' THEN\n      a.loan_end_date\n    ELSE\n      NULL\n    END AS due_date,\n    -- Statement Period Start (use statement_day if available, else 1st of month)\n    CASE WHEN a.statement_day IS NOT NULL THEN\n      -- If today is June 1st and statement_day is 15, then last month's 15th\n      CASE WHEN EXTRACT(DAY FROM t.date) >= a.statement_day THEN\n        make_date (EXTRACT(YEAR FROM t.date)::int,\n          EXTRACT(MONTH FROM t.date)::int,\n          a.statement_day)\n      ELSE\n        make_date (EXTRACT(YEAR FROM t.date - interval '1 month')::int,\n          EXTRACT(MONTH FROM t.date - interval '1 month')::int,\n          a.statement_day)\n      END\n    ELSE\n      DATE_TRUNC('month', t.date)::date\n    END AS statement_start_date,\n    -- Statement Period End (1 day before next statement_day, or end of month)\n    CASE WHEN a.statement_day IS NOT NULL THEN\n      CASE WHEN EXTRACT(DAY FROM t.date) >= a.statement_day THEN\n      (make_date (EXTRACT(YEAR FROM t.date + interval '1 month')::int,\n          EXTRACT(MONTH FROM t.date + interval '1 month')::int,\n          a.statement_day) - interval '1 day')::date\n    ELSE\n      (make_date (EXTRACT(YEAR FROM t.date)::int,\n          EXTRACT(MONTH FROM t.date)::int,\n          a.statement_day) - interval '1 day')::date\n      END\n    ELSE\n      (DATE_TRUNC('month', t.date) + interval '1 month - 1 day')::date\n    END AS statement_end_date,\n    ja.journal_id AS journal_id,\n    SUM(\n      CASE WHEN t.amount IS NOT NULL THEN\n        t.amount\n      ELSE\n        0\n      END) AS total_amount,\n    MAX(\n      CASE WHEN a.type = 'loan' THEN\n        a.original_amount\n      WHEN a.type = 'credit' THEN\n        a. \"limit\"\n      ELSE\n        NULL\n      END) AS \"limit\",\n  SUM(CASE WHEN r.id IS NOT NULL THEN 1 ELSE 0 END) > 0 AS repayment_status\n  FROM\n    accounts a\n    LEFT JOIN journal_accounts ja ON a.id = ja.account_id\n    LEFT JOIN journals j ON ja.journal_id = j.id\n    LEFT JOIN transactions t ON t.account = a.id\n    LEFT JOIN repayments r ON r.account_id = a.id\n      AND r.statement_period_start = CASE WHEN a.statement_day IS NOT NULL THEN\n        -- If today is June 1st and statement_day is 15, then last month's 15th\n        CASE WHEN EXTRACT(DAY FROM t.date) >= a.statement_day THEN\n          make_date (EXTRACT(YEAR FROM t.date)::int,\n            EXTRACT(MONTH FROM t.date)::int,\n            a.statement_day)\n        ELSE\n          make_date (EXTRACT(YEAR FROM t.date - interval '1 month')::int,\n            EXTRACT(MONTH FROM t.date - interval '1 month')::int,\n            a.statement_day)\n        END\n      ELSE\n        DATE_TRUNC('month', t.date)::date\n      END\n    GROUP BY\n      a.id,\n      a.type,\n      a.user_id,\n      ja.journal_id,\n      t.type,\n      j.currency,\n      statement_start_date,\n      statement_end_date,\n      due_date\n    HAVING\n      t.type IS NOT NULL\n      AND j.currency IS NOT NULL",
+      "name": "monthly_account_reports",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": false
+    },
+    "public.monthly_journal_account_reports": {
+      "columns": {
+        "journal_id": {
+          "name": "journal_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "month": {
+          "name": "month",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account": {
+          "name": "account",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_amount": {
+          "name": "total_amount",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "definition": "\n  SELECT\n    journal_id,\n    SUM(amount) AS total_amount,\n    account,\n    date_trunc('month', date) AS \"month\",\n    currency\n  FROM\n    transactions\n    LEFT JOIN journals ON transactions.journal_id = journals.id\n  WHERE\n    TYPE = 'EXPENSE'\n  GROUP BY\n    journal_id,\n    currency,\n    account,\n    \"month\"\n  ORDER BY\n    \"month\" DESC,\n    total_amount DESC",
+      "name": "monthly_journal_account_reports",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": false
+    },
+    "public.monthly_journal_tag_reports": {
+      "columns": {
+        "journal_id": {
+          "name": "journal_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "month": {
+          "name": "month",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tag": {
+          "name": "tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_amount": {
+          "name": "total_amount",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rank": {
+          "name": "rank",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "definition": "\n  SELECT\n    ranked.journal_id,\n    ranked.month,\n    tg.\"name\" AS tag,\n    ranked.total_amount,\n    ranked.rank,\n    currency\n  FROM (\n    SELECT\n      t.journal_id,\n      DATE_TRUNC('month', t.date) AS month,\n      tag,\n      SUM(t.amount) AS total_amount,\n      ROW_NUMBER() OVER (PARTITION BY t.journal_id,\n        DATE_TRUNC('month', t.date)\n        ORDER BY\n          SUM(t.amount)\n          DESC) AS rank\n      FROM\n        transactions t,\n        UNNEST(t.tags) AS tag\n      GROUP BY\n        t.journal_id,\n        month,\n        tag) ranked\n  LEFT JOIN journals j ON ranked.journal_id = j.id\n  LEFT JOIN tags tg ON ranked.tag = tg.id\n  WHERE\n    rank <= 3\n  ORDER BY\n    journal_id,\n    month,\n    total_amount DESC",
+      "name": "monthly_journal_tag_reports",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": false
+    }
+  },
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
