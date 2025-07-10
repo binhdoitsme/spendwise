@@ -1,3 +1,4 @@
+import { withLoading } from "@/app/loader.context";
 import { Localizable } from "@/components/common/i18n";
 import { Button } from "@/components/ui/button";
 import { DateInput } from "@/components/ui/date-input";
@@ -19,12 +20,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { LoadingSpinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import {
   JournalUserBasicDto,
   TagDto,
   TransactionDetailedDto,
 } from "@/modules/journals/application/dto/dtos.types";
+import { SpendingCategoryDto } from "@/modules/shared/application/dto/dtos.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -33,8 +36,6 @@ import { transactionFormSchema, TransactionFormSchema } from "../forms";
 import { Colorized } from "../tag/tag-colors";
 import { Tags } from "../tag/tag-item";
 import { transactionLabels } from "./labels";
-import { LoadingSpinner } from "@/components/ui/spinner";
-import { withLoading } from "@/app/loader.context";
 
 export interface AccountSelectProps {
   accountId: string;
@@ -48,6 +49,7 @@ export interface TransactionFormProps extends Localizable {
   accounts: Record<string, AccountSelectProps[]>;
   collaborators: JournalUserBasicDto[];
   tags: (TagDto & Colorized)[];
+  categories?: SpendingCategoryDto[];
   onSubmit: (data: TransactionFormSchema) => void | Promise<void>;
   onUnknownTag?: (tag: string) => Promise<void>;
   onNoAccount?: () => void | Promise<void>;
@@ -58,6 +60,7 @@ export function TransactionForm({
   accounts,
   collaborators,
   tags,
+  categories = [],
   language,
   isReadonly = false,
   onSubmit,
@@ -84,6 +87,7 @@ export function TransactionForm({
           tags: transaction.tags,
           type: transaction.type as "INCOME" | "EXPENSE",
           notes: transaction.notes,
+          categoryId: transaction.categoryId,
         }
       : {
           title: "",
@@ -215,6 +219,31 @@ export function TransactionForm({
                 <FormLabel>{labels.date}</FormLabel>
                 <FormControl>
                   <DateInput {...field} placeholder="Date" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="categoryId"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{labels.category}</FormLabel>
+                <FormControl>
+                  <Select {...field} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={labels.categoryPlaceholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {/** TODO: get list of spending categories */}
+                      {categories?.map(({ id, name }) => (
+                        <SelectItem key={id} value={id}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>

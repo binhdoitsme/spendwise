@@ -1,4 +1,8 @@
-import { AccountId, UserId } from "@/modules/shared/domain/identifiers";
+import {
+  AccountId,
+  SpendingCategoryId,
+  UserId,
+} from "@/modules/shared/domain/identifiers";
 import { Email } from "@/modules/shared/domain/value-objects";
 import { DateTime, Interval } from "luxon";
 import { JournalAccount } from "../../domain/account";
@@ -117,6 +121,9 @@ export const mapTransactionToDomain = (
     tags: schema.tags ?? [],
     status: TransactionStatus[schema.status],
     notes: schema.notes ?? undefined,
+    categoryId: schema.categoryId
+      ? new SpendingCategoryId(schema.categoryId)
+      : undefined,
   });
 };
 
@@ -135,6 +142,7 @@ export const mapTransactionFromDomain = (
     tags: transaction.tags,
     status: transaction.status,
     notes: transaction.notes ?? null,
+    categoryId: transaction.categoryId?.value ?? null,
   };
 };
 

@@ -109,6 +109,7 @@ export class DrizzleTransactionRepository implements TransactionRepository {
           account: schema.account,
           paidBy: schema.paidBy,
           tags: schema.tags,
+          categoryId: schema.categoryId,
         },
       });
   }

@@ -34,6 +34,8 @@ export interface TransactionLabels {
   notes: string;
   notesPlaceholder: string;
   saveTransaction: string;
+  category: string;
+  categoryPlaceholder: string;
 }
 
 export const transactionLabels: Record<Language, TransactionLabels> = {
@@ -71,6 +73,8 @@ export const transactionLabels: Record<Language, TransactionLabels> = {
     notes: "Notes",
     notesPlaceholder: "Optionally add notes for this transaction...",
     saveTransaction: "Save Transaction",
+    category: "Category",
+    categoryPlaceholder: "Select a category...",
   },
   vi: {
     searchPlaceholder: "Tìm kiếm...",
@@ -106,5 +110,7 @@ export const transactionLabels: Record<Language, TransactionLabels> = {
     notes: "Ghi chú",
     notesPlaceholder: "Thêm ghi chú cho giao dịch này (tùy chọn)...",
     saveTransaction: "Lưu giao dịch",
+    category: "Quỹ",
+    categoryPlaceholder: "Chọn quỹ để dùng ngân sách...",
   },
 };
