@@ -45,6 +45,7 @@ export interface TransactionDetailedDto {
   status: `${TransactionStatus}`;
   notes?: string;
   tags: string[];
+  categoryId?: string;
 }
 
 export interface JournalUserBasicDto {
@@ -96,6 +97,7 @@ export interface TransactionEditDto {
   paidBy?: string;
   tags?: string[];
   notes?: string;
+  categoryId?: string;
 }
 
 export interface TransactionCreateDto {
@@ -108,6 +110,7 @@ export interface TransactionCreateDto {
   paidBy: string;
   tags?: string[];
   notes?: string;
+  categoryId?: string;
 }
 
 export interface RepaymentPayload {
@@ -120,5 +123,6 @@ export interface RepaymentPayload {
 export {
   mapJournalToJournalBasicDto,
   mapJournalToJournalBasicWithTransactionsDto,
-  mapRichJournalToJournalDetailedDto,
+  mapRichJournalToJournalDetailedDto
 } from "./mappers";
+

@@ -21,6 +21,7 @@ import {
 } from "@/modules/reports/application/dto/dtos.types";
 import { MonthlyUsage } from "@/modules/reports/presentation/components/monthly-usage";
 import { PaymentDueRow } from "@/modules/reports/presentation/components/payment-due";
+import { SpendingCategoryDto } from "@/modules/shared/application/dto/dtos.types";
 import { JournalDetailsPageLabels } from "./[id]/labels";
 
 interface BaseTransactionDialogProps {
@@ -29,6 +30,7 @@ interface BaseTransactionDialogProps {
   selectableAccounts: Record<string, AccountSelectProps[]>;
   colorizedTags: (TagDto & { color: Color })[];
   collaborators: JournalUserBasicDto[];
+  spendingCategories: SpendingCategoryDto[];
   onNoAccount: () => void;
   onUnknownTag: (tag: string) => Promise<void>;
 }
@@ -43,6 +45,7 @@ export function NewTransactionDialog({
   selectableAccounts,
   colorizedTags,
   collaborators,
+  spendingCategories,
   onSubmit,
   onNoAccount,
   onUnknownTag,
@@ -58,6 +61,7 @@ export function NewTransactionDialog({
         accounts={selectableAccounts}
         tags={colorizedTags}
         collaborators={collaborators}
+        categories={spendingCategories}
         onSubmit={onSubmit}
         onNoAccount={onNoAccount}
         onUnknownTag={onUnknownTag}
@@ -74,6 +78,7 @@ export function ViewTransactionDialog({
   labels,
   language,
   selectableAccounts,
+  spendingCategories,
   colorizedTags,
   collaborators,
   transaction,
@@ -92,6 +97,7 @@ export function ViewTransactionDialog({
         accounts={selectableAccounts}
         tags={colorizedTags}
         collaborators={collaborators}
+        categories={spendingCategories}
         onNoAccount={onNoAccount}
         onUnknownTag={onUnknownTag}
         onSubmit={() => Promise.resolve()} // Placeholder since form is readonly
@@ -108,6 +114,7 @@ export function EditTransactionDialog({
   labels,
   language,
   selectableAccounts,
+  spendingCategories,
   colorizedTags,
   collaborators,
   transaction,
@@ -126,6 +133,7 @@ export function EditTransactionDialog({
         accounts={selectableAccounts}
         tags={colorizedTags}
         collaborators={collaborators}
+        categories={spendingCategories}
         onSubmit={onSubmit}
         onNoAccount={onNoAccount}
         onUnknownTag={onUnknownTag}
@@ -144,6 +152,7 @@ export function DuplicateTransactionDialog({
   selectableAccounts,
   colorizedTags,
   collaborators,
+  spendingCategories,
   transaction,
   onSubmit,
   onNoAccount,
@@ -160,6 +169,7 @@ export function DuplicateTransactionDialog({
         accounts={selectableAccounts}
         tags={colorizedTags}
         collaborators={collaborators}
+        categories={spendingCategories}
         onSubmit={onSubmit}
         onNoAccount={onNoAccount}
         onUnknownTag={onUnknownTag}

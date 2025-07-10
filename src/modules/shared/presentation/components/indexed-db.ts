@@ -17,6 +17,7 @@ export interface IndexedDbTransaction {
   tags: string[];
   title: string;
   type: "EXPENSE" | "INCOME" | "TRANSFER";
+  categoryId?: string; // Optional field for spending categories
   journalId: string;
 }
 
@@ -28,7 +29,7 @@ class _SpendwiseDexie extends Dexie {
     super("SpendWise");
     this.version(1).stores({
       transactions:
-        "id, accountId, amount, date, notes, paidBy, status, tags, title, type, journalId",
+        "id, accountId, amount, date, notes, paidBy, status, tags, title, type, categoryId, journalId",
       journals:
         "id, etag, ownerId, ownerEmail, ownerFirstName, ownerLastName, title, currency, isArchived, tags, accounts, collaborators",
     });

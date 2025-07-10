@@ -1,5 +1,9 @@
 import { SnowflakeIdentifier } from "@/modules/shared/base/identifiers";
-import { AccountId, UserId } from "@/modules/shared/domain/identifiers";
+import {
+  AccountId,
+  SpendingCategoryId,
+  UserId,
+} from "@/modules/shared/domain/identifiers";
 import { ExcludeMethods } from "@/types";
 import { DateTime } from "luxon";
 import { JournalId } from "./journal";
@@ -31,6 +35,7 @@ interface TransactionProps {
   tags: string[];
   status: TransactionStatus;
   notes?: string;
+  categoryId?: SpendingCategoryId;
 }
 
 export type TransactionCreate = Omit<TransactionProps, "id" | "status">;
@@ -49,7 +54,8 @@ export class Transaction implements TransactionProps {
     public paidBy: UserId,
     public tags: string[],
     private _status: TransactionStatus,
-    public notes?: string
+    public notes?: string,
+    public categoryId?: SpendingCategoryId
   ) {}
 
   static create(
@@ -71,7 +77,8 @@ export class Transaction implements TransactionProps {
       props.paidBy,
       props.tags,
       status,
-      props.notes
+      props.notes,
+      props.categoryId
     );
   }
 
@@ -87,7 +94,8 @@ export class Transaction implements TransactionProps {
       props.paidBy,
       props.tags,
       props.status,
-      props.notes
+      props.notes,
+      props.categoryId
     );
   }
 
@@ -117,6 +125,7 @@ export class Transaction implements TransactionProps {
     this.paidBy = updates.paidBy ?? this.paidBy;
     this.tags = updates.tags ?? this.tags;
     this.notes = updates.notes ?? this.notes;
+    this.categoryId = updates.categoryId ?? this.categoryId;
     return true;
   }
 }

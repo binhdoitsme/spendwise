@@ -18,6 +18,7 @@ export const transactionFormSchema = z.object({
   type: z.enum(["INCOME", "EXPENSE"], { required_error: "Type is required" }),
   paidBy: z.string().nonempty("Paid by is required"),
   notes: z.string().optional(),
+  categoryId: z.string().optional(),
 });
 
 export type TransactionFormSchema = z.infer<typeof transactionFormSchema>;

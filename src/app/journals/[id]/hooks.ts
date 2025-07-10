@@ -105,6 +105,7 @@ export function useTransactionActions({
             journalId: journal.id,
             status: tx!.status,
             date: data.date.toISOString().split("T")[0],
+            categoryId: data.categoryId,
           });
         })().then(() => setOpen(false)),
         journalApi.editTransaction(journal.id, data.id!, {
