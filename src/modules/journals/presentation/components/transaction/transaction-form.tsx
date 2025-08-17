@@ -304,7 +304,7 @@ export function TransactionForm({
                         </Button>
                       )}
                       {paidByUser &&
-                        accounts[transaction?.paidBy ?? paidByUser]?.map(
+                        accounts[paidByUser ?? transaction?.paidBy]?.map(
                           ({ accountId, name }) => (
                             <SelectItem key={accountId} value={accountId}>
                               {name}
