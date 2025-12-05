@@ -1,4 +1,4 @@
-CREATE TABLE "spendwise"."refresh_token" (
+CREATE TABLE "refresh_token" (
 	"id" text PRIMARY KEY NOT NULL,
 	"token" varchar(128) NOT NULL,
 	"expiration" timestamp NOT NULL,

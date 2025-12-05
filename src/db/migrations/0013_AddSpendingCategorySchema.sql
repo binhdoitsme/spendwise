@@ -1,4 +1,4 @@
-CREATE TABLE "spendwise"."spending_categories" (
+CREATE TABLE "spending_categories" (
 	"id" text PRIMARY KEY NOT NULL,
 	"journal_id" text NOT NULL,
 	"name" varchar(100) NOT NULL,

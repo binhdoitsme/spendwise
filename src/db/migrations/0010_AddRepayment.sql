@@ -1,4 +1,4 @@
-CREATE TABLE "spendwise"."repayments" (
+CREATE TABLE "repayments" (
 	"id" text PRIMARY KEY NOT NULL,
 	"currency" text NOT NULL,
 	"account_id" text NOT NULL,
