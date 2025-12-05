@@ -1,15 +1,15 @@
 import { MonthlyAccountReportSpecs } from "@/modules/reports/domain/account-report";
-import { baseSchema } from "@/modules/shared/infrastructure/base-schema";
 import { and, between, inArray, SQL, sql } from "drizzle-orm";
 import {
   boolean,
   date,
   integer,
   numeric,
-  text
+  pgView,
+  text,
 } from "drizzle-orm/pg-core";
 
-export const monthlyAccountReports = baseSchema.view("monthly_account_reports", {
+export const monthlyAccountReports = pgView("monthly_account_reports", {
   accountId: text("account_id").notNull(),
   accountType: text("account_type").notNull(),
   userId: text("user_id").notNull(),
@@ -164,7 +164,7 @@ export function mapToMonthlyAccountReportSQLConditions(
   return conditions;
 }
 
-export const monthlyJournalAccountReport = baseSchema.view(
+export const monthlyJournalAccountReport = pgView(
   "monthly_journal_account_reports",
   {
     journalId: text("journal_id").notNull(),
@@ -194,7 +194,7 @@ export const monthlyJournalAccountReport = baseSchema.view(
     "month" DESC,
     total_amount DESC`);
 
-export const monthlyJournalTagReport = baseSchema.view("monthly_journal_tag_reports", {
+export const monthlyJournalTagReport = pgView("monthly_journal_tag_reports", {
   journalId: text("journal_id").notNull(),
   month: date("month", { mode: "date" }).notNull(),
   tag: text("tag").notNull(),

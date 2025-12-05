@@ -1,18 +1,19 @@
-import { baseSchema } from "@/modules/shared/infrastructure/base-schema";
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   char,
   date,
   numeric,
+  pgEnum,
+  pgTable,
   primaryKey,
   text,
   timestamp,
   unique,
-  varchar
+  varchar,
 } from "drizzle-orm/pg-core";
 
-export const journalAccounts = baseSchema.table(
+export const journalAccounts = pgTable(
   "journal_accounts",
   {
     accountId: text("account_id").notNull(),
@@ -28,19 +29,19 @@ export const journalAccounts = baseSchema.table(
   ]
 );
 
-export const journalPermissions = baseSchema.enum("journal_permissions", [
+export const journalPermissions = pgEnum("journal_permissions", [
   "owner",
   "read",
   "write",
 ]);
 
-export const collaborators = baseSchema.table("collaborators", {
+export const collaborators = pgTable("collaborators", {
   userId: varchar("user_id", { length: 255 }).primaryKey(),
   permission: journalPermissions().notNull(),
   journalId: text("journal_id").notNull(),
 });
 
-export const tags = baseSchema.table(
+export const tags = pgTable(
   "tags",
   {
     id: text("id"),
@@ -52,7 +53,7 @@ export const tags = baseSchema.table(
   ]
 );
 
-export const journals = baseSchema.table("journals", {
+export const journals = pgTable("journals", {
   id: text("id").primaryKey(),
   ownerId: text("owner_id").notNull(),
   ownerEmail: varchar("owner_email", { length: 255 }).notNull(),
@@ -66,20 +67,20 @@ export const journals = baseSchema.table("journals", {
   ),
 });
 
-export const transactionTypeEnum = baseSchema.enum("transaction_types", [
+export const transactionTypeEnum = pgEnum("transaction_types", [
   "INCOME",
   "EXPENSE",
   "TRANSFER",
 ]);
 
-export const transactionStatusEnum = baseSchema.enum("transaction_status", [
+export const transactionStatusEnum = pgEnum("transaction_status", [
   "PENDING",
   "APPROVED",
   "REJECTED",
   "AUTO_APPROVED",
 ]);
 
-export const transactions = baseSchema.table("transactions", {
+export const transactions = pgTable("transactions", {
   id: text("id").primaryKey(),
   journalId: text("journal_id").notNull(),
   title: varchar("title", { length: 200 }).notNull(),
@@ -94,7 +95,7 @@ export const transactions = baseSchema.table("transactions", {
   categoryId: text("category_id"),
 });
 
-export const repayments = baseSchema.table(
+export const repayments = pgTable(
   "repayments",
   {
     id: text("id").primaryKey(),

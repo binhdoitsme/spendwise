@@ -1,9 +1,9 @@
 import { AccountId, UserId } from "@/modules/shared/domain/identifiers";
-import { baseSchema } from "@/modules/shared/infrastructure/base-schema";
 import {
   boolean,
   date,
   integer,
+  pgTable,
   real,
   text,
   timestamp
@@ -17,7 +17,7 @@ import {
   LoanAccountData,
 } from "../../domain/account";
 
-export const accounts = baseSchema.table("accounts", {
+export const accounts = pgTable("accounts", {
   id: text("id").primaryKey(),
   type: text("type").notNull(), // AccountType enum: cash, debit, credit, loan
   name: text("name").notNull(),

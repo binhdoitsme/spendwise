@@ -1,21 +1,20 @@
-import { baseSchema } from "@/modules/shared/infrastructure/base-schema";
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  pgTable,
+  pgView,
   text,
   timestamp,
-  varchar
+  varchar,
 } from "drizzle-orm/pg-core";
 
-export const authUsers = baseSchema
-  .view("auth_users", {
-    id: text().notNull(),
-    email: varchar({ length: 255 }).notNull(),
-    password: text().notNull(),
-  })
-  .as(sql`SELECT id, email, password FROM users`);
+export const authUsers = pgView("auth_users", {
+  id: text().notNull(),
+  email: varchar({ length: 255 }).notNull(),
+  password: text().notNull(),
+}).as(sql`SELECT id, email, password FROM users`);
 
-export const refreshTokens = baseSchema.table("refresh_token", {
+export const refreshTokens = pgTable("refresh_token", {
   id: text("id").primaryKey(),
   token: varchar("token", { length: 128 }).unique().notNull(),
   expiration: timestamp("expiration").notNull(),

@@ -1,4 +1,4 @@
-CREATE TABLE "spendwise"."profiles" (
+CREATE TABLE "profiles" (
 	"userId" text PRIMARY KEY NOT NULL,
 	"firstName" varchar(100) NOT NULL,
 	"lastName" varchar(100) NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE "spendwise"."profiles" (
 	"avatarUrl" text
 );
 --> statement-breakpoint
-CREATE TABLE "spendwise"."users" (
+CREATE TABLE "users" (
 	"id" text PRIMARY KEY NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"password" text NOT NULL,
