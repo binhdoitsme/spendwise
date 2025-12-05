@@ -13,6 +13,6 @@
     Hope to release this update as soon as possible
 */
 
-ALTER TABLE "tags" DROP CONSTRAINT "tags_pkey";--> statement-breakpoint
-ALTER TABLE "tags" ALTER COLUMN "id" DROP NOT NULL;--> statement-breakpoint
-ALTER TABLE "tags" ADD CONSTRAINT "tags_pkey" PRIMARY KEY("id","journalId");
+ALTER TABLE "spendwise"."tags" DROP CONSTRAINT "tags_pkey";--> statement-breakpoint
+ALTER TABLE "spendwise"."tags" ALTER COLUMN "id" DROP NOT NULL;--> statement-breakpoint
+ALTER TABLE "spendwise"."tags" ADD CONSTRAINT "tags_pkey" PRIMARY KEY("id","journalId");

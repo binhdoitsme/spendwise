@@ -1,4 +1,4 @@
-CREATE TABLE "spending_categories" (
+CREATE TABLE "spendwise"."spending_categories" (
 	"id" text PRIMARY KEY NOT NULL,
 	"journal_id" text NOT NULL,
 	"name" varchar(100) NOT NULL,
@@ -9,4 +9,4 @@ CREATE TABLE "spending_categories" (
 	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "transactions" ADD COLUMN "category_id" text;
+ALTER TABLE "spendwise"."transactions" ADD COLUMN "category_id" text;

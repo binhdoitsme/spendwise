@@ -1,13 +1,14 @@
-import { pgTable, text, varchar, date } from "drizzle-orm/pg-core";
+import { baseSchema } from "@/modules/shared/infrastructure/base-schema";
+import { date, text, varchar } from "drizzle-orm/pg-core";
 
-export const users = pgTable("users", {
+export const users = baseSchema.table("users", {
   id: text("id").primaryKey(),
   email: varchar("email", { length: 255 }).notNull(),
   password: text("password").notNull(),
   createdAt: date("created_at", { mode: "date" }).notNull(),
 });
 
-export const profiles = pgTable("profiles", {
+export const profiles = baseSchema.table("profiles", {
   userId: text("user_id").primaryKey(),
   firstName: varchar("first_name", { length: 100 }).notNull(),
   lastName: varchar("last_name", { length: 100 }).notNull(),
