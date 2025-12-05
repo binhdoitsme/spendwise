@@ -4,7 +4,7 @@
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.accounts": {
+    "accounts": {
       "name": "accounts",
       "schema": "",
       "columns": {
@@ -116,7 +116,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.refresh_token": {
+    "refresh_token": {
       "name": "refresh_token",
       "schema": "",
       "columns": {
@@ -174,7 +174,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.collaborators": {
+    "collaborators": {
       "name": "collaborators",
       "schema": "",
       "columns": {
@@ -206,7 +206,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.journal_accounts": {
+    "journal_accounts": {
       "name": "journal_accounts",
       "schema": "",
       "columns": {
@@ -251,7 +251,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.journals": {
+    "journals": {
       "name": "journals",
       "schema": "",
       "columns": {
@@ -321,7 +321,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.repayments": {
+    "repayments": {
       "name": "repayments",
       "schema": "",
       "columns": {
@@ -392,7 +392,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.tags": {
+    "tags": {
       "name": "tags",
       "schema": "",
       "columns": {
@@ -431,7 +431,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.transactions": {
+    "transactions": {
       "name": "transactions",
       "schema": "",
       "columns": {
@@ -512,7 +512,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.profiles": {
+    "profiles": {
       "name": "profiles",
       "schema": "",
       "columns": {
@@ -567,7 +567,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.users": {
+    "users": {
       "name": "users",
       "schema": "",
       "columns": {
@@ -606,7 +606,7 @@
     }
   },
   "enums": {
-    "public.journal_permissions": {
+    "journal_permissions": {
       "name": "journal_permissions",
       "schema": "",
       "values": [
@@ -615,7 +615,7 @@
         "write"
       ]
     },
-    "public.transaction_status": {
+    "transaction_status": {
       "name": "transaction_status",
       "schema": "",
       "values": [
@@ -625,7 +625,7 @@
         "AUTO_APPROVED"
       ]
     },
-    "public.transaction_types": {
+    "transaction_types": {
       "name": "transaction_types",
       "schema": "",
       "values": [
@@ -640,7 +640,7 @@
   "roles": {},
   "policies": {},
   "views": {
-    "public.auth_users": {
+    "auth_users": {
       "columns": {
         "id": {
           "name": "id",
@@ -667,7 +667,7 @@
       "isExisting": false,
       "materialized": false
     },
-    "public.monthly_account_reports": {
+    "monthly_account_reports": {
       "columns": {
         "account_id": {
           "name": "account_id",
@@ -748,7 +748,7 @@
       "isExisting": false,
       "materialized": false
     },
-    "public.monthly_journal_account_reports": {
+    "monthly_journal_account_reports": {
       "columns": {
         "journal_id": {
           "name": "journal_id",
@@ -787,7 +787,7 @@
       "isExisting": false,
       "materialized": false
     },
-    "public.monthly_journal_tag_reports": {
+    "monthly_journal_tag_reports": {
       "columns": {
         "journal_id": {
           "name": "journal_id",

@@ -1,4 +1,4 @@
-CREATE TABLE "spendwise"."accounts" (
+CREATE TABLE "accounts" (
 	"id" text PRIMARY KEY NOT NULL,
 	"type" text NOT NULL,
 	"name" text NOT NULL,

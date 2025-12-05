@@ -4,7 +4,7 @@
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.collaborators": {
+    "collaborators": {
       "name": "collaborators",
       "schema": "",
       "columns": {
@@ -36,7 +36,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.journal_accounts": {
+    "journal_accounts": {
       "name": "journal_accounts",
       "schema": "",
       "columns": {
@@ -85,7 +85,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.journals": {
+    "journals": {
       "name": "journals",
       "schema": "",
       "columns": {
@@ -148,7 +148,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.tags": {
+    "tags": {
       "name": "tags",
       "schema": "",
       "columns": {
@@ -179,7 +179,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.transactions": {
+    "transactions": {
       "name": "transactions",
       "schema": "",
       "columns": {
@@ -274,7 +274,7 @@
     }
   },
   "enums": {
-    "public.journal_permissions": {
+    "journal_permissions": {
       "name": "journal_permissions",
       "schema": "",
       "values": [
@@ -283,7 +283,7 @@
         "write"
       ]
     },
-    "public.transaction_status": {
+    "transaction_status": {
       "name": "transaction_status",
       "schema": "",
       "values": [
@@ -293,7 +293,7 @@
         "AUTO_APPROVED"
       ]
     },
-    "public.transaction_types": {
+    "transaction_types": {
       "name": "transaction_types",
       "schema": "",
       "values": [

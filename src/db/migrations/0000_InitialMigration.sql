@@ -7,7 +7,7 @@ CREATE TABLE "collaborators" (
 	"journalId" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "spendwise"."journal_accounts" (
+CREATE TABLE "journal_accounts" (
 	"accountId" text PRIMARY KEY NOT NULL,
 	"journalId" text NOT NULL,
 	"ownerId" text NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE "spendwise"."journal_accounts" (
 	"createdAt" date NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "spendwise"."journals" (
+CREATE TABLE "journals" (
 	"id" text PRIMARY KEY NOT NULL,
 	"ownerId" text NOT NULL,
 	"ownerEmail" varchar(255) NOT NULL,
@@ -26,13 +26,13 @@ CREATE TABLE "spendwise"."journals" (
 	"createdAt" date NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "spendwise"."tags" (
+CREATE TABLE "tags" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"journalId" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "spendwise"."transactions" (
+CREATE TABLE "transactions" (
 	"id" text PRIMARY KEY NOT NULL,
 	"journalId" text NOT NULL,
 	"title" varchar(200) NOT NULL,
