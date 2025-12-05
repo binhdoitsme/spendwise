@@ -1,4 +1,4 @@
-CREATE VIEW "spendwise"."spending_category_spent_amounts" AS (
+CREATE VIEW "spending_category_spent_amounts" AS (
   SELECT
     DATE_TRUNC('month', t.date) AS month,
     SUM(

@@ -1,1 +1,1 @@
-ALTER TABLE "spendwise"."collaborators" RENAME COLUMN "email" TO "userId";
+ALTER TABLE "collaborators" RENAME COLUMN "email" TO "userId";
