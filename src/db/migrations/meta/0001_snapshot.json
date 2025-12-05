@@ -17,7 +17,7 @@
         "permission": {
           "name": "permission",
           "type": "journal_permissions",
-          "typeSchema": "public",
+          "typeSchema": "spendwise",
           "primaryKey": false,
           "notNull": true
         },
@@ -222,7 +222,7 @@
         "type": {
           "name": "type",
           "type": "transaction_types",
-          "typeSchema": "public",
+          "typeSchema": "spendwise",
           "primaryKey": false,
           "notNull": true
         },
@@ -241,7 +241,7 @@
         "status": {
           "name": "status",
           "type": "transaction_status",
-          "typeSchema": "public",
+          "typeSchema": "spendwise",
           "primaryKey": false,
           "notNull": true
         },
@@ -276,7 +276,7 @@
   "enums": {
     "public.journal_permissions": {
       "name": "journal_permissions",
-      "schema": "public",
+      "schema": "spendwise",
       "values": [
         "owner",
         "read",
@@ -285,7 +285,7 @@
     },
     "public.transaction_status": {
       "name": "transaction_status",
-      "schema": "public",
+      "schema": "spendwise",
       "values": [
         "PENDING",
         "APPROVED",
@@ -295,7 +295,7 @@
     },
     "public.transaction_types": {
       "name": "transaction_types",
-      "schema": "public",
+      "schema": "spendwise",
       "values": [
         "INCOME",
         "EXPENSE",

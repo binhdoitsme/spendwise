@@ -1,13 +1,13 @@
-CREATE TYPE "public"."journal_permissions" AS ENUM('owner', 'read', 'write');--> statement-breakpoint
-CREATE TYPE "public"."transaction_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'AUTO_APPROVED');--> statement-breakpoint
-CREATE TYPE "public"."transaction_types" AS ENUM('INCOME', 'EXPENSE', 'TRANSFER');--> statement-breakpoint
-CREATE TABLE "collaborators" (
+CREATE TYPE "spendwise"."journal_permissions" AS ENUM('owner', 'read', 'write');--> statement-breakpoint
+CREATE TYPE "spendwise"."transaction_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'AUTO_APPROVED');--> statement-breakpoint
+CREATE TYPE "spendwise"."transaction_types" AS ENUM('INCOME', 'EXPENSE', 'TRANSFER');--> statement-breakpoint
+CREATE TABLE "spendwise"."collaborators" (
 	"email" varchar(255) PRIMARY KEY NOT NULL,
 	"permission" "journal_permissions" NOT NULL,
 	"journalId" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "journal_accounts" (
+CREATE TABLE "spendwise"."journal_accounts" (
 	"accountId" text PRIMARY KEY NOT NULL,
 	"journalId" text NOT NULL,
 	"ownerId" text NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE "journal_accounts" (
 	"createdAt" date NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "journals" (
+CREATE TABLE "spendwise"."journals" (
 	"id" text PRIMARY KEY NOT NULL,
 	"ownerId" text NOT NULL,
 	"ownerEmail" varchar(255) NOT NULL,
@@ -26,13 +26,13 @@ CREATE TABLE "journals" (
 	"createdAt" date NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "tags" (
+CREATE TABLE "spendwise"."tags" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"journalId" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "transactions" (
+CREATE TABLE "spendwise"."transactions" (
 	"id" text PRIMARY KEY NOT NULL,
 	"journalId" text NOT NULL,
 	"title" varchar(200) NOT NULL,

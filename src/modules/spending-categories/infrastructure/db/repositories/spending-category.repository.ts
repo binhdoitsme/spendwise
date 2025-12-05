@@ -1,10 +1,11 @@
 import { JournalId } from "@/modules/journals/domain/journal";
 import { SpendingCategoryId } from "@/modules/shared/domain/identifiers";
+import { baseSchema } from "@/modules/shared/infrastructure/base-schema";
 import { SpendingCategoryRepository } from "@/modules/spending-categories/domain/repositories";
 import { SpendingCategory } from "@/modules/spending-categories/domain/spending-category";
 import { eq, sql } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { text, timestamp } from "drizzle-orm/pg-core";
 import { mapSpendingCategoryToDomain } from "../mappers";
 import * as schema from "../schemas";
 
@@ -84,10 +85,10 @@ export class DrizzleSpendingCategoryRepository
     if (!spendingCategory) {
       throw new Error("Spending category not found");
     }
-    const transactionTable = pgTable("transactions", {
+    const transactionTable = baseSchema.table("transactions", {
       categoryId: text("category_id"),
     });
-    const journalTable = pgTable("journals", {
+    const journalTable = baseSchema.table("journals", {
       id: text("id").primaryKey(),
       updatedAt: timestamp("updated_at", { mode: "date" }),
     });

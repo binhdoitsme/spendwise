@@ -1,4 +1,4 @@
-CREATE TABLE "accounts" (
+CREATE TABLE "spendwise"."accounts" (
 	"id" text PRIMARY KEY NOT NULL,
 	"type" text NOT NULL,
 	"name" text NOT NULL,
@@ -32,8 +32,8 @@ CREATE TABLE "accounts" (
     Hope to release this update as soon as possible
 */
 
-ALTER TABLE "journal_accounts" DROP CONSTRAINT "journal_accounts_pkey";--> statement-breakpoint
-ALTER TABLE "transactions" ALTER COLUMN "account" SET DATA TYPE text;--> statement-breakpoint
-ALTER TABLE "journal_accounts" ADD CONSTRAINT "journal_account_composite_pk" PRIMARY KEY("accountId","journalId");--> statement-breakpoint
-ALTER TABLE "journal_accounts" DROP COLUMN "ownerEmail";--> statement-breakpoint
-ALTER TABLE "journal_accounts" DROP COLUMN "gracePeriodDays";
+ALTER TABLE "spendwise"."journal_accounts" DROP CONSTRAINT "journal_accounts_pkey";--> statement-breakpoint
+ALTER TABLE "spendwise"."transactions" ALTER COLUMN "account" SET DATA TYPE text;--> statement-breakpoint
+ALTER TABLE "spendwise"."journal_accounts" ADD CONSTRAINT "journal_account_composite_pk" PRIMARY KEY("accountId","journalId");--> statement-breakpoint
+ALTER TABLE "spendwise"."journal_accounts" DROP COLUMN "ownerEmail";--> statement-breakpoint
+ALTER TABLE "spendwise"."journal_accounts" DROP COLUMN "gracePeriodDays";
