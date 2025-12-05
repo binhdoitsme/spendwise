@@ -187,7 +187,7 @@
         "permission": {
           "name": "permission",
           "type": "journal_permissions",
-          "typeSchema": "public",
+          "typeSchema": "spendwise",
           "primaryKey": false,
           "notNull": true
         },
@@ -467,7 +467,7 @@
         "type": {
           "name": "type",
           "type": "transaction_types",
-          "typeSchema": "public",
+          "typeSchema": "spendwise",
           "primaryKey": false,
           "notNull": true
         },
@@ -486,7 +486,7 @@
         "status": {
           "name": "status",
           "type": "transaction_status",
-          "typeSchema": "public",
+          "typeSchema": "spendwise",
           "primaryKey": false,
           "notNull": true
         },
@@ -601,7 +601,7 @@
   "enums": {
     "public.journal_permissions": {
       "name": "journal_permissions",
-      "schema": "public",
+      "schema": "spendwise",
       "values": [
         "owner",
         "read",
@@ -610,7 +610,7 @@
     },
     "public.transaction_status": {
       "name": "transaction_status",
-      "schema": "public",
+      "schema": "spendwise",
       "values": [
         "PENDING",
         "APPROVED",
@@ -620,7 +620,7 @@
     },
     "public.transaction_types": {
       "name": "transaction_types",
-      "schema": "public",
+      "schema": "spendwise",
       "values": [
         "INCOME",
         "EXPENSE",
@@ -656,7 +656,7 @@
       },
       "definition": "SELECT id, email, password FROM users",
       "name": "auth_users",
-      "schema": "public",
+      "schema": "spendwise",
       "isExisting": false,
       "materialized": false
     },
@@ -737,7 +737,7 @@
       },
       "definition": "\n  SELECT\n    a.id AS account_id,\n    a.type AS account_type,\n    a.user_id AS user_id,\n    j.currency AS currency,\n    t.type AS \"transaction_type\",\n    -- Due Date Logic\n    CASE WHEN a.type = 'credit' THEN\n      -- statement_end_date + grace_period_in_days\n      CASE WHEN a.statement_day IS NOT NULL THEN\n        CASE WHEN EXTRACT(DAY FROM t.date) >= a.statement_day THEN\n        (make_date (EXTRACT(YEAR FROM t.date + interval '1 month')::int,\n            EXTRACT(MONTH FROM t.date + interval '1 month')::int,\n            a.statement_day) - interval '1 day') + (a.grace_period_in_days || ' days')::interval\n      ELSE\n        (make_date (EXTRACT(YEAR FROM t.date)::int,\n            EXTRACT(MONTH FROM t.date)::int,\n            a.statement_day) - interval '1 day') + (a.grace_period_in_days || ' days')::interval\n        END\n      ELSE\n        ((DATE_TRUNC('month', t.date) + interval '1 month - 1 day')::date + a.grace_period_in_days)\n      END\n    WHEN a.type = 'loan' THEN\n      a.loan_end_date\n    ELSE\n      NULL\n    END AS due_date,\n    -- Statement Period Start (use statement_day if available, else 1st of month)\n    CASE WHEN a.statement_day IS NOT NULL THEN\n      -- If today is June 1st and statement_day is 15, then last month's 15th\n      CASE WHEN EXTRACT(DAY FROM t.date) >= a.statement_day THEN\n        make_date (EXTRACT(YEAR FROM t.date)::int,\n          EXTRACT(MONTH FROM t.date)::int,\n          a.statement_day)\n      ELSE\n        make_date (EXTRACT(YEAR FROM t.date - interval '1 month')::int,\n          EXTRACT(MONTH FROM t.date - interval '1 month')::int,\n          a.statement_day)\n      END\n    ELSE\n      DATE_TRUNC('month', t.date)::date\n    END AS statement_start_date,\n    -- Statement Period End (1 day before next statement_day, or end of month)\n    CASE WHEN a.statement_day IS NOT NULL THEN\n      CASE WHEN EXTRACT(DAY FROM t.date) >= a.statement_day THEN\n      (make_date (EXTRACT(YEAR FROM t.date + interval '1 month')::int,\n          EXTRACT(MONTH FROM t.date + interval '1 month')::int,\n          a.statement_day) - interval '1 day')::date\n    ELSE\n      (make_date (EXTRACT(YEAR FROM t.date)::int,\n          EXTRACT(MONTH FROM t.date)::int,\n          a.statement_day) - interval '1 day')::date\n      END\n    ELSE\n      (DATE_TRUNC('month', t.date) + interval '1 month - 1 day')::date\n    END AS statement_end_date,\n    ja.journal_id AS journal_id,\n    SUM(\n      CASE WHEN t.amount IS NOT NULL THEN\n        t.amount\n      ELSE\n        0\n      END) AS total_amount,\n    MAX(\n      CASE WHEN a.type = 'loan' THEN\n        a.original_amount\n      WHEN a.type = 'credit' THEN\n        a. \"limit\"\n      ELSE\n        NULL\n      END) AS \"limit\",\n  SUM(CASE WHEN r.id IS NOT NULL THEN 1 ELSE 0 END) > 0 AS repayment_status\n  FROM\n    accounts a\n    LEFT JOIN journal_accounts ja ON a.id = ja.account_id\n    LEFT JOIN journals j ON ja.journal_id = j.id\n    LEFT JOIN transactions t ON t.account = a.id\n    LEFT JOIN repayments r ON r.account_id = a.id\n      AND r.statement_period_start = CASE WHEN a.statement_day IS NOT NULL THEN\n        -- If today is June 1st and statement_day is 15, then last month's 15th\n        CASE WHEN EXTRACT(DAY FROM t.date) >= a.statement_day THEN\n          make_date (EXTRACT(YEAR FROM t.date)::int,\n            EXTRACT(MONTH FROM t.date)::int,\n            a.statement_day)\n        ELSE\n          make_date (EXTRACT(YEAR FROM t.date - interval '1 month')::int,\n            EXTRACT(MONTH FROM t.date - interval '1 month')::int,\n            a.statement_day)\n        END\n      ELSE\n        DATE_TRUNC('month', t.date)::date\n      END\n    GROUP BY\n      a.id,\n      a.type,\n      a.user_id,\n      ja.journal_id,\n      t.type,\n      j.currency,\n      statement_start_date,\n      statement_end_date,\n      due_date\n    HAVING\n      t.type IS NOT NULL\n      AND j.currency IS NOT NULL",
       "name": "monthly_account_reports",
-      "schema": "public",
+      "schema": "spendwise",
       "isExisting": false,
       "materialized": false
     },
@@ -776,7 +776,7 @@
       },
       "definition": "\n  SELECT\n    journal_id,\n    SUM(amount) AS total_amount,\n    account,\n    date_trunc('month', date) AS \"month\",\n    currency\n  FROM\n    transactions\n    LEFT JOIN journals ON transactions.journal_id = journals.id\n  WHERE\n    TYPE = 'EXPENSE'\n  GROUP BY\n    journal_id,\n    currency,\n    account,\n    \"month\"\n  ORDER BY\n    \"month\" DESC,\n    total_amount DESC",
       "name": "monthly_journal_account_reports",
-      "schema": "public",
+      "schema": "spendwise",
       "isExisting": false,
       "materialized": false
     },
@@ -821,7 +821,7 @@
       },
       "definition": "\n  SELECT\n    ranked.journal_id,\n    ranked.month,\n    tg.\"name\" AS tag,\n    ranked.total_amount,\n    ranked.rank,\n    currency\n  FROM (\n    SELECT\n      t.journal_id,\n      DATE_TRUNC('month', t.date) AS month,\n      tag,\n      SUM(t.amount) AS total_amount,\n      ROW_NUMBER() OVER (PARTITION BY t.journal_id,\n        DATE_TRUNC('month', t.date)\n        ORDER BY\n          SUM(t.amount)\n          DESC) AS rank\n      FROM\n        transactions t,\n        UNNEST(t.tags) AS tag\n      GROUP BY\n        t.journal_id,\n        month,\n        tag) ranked\n  LEFT JOIN journals j ON ranked.journal_id = j.id\n  LEFT JOIN tags tg ON ranked.tag = tg.id\n  WHERE\n    rank <= 3\n  ORDER BY\n    journal_id,\n    month,\n    total_amount DESC",
       "name": "monthly_journal_tag_reports",
-      "schema": "public",
+      "schema": "spendwise",
       "isExisting": false,
       "materialized": false
     }

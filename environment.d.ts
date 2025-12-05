@@ -8,6 +8,7 @@ declare global {
       NEXT_PUBLIC_BASE_URL?: string;
       JWT_EXPIRES_IN?: string;
       JWT_SECRET_KEY?: string;
+      BASE_SCHEMA?: string;
     }
   }
 }

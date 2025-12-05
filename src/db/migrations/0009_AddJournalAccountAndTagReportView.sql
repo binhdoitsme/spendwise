@@ -1,4 +1,4 @@
-CREATE VIEW "public"."monthly_journal_account_reports" AS (
+CREATE VIEW "spendwise"."monthly_journal_account_reports" AS (
   SELECT
     journal_id,
     SUM(amount) AS total_amount,
@@ -18,7 +18,7 @@ CREATE VIEW "public"."monthly_journal_account_reports" AS (
   ORDER BY
     "month" DESC,
     total_amount DESC);--> statement-breakpoint
-CREATE VIEW "public"."monthly_journal_tag_reports" AS (
+CREATE VIEW "spendwise"."monthly_journal_tag_reports" AS (
   SELECT
 	ranked.journal_id,
 	ranked.month,

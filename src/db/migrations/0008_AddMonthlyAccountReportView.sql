@@ -1,5 +1,5 @@
-DROP VIEW "public"."monthly_account_reports";
-CREATE VIEW "public"."monthly_account_reports" AS (
+DROP VIEW IF EXISTS "spendwise"."monthly_account_reports";
+CREATE VIEW "spendwise"."monthly_account_reports" AS (
   SELECT a.id AS account_id,
     a.type AS account_type,
     a.user_id AS user_id,

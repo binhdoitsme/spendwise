@@ -1,15 +1,14 @@
+import { baseSchema } from "@/modules/shared/infrastructure/base-schema";
 import { sql } from "drizzle-orm";
 import {
   date,
   numeric,
-  pgTable,
-  pgView,
   text,
   timestamp,
-  varchar,
+  varchar
 } from "drizzle-orm/pg-core";
 
-export const spendingCategories = pgTable("spending_categories", {
+export const spendingCategories = baseSchema.table("spending_categories", {
   id: text("id").primaryKey(),
   journalId: text("journal_id").notNull(),
   name: varchar("name", { length: 100 }).notNull(),
@@ -24,7 +23,7 @@ export const spendingCategories = pgTable("spending_categories", {
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull(),
 });
 
-export const spendingCategorySpentAmounts = pgView(
+export const spendingCategorySpentAmounts = baseSchema.view(
   "spending_category_spent_amounts",
   {
     journalId: text("journal_id").notNull(),

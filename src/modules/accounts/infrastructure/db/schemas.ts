@@ -1,12 +1,12 @@
 import { AccountId, UserId } from "@/modules/shared/domain/identifiers";
+import { baseSchema } from "@/modules/shared/infrastructure/base-schema";
 import {
   boolean,
   date,
   integer,
-  pgTable,
   real,
   text,
-  timestamp,
+  timestamp
 } from "drizzle-orm/pg-core";
 import { DateTime } from "luxon";
 import {
@@ -17,7 +17,7 @@ import {
   LoanAccountData,
 } from "../../domain/account";
 
-export const accounts = pgTable("accounts", {
+export const accounts = baseSchema.table("accounts", {
   id: text("id").primaryKey(),
   type: text("type").notNull(), // AccountType enum: cash, debit, credit, loan
   name: text("name").notNull(),

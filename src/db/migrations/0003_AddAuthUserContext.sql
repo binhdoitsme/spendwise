@@ -1,4 +1,4 @@
-CREATE TABLE "refresh_token" (
+CREATE TABLE "spendwise"."refresh_token" (
 	"id" text PRIMARY KEY NOT NULL,
 	"token" varchar(128) NOT NULL,
 	"expiration" timestamp NOT NULL,
@@ -8,4 +8,4 @@ CREATE TABLE "refresh_token" (
 	CONSTRAINT "refresh_token_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
-CREATE VIEW "public"."auth_users" AS (SELECT id, email, password FROM users);
+CREATE VIEW "spendwise"."auth_users" AS (SELECT id, email, password FROM users);
