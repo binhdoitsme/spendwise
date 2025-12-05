@@ -9,4 +9,4 @@ CREATE TABLE "spendwise"."spending_categories" (
 	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "spendwise"."transactions" ADD COLUMN "category_id" text;
+ALTER TABLE "transactions" ADD COLUMN "category_id" text;

@@ -8,4 +8,4 @@ CREATE TABLE "spendwise"."refresh_token" (
 	CONSTRAINT "refresh_token_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
-CREATE VIEW "spendwise"."auth_users" AS (SELECT id, email, password FROM users);
+CREATE VIEW "auth_users" AS (SELECT id, email, password FROM users);

@@ -27,4 +27,4 @@ ALTER TABLE "spendwise"."journal_accounts" DROP CONSTRAINT "journal_account_comp
 ALTER TABLE "spendwise"."journal_accounts" ADD CONSTRAINT "journal_account_composite_pk" PRIMARY KEY("account_id","journal_id");--> statement-breakpoint
 ALTER TABLE "spendwise"."tags" DROP CONSTRAINT "tags_pkey";
 --> statement-breakpoint
-ALTER TABLE "spendwise"."tags" ADD CONSTRAINT "tags_pkey" PRIMARY KEY("id","journal_id");
+ALTER TABLE "tags" ADD CONSTRAINT "tags_pkey" PRIMARY KEY("id","journal_id");

@@ -1,5 +1,5 @@
-DROP VIEW IF EXISTS "spendwise"."monthly_account_reports";--> statement-breakpoint
-CREATE VIEW "spendwise"."monthly_account_reports" AS (
+DROP VIEW IF EXISTS "monthly_account_reports";--> statement-breakpoint
+CREATE VIEW "monthly_account_reports" AS (
   SELECT
     a.id AS account_id,
     a.type AS account_type,

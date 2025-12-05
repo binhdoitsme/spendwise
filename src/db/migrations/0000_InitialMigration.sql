@@ -1,7 +1,7 @@
-CREATE TYPE "spendwise"."journal_permissions" AS ENUM('owner', 'read', 'write');--> statement-breakpoint
-CREATE TYPE "spendwise"."transaction_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'AUTO_APPROVED');--> statement-breakpoint
-CREATE TYPE "spendwise"."transaction_types" AS ENUM('INCOME', 'EXPENSE', 'TRANSFER');--> statement-breakpoint
-CREATE TABLE "spendwise"."collaborators" (
+CREATE TYPE "journal_permissions" AS ENUM('owner', 'read', 'write');--> statement-breakpoint
+CREATE TYPE "transaction_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'AUTO_APPROVED');--> statement-breakpoint
+CREATE TYPE "transaction_types" AS ENUM('INCOME', 'EXPENSE', 'TRANSFER');--> statement-breakpoint
+CREATE TABLE "collaborators" (
 	"email" varchar(255) PRIMARY KEY NOT NULL,
 	"permission" "journal_permissions" NOT NULL,
 	"journalId" text NOT NULL

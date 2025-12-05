@@ -10,10 +10,10 @@ CREATE TABLE "spendwise"."repayments" (
 	CONSTRAINT "repayment_keys" UNIQUE("account_id","journal_id","statement_period_start")
 );
 --> statement-breakpoint
-DROP VIEW "spendwise"."monthly_journal_tag_reports";--> statement-breakpoint
-ALTER TABLE "spendwise"."transactions" DROP COLUMN IF EXISTS "paid_off_transaction";--> statement-breakpoint
-ALTER TABLE "spendwise"."transactions" DROP COLUMN IF EXISTS "related_transactions";--> statement-breakpoint
-CREATE VIEW "spendwise"."monthly_journal_tag_reports" AS (
+DROP VIEW "monthly_journal_tag_reports";--> statement-breakpoint
+ALTER TABLE "transactions" DROP COLUMN IF EXISTS "paid_off_transaction";--> statement-breakpoint
+ALTER TABLE "transactions" DROP COLUMN IF EXISTS "related_transactions";--> statement-breakpoint
+CREATE VIEW "monthly_journal_tag_reports" AS (
   SELECT
     ranked.journal_id,
     ranked.month,

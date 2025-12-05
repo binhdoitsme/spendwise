@@ -534,7 +534,7 @@
   "enums": {
     "public.journal_permissions": {
       "name": "journal_permissions",
-      "schema": "spendwise",
+      "schema": "",
       "values": [
         "owner",
         "read",
@@ -543,7 +543,7 @@
     },
     "public.transaction_status": {
       "name": "transaction_status",
-      "schema": "spendwise",
+      "schema": "",
       "values": [
         "PENDING",
         "APPROVED",
@@ -553,7 +553,7 @@
     },
     "public.transaction_types": {
       "name": "transaction_types",
-      "schema": "spendwise",
+      "schema": "",
       "values": [
         "INCOME",
         "EXPENSE",
@@ -589,7 +589,7 @@
       },
       "definition": "SELECT id, email, password FROM users",
       "name": "auth_users",
-      "schema": "spendwise",
+      "schema": "",
       "isExisting": false,
       "materialized": false
     }
