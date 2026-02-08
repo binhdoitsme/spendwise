@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/spinner";
 import { BasicUserApi } from "@/modules/shared/presentation/contracts/user.service";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
@@ -138,12 +137,12 @@ export function SignInForm({
           </form>
         </Form>
         <SSOLoginActions labels={labels} ssoProviders={ssoProviders} />
-        <div className="mt-4 text-center text-sm">
+        {/* <div className="mt-4 text-center text-sm">
           {labels.noAccount}{" "}
           <Link href="/auth/sign-up" className="text-blue-600 hover:underline">
             {labels.signUpButton}
           </Link>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );
