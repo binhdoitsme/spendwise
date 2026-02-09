@@ -4,7 +4,7 @@ import { unauthorized } from "./app/api/api-responses";
 import { appConfig } from "./config/appConfig";
 import { JwtTokenHandler } from "./modules/auth/infrastructure/external/jwt-token-handler";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   if (pathname.startsWith("/_next") || pathname.includes(".")) {
     return NextResponse.next({ request });

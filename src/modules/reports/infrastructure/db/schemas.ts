@@ -5,25 +5,33 @@ import {
   date,
   integer,
   numeric,
+  pgSchema,
   pgView,
   text,
 } from "drizzle-orm/pg-core";
 
-export const monthlyAccountReports = pgView("monthly_account_reports", {
-  accountId: text("account_id").notNull(),
-  accountType: text("account_type").notNull(),
-  userId: text("user_id").notNull(),
-  statementStartDate: date("statement_start_date", { mode: "date" }).notNull(),
-  statementEndDate: date("statement_end_date", { mode: "date" }).notNull(),
-  transactionType: text("transaction_type").notNull(),
-  dueDate: date("due_date", { mode: "date" }),
-  journalId: text("journal_id").notNull(),
-  totalAmount: numeric("total_amount", { mode: "number" }).notNull(),
-  limit: numeric("limit", { mode: "number" }),
-  currency: text("currency").notNull(),
-  repaymentStatus: boolean("repayment_status").notNull(),
-}).as(
-  sql`
+const baseSchemaStr = process.env.BASE_SCHEMA ?? "spendwise";
+const baseSchema = pgSchema(baseSchemaStr);
+
+export const monthlyAccountReports = baseSchema
+  .view("monthly_account_reports", {
+    accountId: text("account_id").notNull(),
+    accountType: text("account_type").notNull(),
+    userId: text("user_id").notNull(),
+    statementStartDate: date("statement_start_date", {
+      mode: "date",
+    }).notNull(),
+    statementEndDate: date("statement_end_date", { mode: "date" }).notNull(),
+    transactionType: text("transaction_type").notNull(),
+    dueDate: date("due_date", { mode: "date" }),
+    journalId: text("journal_id").notNull(),
+    totalAmount: numeric("total_amount", { mode: "number" }).notNull(),
+    limit: numeric("limit", { mode: "number" }),
+    currency: text("currency").notNull(),
+    repaymentStatus: boolean("repayment_status").notNull(),
+  })
+  .as(
+    sql`
   SELECT
     a.id AS account_id,
     a.type AS account_type,
@@ -128,26 +136,26 @@ export const monthlyAccountReports = pgView("monthly_account_reports", {
       due_date
     HAVING
       t.type IS NOT NULL
-      AND j.currency IS NOT NULL`
-);
+      AND j.currency IS NOT NULL`,
+  );
 
 export function mapToMonthlyAccountReportSQLConditions(
-  specs: MonthlyAccountReportSpecs
+  specs: MonthlyAccountReportSpecs,
 ) {
   const conditions = new Array<SQL<unknown>>();
   if (specs.accountIds) {
     conditions.push(
       inArray(
         monthlyAccountReports.accountId,
-        specs.accountIds.map(({ value }) => value)
-      )
+        specs.accountIds.map(({ value }) => value),
+      ),
     );
   }
   if (specs.accountTypes) {
     conditions.push(
       inArray(monthlyAccountReports.accountType, [
         ...new Set(specs.accountTypes),
-      ])
+      ]),
     );
   }
   if (specs.period) {
@@ -156,15 +164,15 @@ export function mapToMonthlyAccountReportSQLConditions(
         between(
           monthlyAccountReports.statementStartDate,
           specs.period.start!.toJSDate(),
-          specs.period.end!.toJSDate()
-        )
-      )!
+          specs.period.end!.toJSDate(),
+        ),
+      )!,
     );
   }
   return conditions;
 }
 
-export const monthlyJournalAccountReport = pgView(
+export const monthlyJournalAccountReport = baseSchema.view(
   "monthly_journal_account_reports",
   {
     journalId: text("journal_id").notNull(),
@@ -172,7 +180,7 @@ export const monthlyJournalAccountReport = pgView(
     account: text("account").notNull(),
     totalAmount: numeric("total_amount", { mode: "number" }).notNull(),
     currency: text("currency").notNull(),
-  }
+  },
 ).as(sql`
   SELECT
     journal_id,

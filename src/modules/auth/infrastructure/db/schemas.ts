@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  pgSchema,
   pgTable,
   pgView,
   text,
@@ -8,13 +9,19 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const authUsers = pgView("auth_users", {
-  id: text().notNull(),
-  email: varchar({ length: 255 }).notNull(),
-  password: text().notNull(),
-}).as(sql`SELECT id, email, password FROM users`);
+const baseSchema = pgSchema(process.env.BASE_SCHEMA ?? "spendwise");
 
-export const refreshTokens = pgTable("refresh_token", {
+export const authUsers = baseSchema
+  .view("auth_users", {
+    id: text().notNull(),
+    email: varchar({ length: 255 }).notNull(),
+    password: text().notNull(),
+  })
+  .as(
+    sql`SELECT id, email, password FROM users`,
+  );
+
+export const refreshTokens = baseSchema.table("refresh_token", {
   id: text("id").primaryKey(),
   token: varchar("token", { length: 128 }).unique().notNull(),
   expiration: timestamp("expiration").notNull(),

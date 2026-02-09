@@ -12,4 +12,5 @@ export default defineConfig({
   migrations: {
     schema: process.env.BASE_SCHEMA ?? "spendwise",
   },
+  schemaFilter: process.env.BASE_SCHEMA ?? "spendwise",
 });
