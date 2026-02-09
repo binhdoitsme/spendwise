@@ -4,16 +4,17 @@ import {
   char,
   date,
   numeric,
-  pgEnum,
-  pgTable,
+  pgSchema,
   primaryKey,
   text,
   timestamp,
   unique,
-  varchar,
+  varchar
 } from "drizzle-orm/pg-core";
 
-export const journalAccounts = pgTable(
+const baseSchema = pgSchema(process.env.BASE_SCHEMA ?? "spendwise");
+
+export const journalAccounts = baseSchema.table(
   "journal_accounts",
   {
     accountId: text("account_id").notNull(),
@@ -26,22 +27,22 @@ export const journalAccounts = pgTable(
       name: "journal_account_composite_pk",
       columns: [table.accountId, table.journalId],
     }),
-  ]
+  ],
 );
 
-export const journalPermissions = pgEnum("journal_permissions", [
+export const journalPermissions = baseSchema.enum("journal_permissions", [
   "owner",
   "read",
   "write",
 ]);
 
-export const collaborators = pgTable("collaborators", {
+export const collaborators = baseSchema.table("collaborators", {
   userId: varchar("user_id", { length: 255 }).primaryKey(),
   permission: journalPermissions().notNull(),
   journalId: text("journal_id").notNull(),
 });
 
-export const tags = pgTable(
+export const tags = baseSchema.table(
   "tags",
   {
     id: text("id"),
@@ -50,10 +51,10 @@ export const tags = pgTable(
   },
   (table) => [
     primaryKey({ name: "tags_pkey", columns: [table.id, table.journalId] }),
-  ]
+  ],
 );
 
-export const journals = pgTable("journals", {
+export const journals = baseSchema.table("journals", {
   id: text("id").primaryKey(),
   ownerId: text("owner_id").notNull(),
   ownerEmail: varchar("owner_email", { length: 255 }).notNull(),
@@ -63,24 +64,24 @@ export const journals = pgTable("journals", {
   isArchived: boolean("is_archived").default(false).notNull(),
   createdAt: date("created_at", { mode: "date" }).notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).default(
-    sql`(CURRENT_TIMESTAMP AT TIME ZONE 'UTC')`
+    sql`(CURRENT_TIMESTAMP AT TIME ZONE 'UTC')`,
   ),
 });
 
-export const transactionTypeEnum = pgEnum("transaction_types", [
+export const transactionTypeEnum = baseSchema.enum("transaction_types", [
   "INCOME",
   "EXPENSE",
   "TRANSFER",
 ]);
 
-export const transactionStatusEnum = pgEnum("transaction_status", [
+export const transactionStatusEnum = baseSchema.enum("transaction_status", [
   "PENDING",
   "APPROVED",
   "REJECTED",
   "AUTO_APPROVED",
 ]);
 
-export const transactions = pgTable("transactions", {
+export const transactions = baseSchema.table("transactions", {
   id: text("id").primaryKey(),
   journalId: text("journal_id").notNull(),
   title: varchar("title", { length: 200 }).notNull(),
@@ -95,7 +96,7 @@ export const transactions = pgTable("transactions", {
   categoryId: text("category_id"),
 });
 
-export const repayments = pgTable(
+export const repayments = baseSchema.table(
   "repayments",
   {
     id: text("id").primaryKey(),
@@ -115,9 +116,9 @@ export const repayments = pgTable(
     unique("repayment_keys").on(
       t.accountId,
       t.journalId,
-      t.statementPeriodStart
+      t.statementPeriodStart,
     ),
-  ]
+  ],
 );
 
 export const accountsRelations = relations(journalAccounts, ({ one }) => ({
