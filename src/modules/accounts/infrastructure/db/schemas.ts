@@ -3,7 +3,7 @@ import {
   boolean,
   date,
   integer,
-  pgTable,
+  pgSchema,
   real,
   text,
   timestamp
@@ -17,7 +17,9 @@ import {
   LoanAccountData,
 } from "../../domain/account";
 
-export const accounts = pgTable("accounts", {
+const baseSchema = pgSchema(process.env.BASE_SCHEMA ?? "spendwise");
+
+export const accounts = baseSchema.table("accounts", {
   id: text("id").primaryKey(),
   type: text("type").notNull(), // AccountType enum: cash, debit, credit, loan
   name: text("name").notNull(),
@@ -53,7 +55,7 @@ export function mapAccountToDomain(row: typeof accounts.$inferSelect) {
         new UserId(row.userId),
         new AccountId(row.id),
         row.isActive,
-        DateTime.fromJSDate(row.createdAt, { zone: "utc" })
+        DateTime.fromJSDate(row.createdAt, { zone: "utc" }),
       );
     case "debit":
       return Account.debit(
@@ -63,7 +65,7 @@ export function mapAccountToDomain(row: typeof accounts.$inferSelect) {
         new UserId(row.userId),
         new AccountId(row.id),
         row.isActive,
-        DateTime.fromJSDate(row.createdAt, { zone: "utc" })
+        DateTime.fromJSDate(row.createdAt, { zone: "utc" }),
       );
     case "credit":
       return Account.credit(
@@ -77,7 +79,7 @@ export function mapAccountToDomain(row: typeof accounts.$inferSelect) {
         row.limit ?? undefined,
         new AccountId(row.id),
         row.isActive,
-        DateTime.fromJSDate(row.createdAt, { zone: "utc" })
+        DateTime.fromJSDate(row.createdAt, { zone: "utc" }),
       );
     case "loan":
       return Account.loan(
@@ -89,14 +91,14 @@ export function mapAccountToDomain(row: typeof accounts.$inferSelect) {
         new UserId(row.userId),
         new AccountId(row.id),
         row.isActive,
-        DateTime.fromJSDate(row.createdAt, { zone: "utc" })
+        DateTime.fromJSDate(row.createdAt, { zone: "utc" }),
       );
   }
   throw Error(`Unknown account type: ${row.type}`);
 }
 
 export function mapAccountFromDomain(
-  account: Account
+  account: Account,
 ): typeof accounts.$inferInsert {
   const common = {
     id: account.id.value,
