@@ -13,8 +13,12 @@ export class AuthServices {
     private readonly userRepository: AuthUserRepository,
     private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly passwordHasher: IPasswordHasher,
-    private readonly tokenHandler: ITokenHandler
+    private readonly tokenHandler: ITokenHandler,
   ) {}
+
+  private async deleteExpiredRefreshTokens(at: DateTime = DateTime.now()) {
+    await this.refreshTokenRepository.deleteExpired(at);
+  }
 
   async createSession({
     email,
@@ -32,6 +36,7 @@ export class AuthServices {
       refreshTokenId: refreshToken.id.value,
     };
     const accessToken = await this.tokenHandler.generateAccessToken(payload);
+    await this.deleteExpiredRefreshTokens();
     return {
       accessToken,
       refreshToken: refreshToken.token,
@@ -60,6 +65,7 @@ export class AuthServices {
       refreshTokenId: refreshToken.id.value,
     };
     const accessToken = await this.tokenHandler.generateAccessToken(payload);
+    await this.deleteExpiredRefreshTokens();
     return {
       accessToken,
       refreshToken: refreshToken.token,
@@ -72,5 +78,6 @@ export class AuthServices {
       return;
     }
     await this.refreshTokenRepository.delete(refreshToken.id);
+    await this.deleteExpiredRefreshTokens();
   }
 }

@@ -1,5 +1,6 @@
 import { UserId } from "@/modules/shared/domain/identifiers";
 import { Email } from "@/modules/shared/domain/value-objects";
+import { DateTime } from "luxon";
 import { AuthUser } from "./auth-user";
 import { RefreshToken, RefreshTokenId } from "./refresh-token";
 
@@ -13,4 +14,5 @@ export abstract class RefreshTokenRepository {
   abstract findByToken(token: string): Promise<RefreshToken | undefined>;
   abstract save(token: RefreshToken): Promise<void>;
   abstract delete(id: RefreshTokenId): Promise<void>;
+  abstract deleteExpired(at: DateTime): Promise<void>;
 }
