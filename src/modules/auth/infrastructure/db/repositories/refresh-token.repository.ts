@@ -4,7 +4,7 @@ import {
 } from "@/modules/auth/domain/refresh-token";
 import { RefreshTokenRepository } from "@/modules/auth/domain/repositories";
 import { UserId } from "@/modules/shared/domain/identifiers";
-import { eq } from "drizzle-orm";
+import { eq, lt } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { DateTime } from "luxon";
 import * as schema from "../schemas";
@@ -54,8 +54,14 @@ export class DrizzleRefreshTokenRepository implements RefreshTokenRepository {
       .where(eq(refreshTokens.id, id.value));
   }
 
+  async deleteExpired(at: DateTime): Promise<void> {
+    await this.dbInstance
+      .delete(refreshTokens)
+      .where(lt(refreshTokens.expiration, at.toJSDate()));
+  }
+
   private mapToDomain(
-    tokenSchema: typeof refreshTokens.$inferSelect
+    tokenSchema: typeof refreshTokens.$inferSelect,
   ): RefreshToken {
     return new RefreshToken(
       tokenSchema.token,
@@ -63,7 +69,7 @@ export class DrizzleRefreshTokenRepository implements RefreshTokenRepository {
       new UserId(tokenSchema.userId),
       new RefreshTokenId(tokenSchema.id),
       DateTime.fromJSDate(tokenSchema.createdAt, { zone: "utc" }),
-      tokenSchema.isRevoked
+      tokenSchema.isRevoked,
     );
   }
 }
